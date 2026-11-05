@@ -1,3 +1,6 @@
 name=WorldQuest
 id=STRK_WorldQuest
 description=Colonias, territorios y crisis en Knox County.
+author=Truquitos212
+modversion=0.1.0
+versionMin=42.0
