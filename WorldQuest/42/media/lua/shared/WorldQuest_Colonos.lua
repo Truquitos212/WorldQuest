@@ -42,7 +42,7 @@ end
 
 -- Cuantos colonos caben en el territorio (despues dependera de camas y nivel)
 function Colonos.cupo(territorio)
-    return Colonos.CUPO_BASE
+    return WorldQuest.Modificadores.cupo(territorio)
 end
 
 local function alAzar(lista)

@@ -91,3 +91,18 @@ function Almacen.contar(territorio)
     recursos.calorias = math.floor(recursos.calorias)
     return recursos
 end
+
+-- Saca del almacen un costo, por ejemplo { tablas = 20, clavos = 40 }
+function Almacen.gastar(territorio, costo)
+    local faltan = {}
+    for recurso, cantidad in pairs(costo) do
+        faltan[recurso] = cantidad
+    end
+    Almacen.recorrerItems(territorio, function(item, contenedor)
+        local recurso = Almacen.MATERIALES[item:getFullType()]
+        if recurso and (faltan[recurso] or 0) > 0 then
+            contenedor:DoRemoveItem(item)
+            faltan[recurso] = faltan[recurso] - 1
+        end
+    end)
+end

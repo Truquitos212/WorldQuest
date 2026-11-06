@@ -47,7 +47,7 @@ Crisis.registrar({
     ejecutar = function(territorio)
         local origenX, origenY = puntoAlrededor(territorio, DISTANCIA_HORDA)
 
-        for i = 1, TAMANO_HORDA do
+        for i = 1, WorldQuest.Modificadores.tamanoHorda(territorio, TAMANO_HORDA) do
             local x = origenX + desvio(DISPERSION_HORDA)
             local y = origenY + desvio(DISPERSION_HORDA)
             local zombies = addZombiesInOutfit(x, y, 0, 1, nil, 50)

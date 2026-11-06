@@ -58,7 +58,7 @@ function Crisis.programar(idTipo, territorio, inmediata)
 
     local espera = 0
     if not inmediata then
-        espera = ficha.horasAviso or 0
+        espera = WorldQuest.Modificadores.horasAviso(territorio, ficha.horasAviso or 0)
     end
 
     table.insert(Crisis.getDatos().pendientes, {
@@ -116,7 +116,7 @@ function Crisis.tirarDado()
 
     local datos = Crisis.getDatos()
     datos.tension = datos.tension + 1
-    local probabilidad = math.min(datos.tension * PROBABILIDAD_POR_TENSION, PROBABILIDAD_MAXIMA)
+    local probabilidad = math.min(datos.tension * PROBABILIDAD_POR_TENSION * WorldQuest.Modificadores.factorNarrador(), PROBABILIDAD_MAXIMA)
     print("[WorldQuest] Narrador: tension " .. datos.tension .. ", probabilidad " .. probabilidad .. "%")
 
     if ZombRand(100) >= probabilidad then

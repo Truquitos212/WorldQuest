@@ -140,7 +140,7 @@ local function dibujarTerritorio(mapa, territorio, lineas)
     local dx = puntos[1].x - centroX
     local dy = puntos[1].y - centroY
     if (dx * dx + dy * dy) >= RADIO_MINIMO_ETIQUETA * RADIO_MINIMO_ETIQUETA then
-        dibujarEtiqueta(mapa, territorio.nombre, lineas, centroX, centroY)
+        dibujarEtiqueta(mapa, WorldQuest.Niveles and WorldQuest.Niveles.titulo(territorio) or territorio.nombre, lineas, centroX, centroY)
     end
 end
 
