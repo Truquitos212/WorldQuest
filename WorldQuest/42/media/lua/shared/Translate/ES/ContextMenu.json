@@ -10,5 +10,10 @@
     "ContextMenu_WQ_MarcarAlmacen": "Marcar como almacén de la colonia",
     "ContextMenu_WQ_QuitarAlmacen": "Quitar almacén de la colonia",
     "ContextMenu_WQ_AlmacenComida": "Comida: %1 (%2 kcal)",
-    "ContextMenu_WQ_AlmacenMateriales": "Materiales: %1 tablas, %2 clavos, %3 troncos"
+    "ContextMenu_WQ_AlmacenMateriales": "Materiales: %1 tablas, %2 clavos, %3 troncos",
+    "ContextMenu_WQ_Colonos": "Colonos (%1/%2)",
+    "ContextMenu_WQ_ColonoInfo": "%1 · %2 %3 · ánimo %4",
+    "ContextMenu_WQ_ColonoHambre": "%1 · ¡tiene hambre! (%2 días)",
+    "ContextMenu_WQ_SinColonos": "Todavía no hay colonos",
+    "ContextMenu_WQ_ProbarLlegada": "Probar llegada de colono"
 }

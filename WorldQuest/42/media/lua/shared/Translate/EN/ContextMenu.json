@@ -10,5 +10,10 @@
     "ContextMenu_WQ_MarcarAlmacen": "Mark as colony storage",
     "ContextMenu_WQ_QuitarAlmacen": "Remove colony storage",
     "ContextMenu_WQ_AlmacenComida": "Food: %1 (%2 kcal)",
-    "ContextMenu_WQ_AlmacenMateriales": "Materials: %1 planks, %2 nails, %3 logs"
+    "ContextMenu_WQ_AlmacenMateriales": "Materials: %1 planks, %2 nails, %3 logs",
+    "ContextMenu_WQ_Colonos": "Colonists (%1/%2)",
+    "ContextMenu_WQ_ColonoInfo": "%1 · %2 %3 · mood %4",
+    "ContextMenu_WQ_ColonoHambre": "%1 · hungry! (%2 days)",
+    "ContextMenu_WQ_SinColonos": "No colonists yet",
+    "ContextMenu_WQ_ProbarLlegada": "Test colonist arrival"
 }

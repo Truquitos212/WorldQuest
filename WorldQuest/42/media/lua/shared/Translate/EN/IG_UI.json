@@ -21,5 +21,13 @@
     "IGUI_WQ_InicioTormenta": "The storm hits %1",
     "IGUI_WQ_MapaPendiente": "%1 in %2 h",
     "IGUI_WQ_MapaEsperando": "%1: waiting for you",
-    "IGUI_WQ_MapaFrio": "Extreme cold"
+    "IGUI_WQ_MapaFrio": "Extreme cold",
+    "IGUI_WQ_ColonoPide": "%1 (%2 %3) asks for shelter in %4. Accept?",
+    "IGUI_WQ_ColonoUnido": "%1 joined %2",
+    "IGUI_WQ_ColonoSeVa": "%1 left %2",
+    "IGUI_WQ_Hab_agricultura": "Farming",
+    "IGUI_WQ_Hab_exploracion": "Scouting",
+    "IGUI_WQ_Hab_construccion": "Construction",
+    "IGUI_WQ_Hab_combate": "Combat",
+    "IGUI_WQ_Hab_medicina": "Medicine"
 }
