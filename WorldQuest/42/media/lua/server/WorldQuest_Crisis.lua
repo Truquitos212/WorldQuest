@@ -30,7 +30,13 @@ local function horaActual()
 end
 
 -- Mensaje al jugador (por ahora sobre su cabeza)
-function Crisis.avisar(texto)
+function Crisis.avisar(texto, tipo)
+    -- Aviso grande en pantalla si esta disponible; si no, sobre la cabeza
+    if WorldQuest.Banner then
+        WorldQuest.Banner.mostrar(texto, tipo)
+        print("[WorldQuest] " .. texto)
+        return
+    end
     local jugador = getPlayer()
     if jugador then
         jugador:Say(texto)
@@ -62,7 +68,7 @@ function Crisis.programar(idTipo, territorio, inmediata)
     })
 
     if ficha.textoAviso then
-        Crisis.avisar(getText(ficha.textoAviso, territorio.nombre))
+        Crisis.avisar(getText(ficha.textoAviso, territorio.nombre), "aviso")
     end
     print("[WorldQuest] Crisis programada: " .. idTipo .. " en " .. territorio.nombre .. " (en " .. espera .. " horas)")
 end
@@ -84,7 +90,7 @@ function Crisis.procesarPendientes()
             table.remove(pendientes, i)
             -- La ficha devuelve false si no pudo ejecutarse
             if ficha.ejecutar(territorio) ~= false then
-                Crisis.avisar(getText(ficha.textoInicio, territorio.nombre))
+                Crisis.avisar(getText(ficha.textoInicio, territorio.nombre), "crisis")
             end
         end
     end

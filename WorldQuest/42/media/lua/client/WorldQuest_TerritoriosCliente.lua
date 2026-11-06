@@ -9,11 +9,9 @@ local ultimaY = nil
 local territorioActual = nil
 
 local function onPlayerUpdate(jugador)
-    -- Casilla actual (las coordenadas vienen con decimales)
     local x = math.floor(jugador:getX())
     local y = math.floor(jugador:getY())
 
-    -- Si sigue en la misma casilla, no hay nada que revisar
     if x == ultimaX and y == ultimaY then
         return
     end
@@ -23,13 +21,12 @@ local function onPlayerUpdate(jugador)
     local nuevo = Territorios.buscarEn(x, y)
 
     if nuevo ~= territorioActual then
-        -- Si el anterior fue abandonado, no avisamos que salimos
         if territorioActual and Territorios.existe(territorioActual) then
-            jugador:Say("Saliendo de " .. territorioActual.nombre)
+            jugador:Say(getText("IGUI_WQ_Saliendo", territorioActual.nombre))
             print("[WorldQuest] Saliendo de " .. territorioActual.nombre)
         end
         if nuevo then
-            jugador:Say("Entrando a " .. nuevo.nombre)
+            jugador:Say(getText("IGUI_WQ_Entrando", nuevo.nombre))
             print("[WorldQuest] Entrando a " .. nuevo.nombre)
         end
         territorioActual = nuevo

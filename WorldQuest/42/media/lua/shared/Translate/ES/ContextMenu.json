@@ -1,0 +1,10 @@
+{
+    "ContextMenu_WQ_TerritorioActual": "Territorio actual: %1",
+    "ContextMenu_WQ_Reclamar": "Reclamar territorio",
+    "ContextMenu_WQ_ReclamarCerca": "Reclamar territorio (cerca de %1)",
+    "ContextMenu_WQ_Renombrar": "Renombrar territorio",
+    "ContextMenu_WQ_Abandonar": "Abandonar territorio",
+    "ContextMenu_WQ_ProbarCrisis": "Probar crisis",
+    "ContextMenu_WQ_ProbarAhora": "Ahora",
+    "ContextMenu_WQ_ProbarConAviso": "Con aviso"
+}

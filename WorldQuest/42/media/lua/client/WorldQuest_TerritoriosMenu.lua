@@ -46,14 +46,14 @@ local function alNombrarNuevo(target, boton, jugador, posicion)
 
     -- Revalidar: mientras la ventana estaba abierta pudo cambiar algo
     if Territorios.buscarSuperpuesto(posicion.x, posicion.y, RADIO_INICIAL) then
-        jugador:Say("Ya no se puede reclamar este lugar")
+        jugador:Say(getText("IGUI_WQ_NoReclamable"))
         return
     end
 
     local nombre = limpiarNombre(boton.parent.entry:getText()) or Territorios.nombreSugerido()
     local territorio = Territorios.crear(nombre, posicion.x, posicion.y, RADIO_INICIAL)
 
-    jugador:Say("Territorio reclamado: " .. territorio.nombre)
+    jugador:Say(getText("IGUI_WQ_Reclamado", territorio.nombre))
     print("[WorldQuest] Territorio reclamado: " .. territorio.nombre .. " en " .. posicion.x .. ", " .. posicion.y)
 end
 
@@ -62,7 +62,7 @@ local function reclamarTerritorio(jugador)
         x = math.floor(jugador:getX()),
         y = math.floor(jugador:getY()),
     }
-    pedirNombre(jugador, "Nombre del nuevo territorio:", Territorios.nombreSugerido(),
+    pedirNombre(jugador, getText("IGUI_WQ_NombreNuevo"), Territorios.nombreSugerido(),
         alNombrarNuevo, jugador, posicion)
 end
 
@@ -81,12 +81,12 @@ local function alRenombrar(target, boton, jugador, territorio)
     local anterior = territorio.nombre
     Territorios.renombrar(territorio, nombre)
 
-    jugador:Say("Territorio renombrado: " .. nombre)
+    jugador:Say(getText("IGUI_WQ_Renombrado", nombre))
     print("[WorldQuest] Territorio renombrado: " .. anterior .. " -> " .. nombre)
 end
 
 local function renombrarTerritorio(jugador, territorio)
-    pedirNombre(jugador, "Nombre del territorio:", territorio.nombre,
+    pedirNombre(jugador, getText("IGUI_WQ_Nombre"), territorio.nombre,
         alRenombrar, jugador, territorio)
 end
 
@@ -99,12 +99,12 @@ local function alConfirmarAbandono(target, boton, jugador, territorio)
 
     Territorios.eliminar(territorio)
 
-    jugador:Say("Territorio abandonado: " .. territorio.nombre)
+    jugador:Say(getText("IGUI_WQ_Abandonado", territorio.nombre))
     print("[WorldQuest] Territorio abandonado: " .. territorio.nombre)
 end
 
 local function abandonarTerritorio(jugador, territorio)
-    pedirConfirmacion(jugador, "Abandonar el territorio " .. territorio.nombre .. "?",
+    pedirConfirmacion(jugador, getText("IGUI_WQ_ConfirmarAbandono", territorio.nombre),
         alConfirmarAbandono, jugador, territorio)
 end
 
@@ -118,22 +118,22 @@ local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, t
     -- Dentro de un territorio: mostrar cual es, renombrar o abandonar
     local actual = Territorios.buscarEn(x, y)
     if actual then
-        local info = context:addOption("Territorio actual: " .. actual.nombre, nil, nil)
+        local info = context:addOption(getText("ContextMenu_WQ_TerritorioActual", actual.nombre), nil, nil)
         info.notAvailable = true
-        context:addOption("Renombrar territorio", jugador, renombrarTerritorio, actual)
-        context:addOption("Abandonar territorio", jugador, abandonarTerritorio, actual)
+        context:addOption(getText("ContextMenu_WQ_Renombrar"), jugador, renombrarTerritorio, actual)
+        context:addOption(getText("ContextMenu_WQ_Abandonar"), jugador, abandonarTerritorio, actual)
         return
     end
 
     -- Fuera, pero el territorio nuevo chocaria con otro
     local cercano = Territorios.buscarSuperpuesto(x, y, RADIO_INICIAL)
     if cercano then
-        local opcion = context:addOption("Reclamar territorio (cerca de " .. cercano.nombre .. ")", nil, nil)
+        local opcion = context:addOption(getText("ContextMenu_WQ_ReclamarCerca", cercano.nombre), nil, nil)
         opcion.notAvailable = true
         return
     end
 
-    context:addOption("Reclamar territorio", jugador, reclamarTerritorio)
+    context:addOption(getText("ContextMenu_WQ_Reclamar"), jugador, reclamarTerritorio)
 end
 
 Events.OnFillWorldObjectContextMenu.Add(onFillWorldObjectContextMenu)

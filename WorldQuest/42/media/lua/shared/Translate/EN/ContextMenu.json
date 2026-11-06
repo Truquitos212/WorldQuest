@@ -1,0 +1,10 @@
+{
+    "ContextMenu_WQ_TerritorioActual": "Current territory: %1",
+    "ContextMenu_WQ_Reclamar": "Claim territory",
+    "ContextMenu_WQ_ReclamarCerca": "Claim territory (near %1)",
+    "ContextMenu_WQ_Renombrar": "Rename territory",
+    "ContextMenu_WQ_Abandonar": "Abandon territory",
+    "ContextMenu_WQ_ProbarCrisis": "Test crisis",
+    "ContextMenu_WQ_ProbarAhora": "Now",
+    "ContextMenu_WQ_ProbarConAviso": "With warning"
+}
