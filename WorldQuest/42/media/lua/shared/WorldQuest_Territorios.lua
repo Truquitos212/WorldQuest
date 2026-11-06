@@ -14,23 +14,28 @@ function Territorios.getDatos()
     return datos
 end
 
--- Crea un territorio circular y lo guarda
+-- Crea un territorio circular, lo guarda y avanza el contador
 function Territorios.crear(nombre, x, y, radio)
+    local datos = Territorios.getDatos()
     local territorio = {
         nombre = nombre,
         x = x,
         y = y,
         radio = radio,
     }
-    table.insert(Territorios.getDatos().lista, territorio)
+    table.insert(datos.lista, territorio)
+    datos.contador = datos.contador + 1
     return territorio
 end
 
--- Siguiente nombre automatico, sin repetir aunque se borren territorios
-function Territorios.siguienteNombre()
-    local datos = Territorios.getDatos()
-    datos.contador = datos.contador + 1
-    return "Territorio " .. datos.contador
+-- Nombre sugerido para el proximo territorio (no avanza el contador)
+function Territorios.nombreSugerido()
+    return "Territorio " .. (Territorios.getDatos().contador + 1)
+end
+
+-- Cambia el nombre de un territorio
+function Territorios.renombrar(territorio, nombre)
+    territorio.nombre = nombre
 end
 
 -- Quita un territorio de la lista
@@ -39,6 +44,16 @@ function Territorios.eliminar(territorio)
     for i = #lista, 1, -1 do
         if lista[i] == territorio then
             table.remove(lista, i)
+            return true
+        end
+    end
+    return false
+end
+
+-- true si el territorio sigue guardado (no fue abandonado)
+function Territorios.existe(territorio)
+    for _, t in ipairs(Territorios.getDatos().lista) do
+        if t == territorio then
             return true
         end
     end
@@ -73,9 +88,4 @@ function Territorios.buscarSuperpuesto(x, y, radio)
         end
     end
     return nil
-end
-
--- Cambia el nombre de un territorio
-function Territorios.renombrar(territorio, nombre)
-    territorio.nombre = nombre
 end

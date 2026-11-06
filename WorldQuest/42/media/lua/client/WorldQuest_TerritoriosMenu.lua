@@ -6,52 +6,109 @@ local Territorios = WorldQuest.Territorios
 local RADIO_INICIAL = 20
 local LARGO_MAXIMO_NOMBRE = 30
 
-local function reclamarTerritorio(jugador)
-    local x = math.floor(jugador:getX())
-    local y = math.floor(jugador:getY())
-    local territorio = Territorios.crear(Territorios.siguienteNombre(), x, y, RADIO_INICIAL)
-
-    jugador:Say("Territorio reclamado: " .. territorio.nombre)
-    print("[WorldQuest] Territorio reclamado: " .. territorio.nombre .. " en " .. x .. ", " .. y)
+-- Limpia el texto escrito por el jugador; devuelve nil si queda vacio
+local function limpiarNombre(texto)
+    texto = texto:match("^%s*(.-)%s*$")
+    if texto == "" then
+        return nil
+    end
+    return string.sub(texto, 1, LARGO_MAXIMO_NOMBRE)
 end
 
-local function abandonarTerritorio(jugador, territorio)
+-- Ventana para escribir un nombre, centrada en pantalla
+local function pedirNombre(jugador, titulo, textoInicial, alConfirmar, param1, param2)
+    local ancho, alto = 280, 180
+    local x = (getCore():getScreenWidth() - ancho) / 2
+    local y = (getCore():getScreenHeight() - alto) / 2
+    local ventana = ISTextBox:new(x, y, ancho, alto, titulo, textoInicial,
+        nil, alConfirmar, jugador:getPlayerNum(), param1, param2)
+    ventana:initialise()
+    ventana:addToUIManager()
+end
+
+-- Ventana de Si/No, centrada en pantalla
+local function pedirConfirmacion(jugador, texto, alResponder, param1, param2)
+    local ancho, alto = 300, 150
+    local x = (getCore():getScreenWidth() - ancho) / 2
+    local y = (getCore():getScreenHeight() - alto) / 2
+    local ventana = ISModalDialog:new(x, y, ancho, alto, texto, true,
+        nil, alResponder, jugador:getPlayerNum(), param1, param2)
+    ventana:initialise()
+    ventana:addToUIManager()
+end
+
+-- RECLAMAR ------------------------------------------------------------
+
+local function alNombrarNuevo(target, boton, jugador, posicion)
+    if boton.internal ~= "OK" then
+        return
+    end
+
+    -- Revalidar: mientras la ventana estaba abierta pudo cambiar algo
+    if Territorios.buscarSuperpuesto(posicion.x, posicion.y, RADIO_INICIAL) then
+        jugador:Say("Ya no se puede reclamar este lugar")
+        return
+    end
+
+    local nombre = limpiarNombre(boton.parent.entry:getText()) or Territorios.nombreSugerido()
+    local territorio = Territorios.crear(nombre, posicion.x, posicion.y, RADIO_INICIAL)
+
+    jugador:Say("Territorio reclamado: " .. territorio.nombre)
+    print("[WorldQuest] Territorio reclamado: " .. territorio.nombre .. " en " .. posicion.x .. ", " .. posicion.y)
+end
+
+local function reclamarTerritorio(jugador)
+    local posicion = {
+        x = math.floor(jugador:getX()),
+        y = math.floor(jugador:getY()),
+    }
+    pedirNombre(jugador, "Nombre del nuevo territorio:", Territorios.nombreSugerido(),
+        alNombrarNuevo, jugador, posicion)
+end
+
+-- RENOMBRAR -----------------------------------------------------------
+
+local function alRenombrar(target, boton, jugador, territorio)
+    if boton.internal ~= "OK" then
+        return
+    end
+
+    local nombre = limpiarNombre(boton.parent.entry:getText())
+    if not nombre then
+        return
+    end
+
+    local anterior = territorio.nombre
+    Territorios.renombrar(territorio, nombre)
+
+    jugador:Say("Territorio renombrado: " .. nombre)
+    print("[WorldQuest] Territorio renombrado: " .. anterior .. " -> " .. nombre)
+end
+
+local function renombrarTerritorio(jugador, territorio)
+    pedirNombre(jugador, "Nombre del territorio:", territorio.nombre,
+        alRenombrar, jugador, territorio)
+end
+
+-- ABANDONAR -----------------------------------------------------------
+
+local function alConfirmarAbandono(target, boton, jugador, territorio)
+    if boton.internal ~= "YES" then
+        return
+    end
+
     Territorios.eliminar(territorio)
 
     jugador:Say("Territorio abandonado: " .. territorio.nombre)
     print("[WorldQuest] Territorio abandonado: " .. territorio.nombre)
 end
 
--- Se llama cuando el jugador aprieta OK o Cancelar en la ventana
-local function alConfirmarNombre(target, boton, jugador, territorio)
-    if boton.internal ~= "OK" then
-        return
-    end
-
-    local texto = boton.parent.entry:getText()
-    texto = texto:match("^%s*(.-)%s*$")
-    if texto == "" then
-        return
-    end
-    texto = string.sub(texto, 1, LARGO_MAXIMO_NOMBRE)
-
-    local anterior = territorio.nombre
-    Territorios.renombrar(territorio, texto)
-
-    jugador:Say("Territorio renombrado: " .. texto)
-    print("[WorldQuest] Territorio renombrado: " .. anterior .. " -> " .. texto)
+local function abandonarTerritorio(jugador, territorio)
+    pedirConfirmacion(jugador, "Abandonar el territorio " .. territorio.nombre .. "?",
+        alConfirmarAbandono, jugador, territorio)
 end
 
-local function renombrarTerritorio(jugador, territorio)
-    local ancho, alto = 280, 180
-    local x = (getCore():getScreenWidth() - ancho) / 2
-    local y = (getCore():getScreenHeight() - alto) / 2
-
-    local ventana = ISTextBox:new(x, y, ancho, alto, "Nombre del territorio:", territorio.nombre,
-        nil, alConfirmarNombre, jugador:getPlayerNum(), jugador, territorio)
-    ventana:initialise()
-    ventana:addToUIManager()
-end
+-- MENU ----------------------------------------------------------------
 
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
     local jugador = getSpecificPlayer(numJugador)

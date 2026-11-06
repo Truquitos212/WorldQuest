@@ -23,7 +23,8 @@ local function onPlayerUpdate(jugador)
     local nuevo = Territorios.buscarEn(x, y)
 
     if nuevo ~= territorioActual then
-        if territorioActual then
+        -- Si el anterior fue abandonado, no avisamos que salimos
+        if territorioActual and Territorios.existe(territorioActual) then
             jugador:Say("Saliendo de " .. territorioActual.nombre)
             print("[WorldQuest] Saliendo de " .. territorioActual.nombre)
         end
