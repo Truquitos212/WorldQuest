@@ -6,5 +6,9 @@
     "ContextMenu_WQ_Abandonar": "Abandon territory",
     "ContextMenu_WQ_ProbarCrisis": "Test crisis",
     "ContextMenu_WQ_ProbarAhora": "Now",
-    "ContextMenu_WQ_ProbarConAviso": "With warning"
+    "ContextMenu_WQ_ProbarConAviso": "With warning",
+    "ContextMenu_WQ_MarcarAlmacen": "Mark as colony storage",
+    "ContextMenu_WQ_QuitarAlmacen": "Remove colony storage",
+    "ContextMenu_WQ_AlmacenComida": "Food: %1 (%2 kcal)",
+    "ContextMenu_WQ_AlmacenMateriales": "Materials: %1 planks, %2 nails, %3 logs"
 }
