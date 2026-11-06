@@ -1,52 +1,32 @@
 # WorldQuest — Documento de diseño
 
-Mod de colonia estilo RimWorld para Project Zomboid (Build 42).
-Territorios, colonos, recursos y crisis en Knox County.
+Mod de colonia estilo RimWorld para Project Zomboid (Build 42.21).
 
-## Sistemas terminados
+## Estado: 7 de 7 fases implementadas (sin probar desde la fase 3)
 
-### Territorios
-- Círculos guardados en ModData, con id fijo, nombre editable y radio.
-- Reclamar, renombrar y abandonar desde el clic derecho, sin superposición.
-- Avisos al entrar y salir. Dibujo en el mapa con relleno, borde, nombre y alertas.
-
-### Crisis
-- Narrador con tensión: sube cada día sin crisis y baja a cero cuando ocurre una.
-- Cada crisis es una ficha (id, horas de aviso, textos, función ejecutar).
-- Crisis actuales: horda (con aviso), incendio en una casa (sorpresa),
-  pérdida de comida (sorpresa), tormenta con frío extremo en el territorio (con aviso).
-- Solo se ejecutan si el territorio está cargado; si no, esperan al jugador.
+| Sistema | Estado |
+|---|---|
+| Territorios (reclamar, renombrar, abandonar, mapa, avisos) | Probado |
+| Traducciones ES/EN | Probado |
+| Crisis: horda, incendio, comida, tormenta con frío | Probado |
+| Aviso en pantalla y crisis en el mapa | Sin probar |
+| Fase 1: Almacén de la colonia | Sin probar |
+| Fase 2: Colonos (llegada, hambre, ánimo) | Sin probar |
+| Fase 3: Producción por rol | Sin probar |
+| Fase 4: Niveles Refugio → Fortaleza | Sin probar |
+| Fase 5: Estructuras detectadas y obras | Sin probar |
+| Fase 6: Locura y asaltantes | Sin probar |
+| Fase 7: Cuerpos con Bandits (opcional) | Sin probar |
 
 ## Decisiones de diseño
+- Colonos en dos capas: simulación propia + cuerpos con Bandits (Bandits2) si está activo.
+- Recursos como items reales en muebles marcados como almacén.
+- Estructuras: detectadas (camas, huertos, cocinas, generadores) + obras del mod (torre, taller, muralla, radio).
+- Efectos centralizados en WorldQuest_Modificadores.lua.
 
-### Colonos: dos capas
-1. **Simulación (propia):** los colonos son datos (nombre, rol, habilidades,
-   hambre, ánimo) y producen o consumen aunque el jugador esté lejos.
-2. **Cuerpos (opcional):** si el mod Bandits está instalado, los colonos aparecen
-   como NPCs en el territorio. Cuando lleguen los NPCs oficiales (Build 43),
-   se reemplaza solo esta capa.
-
-### Recursos: items reales en un almacén
-- El jugador marca muebles como "Almacén de la colonia".
-- Los colonos consumen y producen items reales del juego en esos muebles.
-
-### Estructuras: mezcla
-- **Detectadas:** el mod reconoce lo que el jugador construye con el sistema
-  del juego dentro del territorio (camas = cupos de colonos, huertos, mesas de trabajo...).
-- **Proyectos del mod:** construcciones abstractas que los colonos levantan con
-  materiales del almacén y tiempo (torre de vigilancia, muralla, radio...).
-
-### Progresión
-- Niveles: Refugio → Campamento → Asentamiento → Fortaleza.
-- Subir de nivel cuesta recursos y colonos; aumenta el radio del territorio,
-  los cupos y desbloquea estructuras.
-- El narrador escala con la riqueza de la base.
-
-## Hoja de ruta
-1. Almacén de la colonia: marcar muebles y contar recursos.
-2. Colonos como datos: llegada por evento, roles, hambre y ánimo, consumo diario.
-3. Producción por rol: agricultor, explorador, constructor, guardia, médico.
-4. Niveles de asentamiento.
-5. Estructuras detectadas y proyectos del mod.
-6. Crisis de colonos: locura, asaltantes y bandidos (resueltos por puntaje).
-7. Cuerpos de colonos con Bandits (capa opcional).
+## Pendiente para la versión 1.0
+1. Probar en el juego todo lo marcado "Sin probar" y corregir errores.
+2. Balancear números (producción, costos, probabilidades, ánimo).
+3. Desactivar MODO_PRUEBA en los menús de prueba.
+4. Preparar la publicación en el Workshop (poster, workshop.txt, descripción).
+5. Multijugador: separar cliente y servidor con comandos (hoy funciona en un jugador).
