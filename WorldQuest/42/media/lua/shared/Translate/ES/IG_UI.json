@@ -64,5 +64,6 @@
     "IGUI_WQ_Locura": "%1 perdió la cabeza y huyó de %2 con provisiones",
     "IGUI_WQ_AsaltoRechazado": "¡Los asaltantes fueron rechazados en %1!",
     "IGUI_WQ_AsaltoRobo": "Los asaltantes saquearon %1",
-    "IGUI_WQ_AsaltoMuerte": "%1 murió defendiendo %2"
+    "IGUI_WQ_AsaltoMuerte": "%1 murió defendiendo %2",
+    "IGUI_WQ_ColonoMuerto": "%1 murió en %2"
 }

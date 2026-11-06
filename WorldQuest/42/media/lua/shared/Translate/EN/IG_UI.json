@@ -64,5 +64,6 @@
     "IGUI_WQ_Locura": "%1 lost their mind and fled %2 with supplies",
     "IGUI_WQ_AsaltoRechazado": "The raiders were repelled at %1!",
     "IGUI_WQ_AsaltoRobo": "Raiders looted %1",
-    "IGUI_WQ_AsaltoMuerte": "%1 died defending %2"
+    "IGUI_WQ_AsaltoMuerte": "%1 died defending %2",
+    "IGUI_WQ_ColonoMuerto": "%1 died in %2"
 }
