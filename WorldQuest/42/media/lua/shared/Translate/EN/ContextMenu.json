@@ -12,8 +12,21 @@
     "ContextMenu_WQ_AlmacenComida": "Food: %1 (%2 kcal)",
     "ContextMenu_WQ_AlmacenMateriales": "Materials: %1 planks, %2 nails, %3 logs",
     "ContextMenu_WQ_Colonos": "Colonists (%1/%2)",
-    "ContextMenu_WQ_ColonoInfo": "%1 · %2 %3 · mood %4",
+    "ContextMenu_WQ_ColonoInfo": "%1 · %2 · mood %3",
     "ContextMenu_WQ_ColonoHambre": "%1 · hungry! (%2 days)",
     "ContextMenu_WQ_SinColonos": "No colonists yet",
-    "ContextMenu_WQ_ProbarLlegada": "Test colonist arrival"
+    "ContextMenu_WQ_ProbarLlegada": "Test colonist arrival",
+    "ContextMenu_WQ_Especialidad": "Specialty: %1 %2",
+    "ContextMenu_WQ_AsignarRol": "Role: %1",
+    "ContextMenu_WQ_Asentamiento": "Settlement: %1",
+    "ContextMenu_WQ_Costo": "Cost: %1",
+    "ContextMenu_WQ_Mejorar": "Upgrade to %1",
+    "ContextMenu_WQ_MejorarBloqueado": "Upgrade to %1: %2",
+    "ContextMenu_WQ_Construccion": "Construction",
+    "ContextMenu_WQ_EstructurasInfo": "Detected: %1 beds, %2 farm plots, %3 stoves, %4 generators",
+    "ContextMenu_WQ_RevisarEstructuras": "Check structures",
+    "ContextMenu_WQ_Proyecto": "%1 (%2 · %3 work)",
+    "ContextMenu_WQ_ProyectoHecho": "%1 (built)",
+    "ContextMenu_WQ_ProyectoBloqueado": "%1: %2",
+    "ContextMenu_WQ_ProyectoEnCurso": "Building: %1 (%2 work left)"
 }
