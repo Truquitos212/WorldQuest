@@ -2,7 +2,7 @@
 -- Sirve para probar sin esperar dias. Desactivar con MODO_PRUEBA = false
 
 local MODO_PRUEBA = true
-local TIPOS = { "horda", "incendio", "comida", "tormenta" }
+local TIPOS = { "horda", "incendio", "comida", "tormenta", "locura", "asaltantes" }
 
 local function probarAhora(territorio, idTipo)
     WorldQuest.Crisis.programar(idTipo, territorio, true)

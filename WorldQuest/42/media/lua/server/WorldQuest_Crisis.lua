@@ -89,7 +89,7 @@ function Crisis.procesarPendientes()
         elseif ahora >= pendiente.hora and Crisis.estaCargado(territorio) then
             table.remove(pendientes, i)
             -- La ficha devuelve false si no pudo ejecutarse
-            if ficha.ejecutar(territorio) ~= false then
+            if ficha.ejecutar(territorio) ~= false and ficha.textoInicio then
                 Crisis.avisar(getText(ficha.textoInicio, territorio.nombre), "crisis")
             end
         end
