@@ -1,7 +1,6 @@
 -- WorldQuest - Crisis: opciones de prueba en el clic derecho (cliente)
--- Sirve para probar sin esperar dias. Desactivar con MODO_PRUEBA = false
+-- Sirve para probar sin esperar dias. Se activa con la opcion de partida Herramientas de prueba
 
-local MODO_PRUEBA = true
 local TIPOS = { "horda", "incendio", "comida", "tormenta", "locura", "asaltantes" }
 
 local function probarAhora(territorio, idTipo)
@@ -23,7 +22,7 @@ local function agregarSubmenu(context, menuPadre, titulo, territorio, funcion)
 end
 
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
-    if not MODO_PRUEBA or not WorldQuest.Crisis then
+    if not WorldQuest.Opciones.pruebas() or not WorldQuest.Crisis then
         return
     end
 

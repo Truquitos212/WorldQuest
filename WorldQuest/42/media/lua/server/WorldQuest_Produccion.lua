@@ -8,6 +8,11 @@ local Almacen = WorldQuest.Almacen
 local Crisis = WorldQuest.Crisis
 local M = WorldQuest.Modificadores
 
+-- Cantidad producida con el multiplicador de la opcion de partida
+local function producir(territorio, rol, base)
+    return WorldQuest.Opciones.escalar(M.produccion(territorio, rol, base), WorldQuest.Opciones.produccion())
+end
+
 local HABILIDAD_DEL_ROL = {
     agricultor = "agricultura",
     explorador = "exploracion",
@@ -56,12 +61,12 @@ local function trabajar(colono, territorio, contenedor)
     local habilidad = colono.habilidades[habilidadId]
 
     if colono.rol == "agricultor" then
-        depositar(contenedor, COSECHA, M.produccion(territorio, "agricultor", 1 + math.floor(habilidad / 3)))
+        depositar(contenedor, COSECHA, producir(territorio, "agricultor", 1 + math.floor(habilidad / 3)))
 
     elseif colono.rol == "constructor" then
         -- Si hay una obra, el constructor trabaja en ella en vez de cortar troncos
         if not territorio.proyecto then
-            depositar(contenedor, "Base.Log", M.produccion(territorio, "constructor", 1 + math.floor(habilidad / 4)))
+            depositar(contenedor, "Base.Log", producir(territorio, "constructor", 1 + math.floor(habilidad / 4)))
         end
 
     elseif colono.rol == "explorador" then
@@ -69,7 +74,7 @@ local function trabajar(colono, territorio, contenedor)
         if ZombRand(100) < riesgo then
             return false
         end
-        depositar(contenedor, BOTIN, M.produccion(territorio, "explorador", 1 + ZombRand(1 + math.floor(habilidad / 2))))
+        depositar(contenedor, BOTIN, producir(territorio, "explorador", 1 + ZombRand(1 + math.floor(habilidad / 2))))
     end
 
     if habilidad < 10 and ZombRand(100) < PROBABILIDAD_MEJORA then

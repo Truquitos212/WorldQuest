@@ -22,6 +22,7 @@ local DISPERSION = 4
 local ticksCargado = {}       -- id territorio -> ticks seguidos cargado
 local pedidos = {}            -- id colono -> true (cuerpo pedido en esta carga)
 local nombrePorZombie = {}    -- zombie -> nombre (respaldo para detectar muertes)
+local horaPedido = {}         -- nombre -> hora en que se pidio el cuerpo (diagnostico)
 
 function Cuerpos.activo()
     return Bandit ~= nil and BanditBrain ~= nil
@@ -79,6 +80,7 @@ local function pedirCuerpo(jugador, colono, territorio)
         fullname = colono.nombre,
     })
     pedidos[colono.id] = true
+    horaPedido[colono.nombre] = getGameTime():getWorldAgeHours()
     registro()[colono.nombre] = true
     print("[WorldQuest] Cuerpo pedido para " .. colono.nombre)
 end
@@ -140,6 +142,64 @@ local function alPasarDiezMinutos()
     end
 end
 
+-- Diagnostico de muertes: deja en el log lo necesario para saber la causa
+local function contarCerca(zombie, radio)
+    local zombies, hostiles = 0, 0
+    local lista = getCell():getZombieList()
+    for i = 0, lista:size() - 1 do
+        local otro = lista:get(i)
+        if otro ~= zombie and not otro:isDead() then
+            local dx = otro:getX() - zombie:getX()
+            local dy = otro:getY() - zombie:getY()
+            if dx * dx + dy * dy <= radio * radio then
+                if otro:getVariableBoolean("Bandit") then
+                    local brain = BanditBrain.Get(otro)
+                    if brain and brain.hostile then
+                        hostiles = hostiles + 1
+                    end
+                else
+                    zombies = zombies + 1
+                end
+            end
+        end
+    end
+    return zombies, hostiles
+end
+
+function Cuerpos.diagnosticar(zombie, nombre, colono, quien)
+    local ok, err = pcall(function()
+        local x, y, z = math.floor(zombie:getX()), math.floor(zombie:getY()), math.floor(zombie:getZ())
+        local distancia = "?"
+        local territorio = WorldQuest.Territorios.buscarPorId(colono.territorio)
+        if territorio then
+            local dx, dy = x - territorio.x, y - territorio.y
+            distancia = math.floor(math.sqrt(dx * dx + dy * dy)) .. "/" .. tostring(territorio.radio)
+        end
+        local minutos = "?"
+        if horaPedido[nombre] then
+            minutos = tostring(math.floor((getGameTime():getWorldAgeHours() - horaPedido[nombre]) * 60))
+        end
+        local zombies, hostiles = contarCerca(zombie, 10)
+        local brain = zombie:getVariableBoolean("Bandit") and BanditBrain.Get(zombie) or nil
+        local programa = "?"
+        if brain and brain.program then
+            programa = type(brain.program) == "table" and tostring(brain.program.name) or tostring(brain.program)
+        end
+        print("[WorldQuest] Diagnostico " .. nombre
+            .. ": atacante=" .. quien
+            .. ", pos=" .. x .. "," .. y .. "," .. z
+            .. ", distancia=" .. distancia
+            .. ", minutos desde el pedido=" .. minutos
+            .. ", en llamas=" .. tostring(zombie:isOnFire())
+            .. ", zombies a 10=" .. zombies
+            .. ", hostiles a 10=" .. hostiles
+            .. ", programa=" .. programa)
+    end)
+    if not ok then
+        print("[WorldQuest] Diagnostico de " .. nombre .. " fallo: " .. tostring(err))
+    end
+end
+
 -- Si muere el cuerpo, muere el colono
 local function onZombieDead(zombie)
     if not Cuerpos.activo() then
@@ -174,6 +234,7 @@ local function onZombieDead(zombie)
                 end
             end
             print("[WorldQuest] " .. nombre .. " fue atacado por " .. quien)
+            Cuerpos.diagnosticar(zombie, nombre, colono, quien)
             registro()[nombre] = nil
             local territorio = WorldQuest.Territorios.buscarPorId(colono.territorio)
             local texto = getText("IGUI_WQ_ColonoMuerto", colono.nombre, territorio and territorio.nombre or "?")

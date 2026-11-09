@@ -330,7 +330,7 @@ function VistaCrisis:render()
     local datos = Crisis.getDatos()
     local factor = 1
     if WorldQuest.Modificadores then
-        factor = WorldQuest.Modificadores.factorNarrador()
+        factor = WorldQuest.Modificadores.factorNarrador() * WorldQuest.Opciones.frecuenciaCrisis()
     end
     local probabilidad = math.floor(math.min(datos.tension * 10 * factor, 80))
 

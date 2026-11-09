@@ -96,5 +96,6 @@
     "IGUI_WQ_Panel_Frio": "Frío extremo activo"
 ,
     "IGUI_WQ_AlmacenNombreDefecto": "Almacén de %1",
-    "IGUI_WQ_NombreAlmacen": "Nombre del almacén:"
+    "IGUI_WQ_NombreAlmacen": "Nombre del almacén:",
+    "IGUI_WQ_SinAlmacen": "No hay almacén cargado en %1"
 }

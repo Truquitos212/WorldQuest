@@ -32,5 +32,6 @@
 ,
     "ContextMenu_WQ_AbrirPanel": "Open colony panel"
 ,
-    "ContextMenu_WQ_RenombrarAlmacen": "Rename storage"
+    "ContextMenu_WQ_RenombrarAlmacen": "Rename storage",
+    "ContextMenu_WQ_ProbarLlenar": "[Test] Fill storage"
 }

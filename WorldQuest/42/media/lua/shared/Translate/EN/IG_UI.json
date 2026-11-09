@@ -96,5 +96,6 @@
     "IGUI_WQ_Panel_Frio": "Extreme cold active"
 ,
     "IGUI_WQ_AlmacenNombreDefecto": "%1 storage",
-    "IGUI_WQ_NombreAlmacen": "Storage name:"
+    "IGUI_WQ_NombreAlmacen": "Storage name:",
+    "IGUI_WQ_SinAlmacen": "No storage loaded in %1"
 }

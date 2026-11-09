@@ -5,7 +5,6 @@ WorldQuest = WorldQuest or {}
 WorldQuest.ColonosUI = WorldQuest.ColonosUI or {}
 
 local ColonosUI = WorldQuest.ColonosUI
-local MODO_PRUEBA = true
 
 local function alResponder(target, boton, propuesta, territorio)
     if boton.internal == "YES" then
@@ -30,7 +29,7 @@ end
 
 -- Opcion de prueba: forzar la llegada de un colono
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
-    if not MODO_PRUEBA then
+    if not WorldQuest.Opciones.pruebas() then
         return
     end
     local jugador = getSpecificPlayer(numJugador)

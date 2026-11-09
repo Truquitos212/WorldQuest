@@ -1,7 +1,5 @@
 -- WorldQuest - Opcion de prueba: llenar el almacen con materiales (cliente)
--- Desactivar con MODO_PRUEBA = false
-
-local MODO_PRUEBA = true
+-- Se activa con la opcion de partida Herramientas de prueba
 
 local CANTIDADES = {
     ["Base.Plank"] = 100,
@@ -13,7 +11,7 @@ local CANTIDADES = {
 local function llenar(territorio)
     local mueble = WorldQuest.Almacen.objetos(territorio)[1]
     if not mueble then
-        getPlayer():Say("No hay almacen cargado en " .. territorio.nombre)
+        getPlayer():Say(getText("IGUI_WQ_SinAlmacen", territorio.nombre))
         return
     end
     local contenedor = mueble:getContainerByIndex(0)
@@ -26,13 +24,13 @@ local function llenar(territorio)
 end
 
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
-    if not MODO_PRUEBA then
+    if not WorldQuest.Opciones.pruebas() then
         return
     end
     local jugador = getSpecificPlayer(numJugador)
     local territorio = WorldQuest.Territorios.buscarEn(math.floor(jugador:getX()), math.floor(jugador:getY()))
     if territorio then
-        context:addOption("[Prueba] Llenar almacen", territorio, llenar)
+        context:addOption(getText("ContextMenu_WQ_ProbarLlenar"), territorio, llenar)
     end
 end
 

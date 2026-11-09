@@ -1,0 +1,23 @@
+VERSION = 1,
+
+/***** WORLDQUEST *****/
+
+option WorldQuest.HerramientasPrueba = {
+    type = boolean, default = false,
+    page = WorldQuest, translation = WorldQuest_HerramientasPrueba,
+}
+
+option WorldQuest.FrecuenciaCrisis = {
+    type = double, min = 0.0, max = 3.0, default = 1.0,
+    page = WorldQuest, translation = WorldQuest_FrecuenciaCrisis,
+}
+
+option WorldQuest.Produccion = {
+    type = double, min = 0.25, max = 4.0, default = 1.0,
+    page = WorldQuest, translation = WorldQuest_Produccion,
+}
+
+option WorldQuest.Costos = {
+    type = double, min = 0.25, max = 4.0, default = 1.0,
+    page = WorldQuest, translation = WorldQuest_Costos,
+}

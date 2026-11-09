@@ -32,5 +32,6 @@
 ,
     "ContextMenu_WQ_AbrirPanel": "Abrir panel de la colonia"
 ,
-    "ContextMenu_WQ_RenombrarAlmacen": "Renombrar almacén"
+    "ContextMenu_WQ_RenombrarAlmacen": "Renombrar almacén",
+    "ContextMenu_WQ_ProbarLlenar": "[Prueba] Llenar almacén"
 }

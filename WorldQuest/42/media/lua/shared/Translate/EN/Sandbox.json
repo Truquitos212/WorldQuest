@@ -1,0 +1,11 @@
+{
+    "Sandbox_WorldQuest": "WorldQuest",
+    "Sandbox_WorldQuest_HerramientasPrueba": "Test tools",
+    "Sandbox_WorldQuest_HerramientasPrueba_tooltip": "Adds [Test] options to the right-click menu inside your territories: force crises, bring a colonist and fill the storage.",
+    "Sandbox_WorldQuest_FrecuenciaCrisis": "Crisis frequency",
+    "Sandbox_WorldQuest_FrecuenciaCrisis_tooltip": "Multiplies the daily crisis chance. At 0 there are no random crises.",
+    "Sandbox_WorldQuest_Produccion": "Colonist production",
+    "Sandbox_WorldQuest_Produccion_tooltip": "Multiplies what colonists deliver each day.",
+    "Sandbox_WorldQuest_Costos": "Level and building costs",
+    "Sandbox_WorldQuest_Costos_tooltip": "Multiplies the materials required by level upgrades and buildings."
+}

@@ -116,7 +116,7 @@ function Crisis.tirarDado()
 
     local datos = Crisis.getDatos()
     datos.tension = datos.tension + 1
-    local probabilidad = math.min(datos.tension * PROBABILIDAD_POR_TENSION * WorldQuest.Modificadores.factorNarrador(), PROBABILIDAD_MAXIMA)
+    local probabilidad = math.min(datos.tension * PROBABILIDAD_POR_TENSION * WorldQuest.Modificadores.factorNarrador() * WorldQuest.Opciones.frecuenciaCrisis(), PROBABILIDAD_MAXIMA)
     print("[WorldQuest] Narrador: tension " .. datos.tension .. ", probabilidad " .. probabilidad .. "%")
 
     if ZombRand(100) >= probabilidad then

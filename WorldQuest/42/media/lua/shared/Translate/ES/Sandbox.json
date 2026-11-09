@@ -1,0 +1,11 @@
+{
+    "Sandbox_WorldQuest": "WorldQuest",
+    "Sandbox_WorldQuest_HerramientasPrueba": "Herramientas de prueba",
+    "Sandbox_WorldQuest_HerramientasPrueba_tooltip": "Agrega opciones [Prueba] al clic derecho dentro de tus territorios: forzar crisis, traer un colono y llenar el almacén.",
+    "Sandbox_WorldQuest_FrecuenciaCrisis": "Frecuencia de crisis",
+    "Sandbox_WorldQuest_FrecuenciaCrisis_tooltip": "Multiplica la probabilidad diaria de crisis. Con 0 no hay crisis al azar.",
+    "Sandbox_WorldQuest_Produccion": "Producción de los colonos",
+    "Sandbox_WorldQuest_Produccion_tooltip": "Multiplica lo que entregan los colonos cada día.",
+    "Sandbox_WorldQuest_Costos": "Costo de niveles y obras",
+    "Sandbox_WorldQuest_Costos_tooltip": "Multiplica los materiales que piden las mejoras de nivel y las obras."
+}
