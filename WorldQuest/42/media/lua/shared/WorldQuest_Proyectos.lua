@@ -10,10 +10,11 @@ WorldQuest.Proyectos = WorldQuest.Proyectos or {}
 local Proyectos = WorldQuest.Proyectos
 
 Proyectos.LISTA = {
-    { id = "torre",   costo = { tablas = 30, clavos = 30 },                trabajo = 3 },
-    { id = "taller",  costo = { tablas = 20, clavos = 20 },                trabajo = 2 },
-    { id = "muralla", costo = { tablas = 60, clavos = 80, troncos = 20 },  trabajo = 6, nivel = 2 },
-    { id = "radio",   costo = { tablas = 15, clavos = 15 },                trabajo = 2, nivel = 2 },
+    -- tamano: lado en casillas de la silueta que se coloca en el mapa o en el mundo
+    { id = "torre",   costo = { tablas = 30, clavos = 30 },                trabajo = 3, tamano = 2 },
+    { id = "taller",  costo = { tablas = 20, clavos = 20 },                trabajo = 2, tamano = 3 },
+    { id = "muralla", costo = { tablas = 60, clavos = 80, troncos = 20 },  trabajo = 6, tamano = 1, nivel = 2 },
+    { id = "radio",   costo = { tablas = 15, clavos = 15 },                trabajo = 2, tamano = 1, nivel = 2 },
 }
 
 function Proyectos.buscar(id)
@@ -56,7 +57,8 @@ function Proyectos.iniciar(t, proyecto)
         return false
     end
     WorldQuest.Almacen.gastar(t, proyecto.costo)
-    t.proyecto = { id = proyecto.id, restante = proyecto.trabajo }
+    -- La obra no avanza hasta que se elige su lugar (ordenes ubicarObra)
+    t.proyecto = { id = proyecto.id, restante = proyecto.trabajo, sinUbicar = true }
     return true
 end
 

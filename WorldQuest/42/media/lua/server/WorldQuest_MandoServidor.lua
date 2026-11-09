@@ -6,7 +6,7 @@ local Territorios = WorldQuest.Territorios
 local Colonos = WorldQuest.Colonos
 
 local MAX_ESCUADRAS = 8
-local TIPOS = { defender = true, volver = true, llamar = true }
+local TIPOS = { defender = true, volver = true, llamar = true, ir = true, mantener = true }
 
 -- Colonos de la lista que son de la faccion del jugador
 local function colonosPropios(jugador, ids)
@@ -47,6 +47,17 @@ Red.orden("ordenColonos", function(jugador, args)
         elseif args.tipo == "volver" then
             colono.orden = nil
             aplicadas = aplicadas + 1
+        elseif args.tipo == "ir" and x and y then
+            colono.orden = { tipo = "ir", x = math.floor(x), y = math.floor(y) }
+            aplicadas = aplicadas + 1
+        elseif args.tipo == "mantener" then
+            -- Cada uno se queda donde esta (el cliente manda su posicion)
+            local p = type(args.posiciones) == "table" and args.posiciones[tostring(colono.id)]
+            local px, py = p and tonumber(p.x), p and tonumber(p.y)
+            if px and py then
+                colono.orden = { tipo = "mantener", x = math.floor(px), y = math.floor(py) }
+                aplicadas = aplicadas + 1
+            end
         elseif args.tipo == "llamar" then
             colono.orden = { tipo = "llamar", usuario = jugador:getUsername() }
             aplicadas = aplicadas + 1

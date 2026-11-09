@@ -61,6 +61,7 @@ Pistas.LISTA = {
         end
         return false
     end },
+    { id = "ubicar", cumple = function(j, t) return t ~= nil and t.proyecto ~= nil and t.proyecto.sinUbicar == true end },
     { id = "mejorar", cumple = function(j, t)
         return t ~= nil and WorldQuest.Niveles.siguiente(t) ~= nil and WorldQuest.Niveles.puedeMejorar(t) == true
     end },

@@ -285,11 +285,20 @@
     "IGUI_WQ_Mando_Defender": "Defend here",
     "IGUI_WQ_Mando_Llamar": "Call (follow me)",
     "IGUI_WQ_Mando_Volver": "Back to work",
-    "IGUI_WQ_Mando_IrAqui": "Go here (arrives in Phase 5)",
-    "IGUI_WQ_Mando_Mantener": "Hold position (arrives in Phase 5)",
+    "IGUI_WQ_Mando_IrAqui": "Go here and stand guard",
+    "IGUI_WQ_Mando_Mantener": "Hold position",
     "IGUI_WQ_Mando_DefenderFuera": "They can only defend a spot inside their territory.",
     "IGUI_WQ_Mando_MaxEscuadras": "Your faction already has the maximum of %1 squads.",
     "IGUI_WQ_Mando_EscuadraCreada": "Squad %1 ready (%2 colonists)",
     "IGUI_WQ_Ayuda_GuardarEscuadra": "Saves the selection with a name so you can pick it with one click. The same name replaces it.",
-    "IGUI_WQ_Pista_mando": "Your colonists show up on the map. Click or use Shift + drag to select them, and right-click to give orders."
+    "IGUI_WQ_Pista_mando": "Your colonists show up on the map. Click or use Shift + drag to select them, and right-click to give orders.",
+    "IGUI_WQ_ObraFuera": "The building has to be inside the territory.",
+    "IGUI_WQ_ObraUbicada": "Spot chosen for: %1",
+    "IGUI_WQ_ObraElige": "Where does the building go? Click to choose, right-click to cancel.",
+    "IGUI_WQ_Panel_ElegirLugar": "Choose spot",
+    "IGUI_WQ_Panel_CambiarLugar": "Change spot",
+    "IGUI_WQ_Panel_ObraSinLugar": "Building: %1 (choose where it goes)",
+    "IGUI_WQ_Ayuda_ElegirLugar": "The building doesn't progress until you choose its spot. Use this button and click on the ground, or right-click on the map inside your territory.",
+    "IGUI_WQ_Mando_UbicarObra": "Place here: %1",
+    "IGUI_WQ_Pista_ubicar": "The building is waiting for you to choose its spot: Choose spot button in the Buildings tab, or right-click on the map."
 }

@@ -219,6 +219,24 @@ Red.orden("construir", function(jugador, args)
     end
 end)
 
+-- Lugar de la obra en curso (dentro del territorio). Se puede cambiar mientras dure.
+Red.orden("ubicarObra", function(jugador, args)
+    local t = territorioPropio(jugador, args.id)
+    local x, y = tonumber(args.x), tonumber(args.y)
+    if not t or not t.proyecto or not x or not y then
+        return
+    end
+    x, y = math.floor(x), math.floor(y)
+    if not Territorios.contiene(t, x, y) then
+        Red.decir(jugador, "IGUI_WQ_ObraFuera")
+        return
+    end
+    t.proyecto.x = x
+    t.proyecto.y = y
+    t.proyecto.sinUbicar = nil
+    Red.decir(jugador, "IGUI_WQ_ObraUbicada", { { clave = "IGUI_WQ_Proyecto_" .. t.proyecto.id } })
+end)
+
 Red.orden("rol", function(jugador, args)
     local colono = colonoPorId(args.colono)
     if not colono or not ROLES[args.rol] then

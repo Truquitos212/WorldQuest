@@ -285,11 +285,20 @@
     "IGUI_WQ_Mando_Defender": "Defender aquí",
     "IGUI_WQ_Mando_Llamar": "Llamar (que me sigan)",
     "IGUI_WQ_Mando_Volver": "Volver al trabajo",
-    "IGUI_WQ_Mando_IrAqui": "Ir aquí (llega en la Fase 5)",
-    "IGUI_WQ_Mando_Mantener": "Mantener posición (llega en la Fase 5)",
+    "IGUI_WQ_Mando_IrAqui": "Ir aquí y quedarse de guardia",
+    "IGUI_WQ_Mando_Mantener": "Mantener posición",
     "IGUI_WQ_Mando_DefenderFuera": "Solo pueden defender un punto dentro de su territorio.",
     "IGUI_WQ_Mando_MaxEscuadras": "Tu facción ya tiene el máximo de %1 escuadras.",
     "IGUI_WQ_Mando_EscuadraCreada": "Escuadra %1 lista (%2 colonos)",
     "IGUI_WQ_Ayuda_GuardarEscuadra": "Guarda la selección con un nombre para elegirla de un clic. Con el mismo nombre, la reemplaza.",
-    "IGUI_WQ_Pista_mando": "En el mapa ves a tus colonos. Haz clic o usa Shift + arrastrar para elegirlos, y clic derecho para darles órdenes."
+    "IGUI_WQ_Pista_mando": "En el mapa ves a tus colonos. Haz clic o usa Shift + arrastrar para elegirlos, y clic derecho para darles órdenes.",
+    "IGUI_WQ_ObraFuera": "La obra tiene que quedar dentro del territorio.",
+    "IGUI_WQ_ObraUbicada": "Lugar elegido para: %1",
+    "IGUI_WQ_ObraElige": "¿Dónde va la obra? Clic para elegir, clic derecho para cancelar.",
+    "IGUI_WQ_Panel_ElegirLugar": "Elegir lugar",
+    "IGUI_WQ_Panel_CambiarLugar": "Cambiar lugar",
+    "IGUI_WQ_Panel_ObraSinLugar": "En obra: %1 (falta elegir dónde va)",
+    "IGUI_WQ_Ayuda_ElegirLugar": "La obra no avanza hasta que eliges su lugar. Usa este botón y haz clic en el suelo, o clic derecho en el mapa dentro de tu territorio.",
+    "IGUI_WQ_Mando_UbicarObra": "Ubicar aquí: %1",
+    "IGUI_WQ_Pista_ubicar": "La obra espera que elijas su lugar: botón Elegir lugar en la pestaña Obras, o clic derecho en el mapa."
 }

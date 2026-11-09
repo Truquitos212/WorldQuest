@@ -79,16 +79,48 @@ local function posicion(colono, territorio, indice, total)
     if cuerpo then
         return cuerpo:getX(), cuerpo:getY()
     end
-    if colono.orden and colono.orden.tipo == "defender" then
-        return colono.orden.x + 0.5, colono.orden.y + 0.5
+    local orden = colono.orden
+    if orden and orden.x and (orden.tipo == "defender" or orden.tipo == "ir" or orden.tipo == "mantener") then
+        return orden.x + 0.5, orden.y + 0.5
     end
     local angulo = (indice / math.max(1, total)) * 2 * math.pi
     local radio = math.min(6, territorio.radio / 3)
     return territorio.x + math.cos(angulo) * radio, territorio.y + math.sin(angulo) * radio
 end
 
+-- Obras de la faccion: la que esta en curso (contorno naranjo) y las terminadas (gris)
+local function dibujarObras(mapa)
+    local jugador = getPlayer()
+    local f = jugador and WorldQuest.Facciones.deJugador(jugador)
+    if not f then
+        return
+    end
+    local api = mapa.mapAPI
+    local function cuadro(x, y, tamano, relleno, r, g, b)
+        local x1, y1 = api:worldToUIX(x, y), api:worldToUIY(x, y)
+        local x2, y2 = api:worldToUIX(x + tamano, y + tamano), api:worldToUIY(x + tamano, y + tamano)
+        local w, h = math.max(4, x2 - x1), math.max(4, y2 - y1)
+        if relleno then
+            mapa:drawRect(x1, y1, w, h, 0.8, r, g, b)
+        end
+        mapa:drawRectBorder(x1, y1, w, h, 1, r, g, b)
+    end
+    for _, t in ipairs(WorldQuest.Territorios.getDatos().lista) do
+        if t.faccion == f.id then
+            for _, obra in pairs(t.obras or {}) do
+                cuadro(obra.x, obra.y, obra.tamano or 1, true, 0.55, 0.55, 0.55)
+            end
+            if t.proyecto and t.proyecto.x then
+                local definicion = WorldQuest.Proyectos.buscar(t.proyecto.id)
+                cuadro(t.proyecto.x, t.proyecto.y, definicion and definicion.tamano or 1, false, 1, 0.6, 0.15)
+            end
+        end
+    end
+end
+
 local function dibujar(mapa)
     iconos = {}
+    dibujarObras(mapa)
     local lista = colonosPropios()
     if #lista == 0 then
         return
@@ -114,6 +146,8 @@ local function dibujar(mapa)
         mapa:drawTextCentre(LETRAS[colono.rol] or "?", sx, sy - 7, 0, 0, 0, 1, UIFont.Small)
         if colono.orden and colono.orden.tipo == "defender" then
             mapa:drawRectBorder(sx - m - 5, sy - m - 5, TAMANO + 10, TAMANO + 10, 1, 0.85, 0.25, 0.2)
+        elseif colono.orden and (colono.orden.tipo == "ir" or colono.orden.tipo == "mantener") then
+            mapa:drawRectBorder(sx - m - 5, sy - m - 5, TAMANO + 10, TAMANO + 10, 1, 0.3, 0.6, 1)
         end
         table.insert(iconos, { id = colono.id, x = sx, y = sy })
     end
@@ -147,7 +181,39 @@ local function ordenar(tipo, wx, wy)
     if #ids == 0 then
         return
     end
-    Red.pedir("ordenColonos", { colonos = ids, tipo = tipo, x = wx, y = wy })
+    local args = { colonos = ids, tipo = tipo, x = wx, y = wy }
+    local lista = colonosPropios()
+
+    -- Mantener: cada uno donde esta ahora (su cuerpo, o su icono si no esta cargado)
+    if tipo == "mantener" then
+        args.posiciones = {}
+        local porTerritorio = {}
+        for _, item in ipairs(lista) do
+            porTerritorio[item.territorio.id] = (porTerritorio[item.territorio.id] or 0) + 1
+            if Mando.seleccion[item.colono.id] then
+                local px, py = posicion(item.colono, item.territorio, porTerritorio[item.territorio.id], #WorldQuest.Colonos.delTerritorio(item.territorio))
+                args.posiciones[tostring(item.colono.id)] = { x = math.floor(px), y = math.floor(py) }
+            end
+        end
+    end
+    Red.pedir("ordenColonos", args)
+
+    -- Cuerpos de Bandits: ir y mantener los llevan a un puesto de guardia en ese punto
+    if WorldQuest.Cuerpos and WorldQuest.Cuerpos.activo() and (tipo == "ir" or tipo == "mantener") then
+        for _, item in ipairs(lista) do
+            if Mando.seleccion[item.colono.id] then
+                local destino = args.posiciones and args.posiciones[tostring(item.colono.id)] or { x = math.floor(wx), y = math.floor(wy) }
+                Mando.mover(item.colono.nombre, destino.x, destino.y, 0)
+            end
+        end
+    end
+    if tipo == "volver" or tipo == "llamar" then
+        for _, item in ipairs(lista) do
+            if Mando.seleccion[item.colono.id] then
+                Mando.soltarDestino(item.colono.nombre)
+            end
+        end
+    end
     -- Cuerpos de Bandits cercanos: llamar los hace seguirte, volver los deja en la base
     if WorldQuest.Cuerpos and WorldQuest.Cuerpos.activo() and (tipo == "llamar" or tipo == "volver") then
         local programa = (tipo == "llamar") and "Companion" or "Camper"
@@ -191,6 +257,94 @@ function Mando.seleccionarEscuadra(escuadra)
     end
     Mando.escuadraActual = escuadra.nombre
 end
+
+-- CUERPOS DE BANDITS: ir a un punto y quedarse de guardia --------------------
+-- El cuerpo camina con una tarea "Move" de Bandits. Al llegar se crea un puesto de
+-- guardia en esa casilla y el cuerpo pasa al programa CompanionGuard, que se queda
+-- quieto vigilando mientras este sobre el puesto.
+
+local destinos = {}          -- nombre -> { x, y, z, pedidoPuesto }
+local creados = {}           -- "x,y,z" -> true (puestos que creo WorldQuest)
+local ultimoSeguimiento = 0
+local INTERVALO_MS = 1000
+
+function Mando.ubicarObra(idTerritorio, x, y)
+    Red.pedir("ubicarObra", { id = idTerritorio, x = x, y = y })
+end
+
+function Mando.mover(nombre, x, y, z)
+    destinos[nombre] = { x = x, y = y, z = z or 0 }
+end
+
+local function llave(x, y, z)
+    return x .. "," .. y .. "," .. z
+end
+
+local function hayPuesto(x, y, z)
+    local ok, puestos = pcall(BanditPost.GetAll)
+    if not ok or type(puestos) ~= "table" then
+        return false
+    end
+    for _, p in pairs(puestos) do
+        if p.x == x and p.y == y and p.z == z and p.type == "guard" then
+            return true
+        end
+    end
+    return false
+end
+
+-- Quita el destino y, si el puesto lo creo WorldQuest, lo saca
+function Mando.soltarDestino(nombre)
+    local d = destinos[nombre]
+    destinos[nombre] = nil
+    if d and creados[llave(d.x, d.y, d.z)] and hayPuesto(d.x, d.y, d.z) then
+        creados[llave(d.x, d.y, d.z)] = nil
+        pcall(BanditPost.GuardToggle, getPlayer(), d.x, d.y, d.z)
+    end
+end
+
+local function seguir()
+    if isServer() or not next(destinos) then
+        return
+    end
+    local ahora = getTimestampMs()
+    if ahora - ultimoSeguimiento < INTERVALO_MS then
+        return
+    end
+    ultimoSeguimiento = ahora
+    if not (WorldQuest.Cuerpos and WorldQuest.Cuerpos.activo() and BanditPost) then
+        return
+    end
+    local cuerpos = WorldQuest.Cuerpos.cercanos()
+    for nombre, d in pairs(destinos) do
+        local zombie = cuerpos[nombre]
+        if zombie then
+            local dx, dy = zombie:getX() - (d.x + 0.5), zombie:getY() - (d.y + 0.5)
+            if dx * dx + dy * dy <= 1.5 then
+                -- Llego: puesto de guardia y programa de guardia
+                if hayPuesto(d.x, d.y, d.z) then
+                    WorldQuest.Cuerpos.cambiarPrograma(nombre, "CompanionGuard")
+                    destinos[nombre] = nil
+                elseif not d.pedidoPuesto then
+                    d.pedidoPuesto = true
+                    creados[llave(d.x, d.y, d.z)] = true
+                    pcall(BanditPost.GuardToggle, getPlayer(), d.x, d.y, d.z)
+                end
+            else
+                local ok, enCamino = pcall(Bandit.HasMoveTask, zombie)
+                if ok and not enCamino then
+                    pcall(function()
+                        Bandit.ClearTasks(zombie)
+                        Bandit.AddTask(zombie, { action = "Move", time = 200, endurance = 0,
+                            x = d.x + 0.5, y = d.y + 0.5, z = d.z, walkType = "Walk" })
+                    end)
+                end
+            end
+        end
+    end
+end
+
+Events.OnTick.Add(seguir)
 
 -- PANEL DE MANDO (dentro del mapa) ----------------------------------------
 
@@ -376,22 +530,31 @@ local function instalar()
     -- Clic derecho con colonos seleccionados: menu de ordenes
     local derechoOriginal = ISWorldMap.onRightMouseUp
     function ISWorldMap:onRightMouseUp(x, y)
-        if Mando.cantidadSeleccion() == 0 then
-            return derechoOriginal(self, x, y)
-        end
         local wx = self.mapAPI:uiToWorldX(x, y)
         local wy = self.mapAPI:uiToWorldY(x, y)
+
+        -- Obra en curso de un territorio propio bajo el clic: se puede ubicar aqui
+        local jugador = getPlayer()
+        local t = WorldQuest.Territorios.buscarEn(math.floor(wx), math.floor(wy))
+        local obra = t and t.proyecto and WorldQuest.Territorios.esDueno(t, jugador) and t.faccion ~= nil
+        local n = Mando.cantidadSeleccion()
+        if n == 0 and not obra then
+            return derechoOriginal(self, x, y)
+        end
+
         local context = ISContextMenu.get(self.playerNum, x + self:getAbsoluteX(), y + self:getAbsoluteY())
-        local n = tostring(Mando.cantidadSeleccion())
-        local titulo = context:addOption(getText("IGUI_WQ_Mando_Menu", n), nil, nil)
-        titulo.notAvailable = true
-        context:addOption(getText("IGUI_WQ_Mando_Defender"), "defender", ordenar, wx, wy)
-        context:addOption(getText("IGUI_WQ_Mando_Llamar"), "llamar", ordenar, wx, wy)
-        context:addOption(getText("IGUI_WQ_Mando_Volver"), "volver", ordenar, wx, wy)
-        local irAqui = context:addOption(getText("IGUI_WQ_Mando_IrAqui"), nil, nil)
-        irAqui.notAvailable = true
-        local mantener = context:addOption(getText("IGUI_WQ_Mando_Mantener"), nil, nil)
-        mantener.notAvailable = true
+        if obra then
+            context:addOption(getText("IGUI_WQ_Mando_UbicarObra", WorldQuest.Proyectos.nombre(t.proyecto.id)), t.id, Mando.ubicarObra, math.floor(wx), math.floor(wy))
+        end
+        if n > 0 then
+            local titulo = context:addOption(getText("IGUI_WQ_Mando_Menu", tostring(n)), nil, nil)
+            titulo.notAvailable = true
+            context:addOption(getText("IGUI_WQ_Mando_IrAqui"), "ir", ordenar, wx, wy)
+            context:addOption(getText("IGUI_WQ_Mando_Mantener"), "mantener", ordenar, wx, wy)
+            context:addOption(getText("IGUI_WQ_Mando_Defender"), "defender", ordenar, wx, wy)
+            context:addOption(getText("IGUI_WQ_Mando_Llamar"), "llamar", ordenar, wx, wy)
+            context:addOption(getText("IGUI_WQ_Mando_Volver"), "volver", ordenar, wx, wy)
+        end
         return true
     end
 

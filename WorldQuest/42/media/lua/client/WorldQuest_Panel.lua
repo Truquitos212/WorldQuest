@@ -307,6 +307,10 @@ end
 local VistaObras = Vista:derive("WorldQuestVistaObras")
 
 function VistaObras:createChildren()
+    self.botonUbicar = ISButton:new(self.width - 160 - MARGEN, MARGEN - 2, 160, 22, getText("IGUI_WQ_Panel_ElegirLugar"), self, VistaObras.alUbicar)
+    self.botonUbicar:initialise()
+    self.botonUbicar:setTooltip(ayuda("ElegirLugar"))
+    self:addChild(self.botonUbicar)
     self.botones = {}
     for i, proyecto in ipairs(WorldQuest.Proyectos.LISTA) do
         local boton = ISButton:new(self.width - 120 - MARGEN, 0, 120, 22, getText("IGUI_WQ_Panel_Construir"), self, VistaObras.alConstruir)
@@ -315,6 +319,14 @@ function VistaObras:createChildren()
         boton.proyecto = proyecto
         self:addChild(boton)
         self.botones[i] = boton
+    end
+end
+
+function VistaObras:alUbicar()
+    local t = self.ventana.territorio
+    if t and t.proyecto and self.ventana.propio then
+        WorldQuest.CursorObra.empezar(t)
+        self.ventana:close()
     end
 end
 
@@ -336,11 +348,18 @@ function VistaObras:dibujar()
         for _, boton in ipairs(self.botones) do
             boton:setVisible(false)
         end
+        self.botonUbicar:setVisible(false)
         return
     end
 
     local y = MARGEN
-    if t.proyecto then
+    self.botonUbicar:setVisible(t.proyecto ~= nil and v.propio)
+    if t.proyecto and t.proyecto.sinUbicar then
+        self.botonUbicar:setTitle(getText("IGUI_WQ_Panel_ElegirLugar"))
+        self:texto(getText("IGUI_WQ_Panel_ObraSinLugar", Proyectos.nombre(t.proyecto.id)), MARGEN, y, e.alerta, nil, ayuda("ElegirLugar"))
+        y = y + ALTO_LINEA * 2 + 8
+    elseif t.proyecto then
+        self.botonUbicar:setTitle(getText("IGUI_WQ_Panel_CambiarLugar"))
         local definicion = Proyectos.buscar(t.proyecto.id)
         local porCiclo = Proyectos.trabajoDiario(t)
         local estado = getText("IGUI_WQ_Panel_ObraDetenida", Proyectos.nombre(t.proyecto.id))
