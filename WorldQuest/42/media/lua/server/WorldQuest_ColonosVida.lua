@@ -59,9 +59,9 @@ end
 -- Genera un sobreviviente y le pregunta al dueno del territorio si lo acepta.
 -- La propuesta queda guardada en el servidor hasta que el dueno responda.
 function Colonos.ofrecerLlegada(territorio)
-    local jugador = WorldQuest.Red.jugador(territorio.dueno)
+    local jugador = WorldQuest.Facciones.responsable(territorio)
     if not jugador then
-        return -- el dueno no esta conectado: nadie puede responder
+        return -- nadie de la faccion esta conectado: nadie puede responder
     end
 
     local datos = Colonos.getDatos()
@@ -92,11 +92,7 @@ function Colonos.tomarPropuesta(pid)
 end
 
 local function intentarLlegada()
-    if ZombRand(100) >= M.probabilidadLlegada(PROBABILIDAD_LLEGADA) then
-        return
-    end
-
-    -- Solo territorios con almacen y cupo libre
+    -- Solo territorios con almacen y cupo libre; la radio de su dueno duplica la probabilidad
     local candidatos = {}
     for _, territorio in ipairs(Territorios.getDatos().lista) do
         local tieneAlmacen = territorio.almacenes and #territorio.almacenes > 0
@@ -105,8 +101,12 @@ local function intentarLlegada()
         end
     end
 
-    if #candidatos > 0 then
-        Colonos.ofrecerLlegada(candidatos[ZombRand(#candidatos) + 1])
+    if #candidatos == 0 then
+        return
+    end
+    local elegido = candidatos[ZombRand(#candidatos) + 1]
+    if ZombRand(100) < M.probabilidadLlegada(PROBABILIDAD_LLEGADA, elegido) then
+        Colonos.ofrecerLlegada(elegido)
     end
 end
 

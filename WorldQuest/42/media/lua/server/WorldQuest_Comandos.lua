@@ -29,16 +29,24 @@ local function usuario(jugador)
 end
 
 -- Territorio de la orden si el jugador manda en el; si no, avisa y devuelve nil.
--- Un territorio antiguo sin dueno pasa a ser de quien le da la primera orden.
+-- Un territorio antiguo sin dueno pasa a ser de quien le da la primera orden, y
+-- uno antiguo sin faccion pasa a la faccion de su dueno.
 local function territorioPropio(jugador, id)
     local t = Territorios.buscarPorId(id)
     if not t then
         return nil
     end
-    if t.dueno == nil then
-        t.dueno = usuario(jugador)
+    local u = usuario(jugador)
+    if t.faccion == nil and t.dueno == nil then
+        t.dueno = u
     end
-    if t.dueno ~= usuario(jugador) then
+    if t.faccion == nil and t.dueno == u then
+        local f = WorldQuest.Facciones.de(u)
+        if f then
+            t.faccion = f.id
+        end
+    end
+    if not Territorios.esDueno(t, jugador) then
         Red.decir(jugador, "IGUI_WQ_NoEresDueno", { t.nombre })
         return nil
     end
@@ -94,6 +102,11 @@ Red.orden("reclamar", function(jugador, args)
         return
     end
     x, y = math.floor(x), math.floor(y)
+    local faccion = WorldQuest.Facciones.deJugador(jugador)
+    if not faccion then
+        Red.decir(jugador, "IGUI_WQ_SinFaccion")
+        return
+    end
     if Territorios.buscarSuperpuesto(x, y, RADIO_INICIAL) then
         Red.decir(jugador, "IGUI_WQ_NoReclamable")
         return
@@ -102,6 +115,7 @@ Red.orden("reclamar", function(jugador, args)
         or ("Territorio " .. tostring(Territorios.getDatos().contador + 1))
     local t = Territorios.crear(nombre, x, y, RADIO_INICIAL)
     t.dueno = usuario(jugador)
+    t.faccion = faccion.id
     Red.decir(jugador, "IGUI_WQ_Reclamado", { t.nombre })
     print("[WorldQuest] Territorio reclamado: " .. t.nombre .. " en " .. x .. ", " .. y .. " por " .. tostring(t.dueno))
 end)

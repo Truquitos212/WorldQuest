@@ -130,10 +130,16 @@ function Territorios.limpiarNombre(texto)
     return string.sub(texto, 1, Territorios.LARGO_MAXIMO_NOMBRE)
 end
 
--- true si el jugador manda en el territorio (los territorios antiguos sin dueno son de todos)
+-- true si el jugador manda en el territorio: es de su faccion, o (territorios
+-- antiguos sin faccion) lo reclamo el, o no tiene dueno
 function Territorios.esDueno(territorio, jugador)
     if not territorio or not jugador then
         return false
     end
-    return territorio.dueno == nil or territorio.dueno == jugador:getUsername()
+    local usuario = jugador:getUsername()
+    if territorio.faccion and WorldQuest.Facciones then
+        local f = WorldQuest.Facciones.de(usuario)
+        return f ~= nil and f.id == territorio.faccion
+    end
+    return territorio.dueno == nil or territorio.dueno == usuario
 end

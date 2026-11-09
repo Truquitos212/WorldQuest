@@ -17,7 +17,7 @@ local ultima = 0
 local function propio(jugador)
     local mejor, mejorDistancia = nil, nil
     for _, t in ipairs(WorldQuest.Territorios.getDatos().lista) do
-        if t.dueno == jugador:getUsername() or t.dueno == nil then
+        if WorldQuest.Territorios.esDueno(t, jugador) then
             local dx, dy = t.x - jugador:getX(), t.y - jugador:getY()
             local d = dx * dx + dy * dy
             if not mejorDistancia or d < mejorDistancia then
@@ -34,7 +34,8 @@ end
 
 -- En orden: la primera que se cumpla y no se haya visto es la que sale
 Pistas.LISTA = {
-    { id = "reclamar", cumple = function(j, t) return t == nil end },
+    { id = "faccion", cumple = function(j, t) return WorldQuest.Facciones.deJugador(j) == nil end },
+    { id = "reclamar", cumple = function(j, t) return t == nil and WorldQuest.Facciones.deJugador(j) ~= nil end },
     { id = "almacen", cumple = function(j, t) return t ~= nil and #(t.almacenes or {}) == 0 end },
     { id = "colonos", cumple = function(j, t) return t ~= nil and #(t.almacenes or {}) > 0 and #colonos(t) == 0 end },
     { id = "roles", cumple = function(j, t)

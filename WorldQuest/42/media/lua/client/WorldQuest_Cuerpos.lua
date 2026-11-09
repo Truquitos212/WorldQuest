@@ -80,6 +80,14 @@ local function cuerposCercanos()
     return porNombre
 end
 
+function Cuerpos.soyResponsable(territorio, jugador)
+    if not WorldQuest.Territorios.esDueno(territorio, jugador) then
+        return false
+    end
+    local f = WorldQuest.Facciones.deTerritorio(territorio)
+    return f == nil or f.lider == jugador:getUsername()
+end
+
 local function desvio(n)
     return ZombRand(n * 2 + 1) - n
 end
@@ -158,8 +166,9 @@ local function alPasarDiezMinutos()
             nombresActuales[colono.nombre] = true
         end
 
-        -- Solo el dueno del territorio pide los cuerpos (asi no salen repetidos)
-        if not WorldQuest.Territorios.esDueno(territorio, jugador) then
+        -- Solo un jugador por territorio pide los cuerpos (asi no salen repetidos):
+        -- el lider de la faccion, o quien lo reclamo si es un territorio sin faccion
+        if not Cuerpos.soyResponsable(territorio, jugador) then
             ticksCargado[territorio.id] = 0
         elseif getCell():getGridSquare(territorio.x, territorio.y, 0) then
             ticksCargado[territorio.id] = (ticksCargado[territorio.id] or 0) + 1

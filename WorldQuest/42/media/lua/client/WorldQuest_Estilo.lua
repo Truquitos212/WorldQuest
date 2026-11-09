@@ -21,6 +21,31 @@ local ESTILOS = {
     },
 }
 
+-- Mezcla un color con blanco para que se lea bien como texto
+local function aclarar(c, cuanto)
+    return { c.r + (1 - c.r) * cuanto, c.g + (1 - c.g) * cuanto, c.b + (1 - c.b) * cuanto }
+end
+
+local cache = {}
+
+-- Por ahora la faccion solo cambia el color de acento (titulos, seleccion, bordes)
 function Estilo.actual()
-    return ESTILOS.neutral
+    local base = ESTILOS.neutral
+    local jugador = getPlayer()
+    local f = jugador and WorldQuest.Facciones and WorldQuest.Facciones.deJugador(jugador)
+    local color = f and WorldQuest.Facciones.color(f.color)
+    if not color then
+        return base
+    end
+    if not cache[color.id] then
+        local estilo = {}
+        for k, v in pairs(base) do
+            estilo[k] = v
+        end
+        estilo.acento = aclarar(color, 0.35)
+        estilo.bordeAyuda = aclarar(color, 0.35)
+        estilo.seleccion = { color.r * 0.6, color.g * 0.6, color.b * 0.6 }
+        cache[color.id] = estilo
+    end
+    return cache[color.id]
 end

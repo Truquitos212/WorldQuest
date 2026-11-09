@@ -105,6 +105,13 @@ local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, t
         return
     end
 
+    -- Sin faccion no se puede reclamar
+    if not WorldQuest.Facciones.deJugador(jugador) then
+        local opcion = context:addOption(getText("ContextMenu_WQ_ReclamarSinFaccion"), nil, nil)
+        opcion.notAvailable = true
+        return
+    end
+
     context:addOption(getText("ContextMenu_WQ_Reclamar"), jugador, reclamarTerritorio)
 end
 

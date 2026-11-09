@@ -14,7 +14,7 @@ WorldQuest.Panel = WorldQuest.Panel or {}
 
 local Panel = WorldQuest.Panel
 
-local ANCHO, ALTO = 640, 480
+local ANCHO, ALTO = 700, 480
 local MARGEN = 12
 local FUENTE = UIFont.Small
 local FUENTE_TITULO = UIFont.Medium
@@ -165,7 +165,7 @@ function VistaColonia:dibujar()
     self:texto(getText("IGUI_WQ_Panel_Nivel", Niveles.nombre(Niveles.datos(t))), MARGEN, y, e.acento, FUENTE_TITULO, ayuda("Nivel"))
     y = y + ALTO_LINEA * 2
     if not v.propio then
-        self:texto(getText("IGUI_WQ_Panel_DeOtro", tostring(t.dueno)), MARGEN, y, e.gris, nil, ayuda("DeOtro"))
+        self:texto(getText("IGUI_WQ_Panel_DeOtro", WorldQuest.Facciones.nombreDueno(t)), MARGEN, y, e.gris, nil, ayuda("DeOtro"))
         y = y + ALTO_LINEA
     end
     self:texto(getText("IGUI_WQ_Panel_Colonos", tostring(#v.colonos), tostring(v.cupo)), MARGEN, y, nil, nil, ayuda("Cupo"))
@@ -425,6 +425,93 @@ function VistaCrisis:dibujar()
     end
 end
 
+-- PESTANA FACCION: tu faccion, sus miembros y territorios ---------------------
+local VistaFaccion = Vista:derive("WorldQuestVistaFaccion")
+
+function VistaFaccion:createChildren()
+    self.botonCrear = ISButton:new(MARGEN, MARGEN + ALTO_LINEA * 2, 180, 24, getText("IGUI_WQ_Panel_CrearOUnirse"), self, VistaFaccion.alCrear)
+    self.botonCrear:initialise()
+    self:addChild(self.botonCrear)
+    self.botonSalir = ISButton:new(MARGEN, 0, 180, 24, getText("IGUI_WQ_Panel_SalirFaccion"), self, VistaFaccion.alSalir)
+    self.botonSalir:initialise()
+    self.botonSalir:setTooltip(ayuda("SalirFaccion"))
+    self:addChild(self.botonSalir)
+end
+
+function VistaFaccion:alCrear()
+    WorldQuest.FaccionVentana.abrir()
+end
+
+local function alConfirmarSalida(target, boton)
+    if boton.internal == "YES" then
+        WorldQuest.Red.pedir("salirFaccion", {})
+    end
+end
+
+function VistaFaccion:alSalir()
+    local f = WorldQuest.Facciones.deJugador(getPlayer())
+    if not f then
+        return
+    end
+    local ancho, alto = 360, 150
+    local x = (getCore():getScreenWidth() - ancho) / 2
+    local y = (getCore():getScreenHeight() - alto) / 2
+    local ventana = ISModalDialog:new(x, y, ancho, alto, getText("IGUI_WQ_ConfirmarSalida", f.nombre), true,
+        nil, alConfirmarSalida, getPlayer():getPlayerNum())
+    ventana:initialise()
+    ventana:addToUIManager()
+end
+
+function VistaFaccion:dibujar()
+    local e = E()
+    local Facciones = WorldQuest.Facciones
+    local jugador = getPlayer()
+    local f = Facciones.deJugador(jugador)
+    if not f then
+        self:texto(getText("IGUI_WQ_Panel_SinFaccion"), MARGEN, MARGEN, e.gris, nil, ayuda("SinFaccion"))
+        self.botonCrear:setVisible(true)
+        self.botonSalir:setVisible(false)
+        return
+    end
+    self.botonCrear:setVisible(false)
+
+    local y = MARGEN
+    self:texto(f.nombre, MARGEN, y, e.acento, FUENTE_TITULO)
+    y = y + ALTO_LINEA * 2
+    self:texto(getText("IGUI_WQ_Panel_TipoFaccion", Facciones.nombreTipo(f.tipo)), MARGEN, y, nil, nil,
+        getText("IGUI_WQ_FaccionDesc_" .. f.tipo))
+    y = y + ALTO_LINEA
+    local color = Facciones.color(f.color)
+    self:texto(getText("IGUI_WQ_Panel_ColorFaccion", getText("IGUI_WQ_Color_" .. f.color)), MARGEN, y)
+    if color then
+        self:drawRect(MARGEN + 160, y + 2, 40, ALTO_LINEA - 6, 1, color.r, color.g, color.b)
+    end
+    y = y + ALTO_LINEA
+    self:texto(getText("IGUI_WQ_Panel_EmblemaFaccion", getText("IGUI_WQ_Emblema_" .. f.emblema)), MARGEN, y)
+    y = y + ALTO_LINEA
+    self:texto(getText("IGUI_WQ_Panel_Lider", f.lider), MARGEN, y, nil, nil, ayuda("Lider"))
+    y = y + ALTO_LINEA
+
+    local territorios = 0
+    for _, t in ipairs(WorldQuest.Territorios.getDatos().lista) do
+        if t.faccion == f.id then
+            territorios = territorios + 1
+        end
+    end
+    self:texto(getText("IGUI_WQ_Panel_TerritoriosFaccion", tostring(territorios)), MARGEN, y)
+    y = y + ALTO_LINEA * 2
+
+    self:texto(getText("IGUI_WQ_Panel_Miembros"), MARGEN, y, e.gris)
+    y = y + ALTO_LINEA
+    for _, usuario in ipairs(Facciones.miembros(f)) do
+        self:texto("- " .. usuario, MARGEN + 8, y)
+        y = y + ALTO_LINEA
+    end
+
+    self.botonSalir:setY(y + 10)
+    self.botonSalir:setVisible(true)
+end
+
 -- PESTANA MAPA: todos los territorios conocidos; clic para verlo en el mapa --
 local VistaMapa = Vista:derive("WorldQuestVistaMapa")
 
@@ -479,7 +566,7 @@ function VistaMapa:dibujar()
         local y = Y_LISTA_MAPA + (i - 1) * ALTO_LINEA
         local propio = WorldQuest.Territorios.esDueno(t, jugador)
         local color = propio and e.acento or e.texto
-        local linea = getText("IGUI_WQ_Mapa_Fila", WorldQuest.Niveles.titulo(t), tostring(t.dueno or "?"),
+        local linea = getText("IGUI_WQ_Mapa_Fila", WorldQuest.Niveles.titulo(t), WorldQuest.Facciones.nombreDueno(t),
             tostring(#WorldQuest.Colonos.delTerritorio(t)))
         self:texto(linea, MARGEN, y, color, nil, ayuda("FilaMapa"))
     end
@@ -575,6 +662,7 @@ function Ventana:createChildren()
     agregar(VistaColonos, "IGUI_WQ_Tab_Colonos")
     agregar(VistaObras, "IGUI_WQ_Tab_Construccion")
     agregar(VistaCrisis, "IGUI_WQ_Tab_Crisis")
+    agregar(VistaFaccion, "IGUI_WQ_Tab_Faccion")
     agregar(VistaMapa, "IGUI_WQ_Tab_Mapa")
     agregar(VistaRegistro, "IGUI_WQ_Tab_Registro")
     agregar(VistaAyuda, "IGUI_WQ_Tab_Ayuda")

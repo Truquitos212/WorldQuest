@@ -59,10 +59,18 @@ function M.minutosAviso(t, base)
     return base
 end
 
--- Llegadas: una radio en cualquier territorio las duplica
-function M.probabilidadLlegada(base)
+-- true si dos territorios son del mismo dueno (misma faccion, o mismo jugador si no tienen)
+local function mismoDueno(a, b)
+    if a.faccion or b.faccion then
+        return a.faccion == b.faccion
+    end
+    return a.dueno == b.dueno
+end
+
+-- Llegadas: una radio en cualquier territorio del mismo dueno las duplica
+function M.probabilidadLlegada(base, territorio)
     for _, t in ipairs(WorldQuest.Territorios.getDatos().lista) do
-        if M.tieneMejora(t, "radio") then
+        if M.tieneMejora(t, "radio") and (territorio == nil or mismoDueno(t, territorio)) then
             return base * 2
         end
     end

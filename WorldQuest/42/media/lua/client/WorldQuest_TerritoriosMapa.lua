@@ -127,7 +127,7 @@ local function dibujarTerritorio(mapa, territorio, lineas)
     local centroX = api:worldToUIX(territorio.x, territorio.y)
     local centroY = api:worldToUIY(territorio.x, territorio.y)
     local puntos = puntosEnPantalla(api, territorio)
-    local color = COLOR
+    local color = WorldQuest.Facciones.colorTerritorio(territorio) or COLOR
     if #lineas > 0 then
         color = COLOR_ALERTA
     end

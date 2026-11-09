@@ -8,7 +8,7 @@ WorldQuest.Red = WorldQuest.Red or {}
 
 local Red = WorldQuest.Red
 Red.MODULO = "WorldQuest"
-Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis", "WorldQuest_Registro" }
+Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis", "WorldQuest_Registro", "WorldQuest_Facciones" }
 local CLAVE_REGISTRO = "WorldQuest_Registro"
 local MAX_REGISTRO = 60
 
