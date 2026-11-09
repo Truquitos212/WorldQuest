@@ -1,52 +1,23 @@
--- WorldQuest - Crisis: narrador y crisis pendientes
+-- WorldQuest - Crisis: narrador y crisis pendientes (servidor)
+
+require "WorldQuest_CrisisDatos"
 
 WorldQuest = WorldQuest or {}
 WorldQuest.Crisis = WorldQuest.Crisis or {}
 
 local Crisis = WorldQuest.Crisis
 local Territorios = WorldQuest.Territorios
-local CLAVE_DATOS = "WorldQuest_Crisis"
+local Red = WorldQuest.Red
 
--- Narrador: tira el dado cada CICLOS_NARRADOR ciclos; la tension sube un punto
--- por cada tirada sin crisis
-Crisis.CICLOS_NARRADOR = 3
+-- Narrador: la tension sube un punto por cada tirada sin crisis
 local PROBABILIDAD_POR_TENSION = 10 -- % por punto de tension
 local PROBABILIDAD_MAXIMA = 80      -- % tope
-
-Crisis.tipos = Crisis.tipos or {}
-
--- Agrega un tipo de crisis (una "ficha")
-function Crisis.registrar(ficha)
-    Crisis.tipos[ficha.id] = ficha
-end
-
-function Crisis.getDatos()
-    local datos = ModData.getOrCreate(CLAVE_DATOS)
-    datos.tension = datos.tension or 0
-    datos.pendientes = datos.pendientes or {}
-    return datos
-end
 
 local function horaActual()
     return getGameTime():getWorldAgeHours()
 end
 
--- Mensaje al jugador (por ahora sobre su cabeza)
-function Crisis.avisar(texto, tipo)
-    -- Aviso grande en pantalla si esta disponible; si no, sobre la cabeza
-    if WorldQuest.Banner then
-        WorldQuest.Banner.mostrar(texto, tipo)
-        print("[WorldQuest] " .. texto)
-        return
-    end
-    local jugador = getPlayer()
-    if jugador then
-        jugador:Say(texto)
-    end
-    print("[WorldQuest] " .. texto)
-end
-
--- true si el centro del territorio esta cargado (el jugador anda cerca)
+-- true si el centro del territorio esta cargado (algun jugador anda cerca)
 function Crisis.estaCargado(territorio)
     return getCell():getGridSquare(territorio.x, territorio.y, 0) ~= nil
 end
@@ -67,16 +38,21 @@ function Crisis.programar(idTipo, territorio, inmediata)
         tipo = idTipo,
         territorio = territorio.id,
         hora = horaActual() + WorldQuest.Reloj.horasDeJuego(espera),
+        conAviso = ficha.textoAviso ~= nil,
     })
+    Red.cambio()
 
     if ficha.textoAviso then
-        Crisis.avisar(getText(ficha.textoAviso, territorio.nombre), "aviso")
+        Red.avisar(ficha.textoAviso, { territorio.nombre }, "aviso")
     end
     print("[WorldQuest] Crisis programada: " .. idTipo .. " en " .. territorio.nombre .. " (en " .. espera .. " min)")
 end
 
 -- Ejecuta las crisis pendientes cuya hora llego, si el territorio esta cargado
 function Crisis.procesarPendientes()
+    if isClient() then
+        return
+    end
     local pendientes = Crisis.getDatos().pendientes
     local ahora = horaActual()
 
@@ -88,11 +64,13 @@ function Crisis.procesarPendientes()
         if not territorio or not ficha then
             -- Territorio abandonado o tipo que ya no existe: se descarta
             table.remove(pendientes, i)
+            Red.cambio()
         elseif ahora >= pendiente.hora and Crisis.estaCargado(territorio) then
             table.remove(pendientes, i)
+            Red.cambio()
             -- La ficha devuelve false si no pudo ejecutarse
             if ficha.ejecutar(territorio) ~= false and ficha.textoInicio then
-                Crisis.avisar(getText(ficha.textoInicio, territorio.nombre), "crisis")
+                Red.avisar(ficha.textoInicio, { territorio.nombre }, "crisis")
             end
         end
     end

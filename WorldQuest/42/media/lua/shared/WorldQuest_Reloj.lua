@@ -55,6 +55,9 @@ function Reloj.getDatos()
 end
 
 local function alPasarMinuto()
+    if isClient() then
+        return -- en multijugador el reloj corre solo en el servidor
+    end
     local datos = Reloj.getDatos()
     local ahora = getGameTime():getWorldAgeHours()
     local delta = ahora - datos.ultimaHora
@@ -76,6 +79,9 @@ local function alPasarMinuto()
                 print("[WorldQuest] Error en un ciclo: " .. tostring(err))
             end
         end
+        if WorldQuest.Red then
+            WorldQuest.Red.cambio()
+        end
     end
     if datos.acumulado >= largo then
         datos.acumulado = 0
@@ -88,4 +94,7 @@ local function alEmpezar()
 end
 
 Events.OnGameStart.Add(alEmpezar)
+if Events.OnServerStarted then
+    Events.OnServerStarted.Add(alEmpezar)
+end
 Events.EveryOneMinute.Add(alPasarMinuto)

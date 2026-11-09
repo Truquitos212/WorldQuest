@@ -1,26 +1,8 @@
 -- WorldQuest - Opcion de prueba: llenar el almacen con materiales (cliente)
--- Se activa con la opcion de partida Herramientas de prueba
-
-local CANTIDADES = {
-    ["Base.Plank"] = 100,
-    ["Base.Nails"] = 200,
-    ["Base.Log"] = 40,
-    ["Base.TinnedBeans"] = 20,
-}
+-- Se activa con la opcion de partida Herramientas de prueba. Lo hace el servidor.
 
 local function llenar(territorio)
-    local mueble = WorldQuest.Almacen.objetos(territorio)[1]
-    if not mueble then
-        getPlayer():Say(getText("IGUI_WQ_SinAlmacen", territorio.nombre))
-        return
-    end
-    local contenedor = mueble:getContainerByIndex(0)
-    for tipo, cantidad in pairs(CANTIDADES) do
-        for i = 1, cantidad do
-            contenedor:AddItem(tipo)
-        end
-    end
-    print("[WorldQuest] Almacen de prueba lleno en " .. territorio.nombre)
+    WorldQuest.Red.pedir("llenarAlmacen", { id = territorio.id })
 end
 
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)

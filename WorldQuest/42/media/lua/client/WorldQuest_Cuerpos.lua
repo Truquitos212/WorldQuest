@@ -1,6 +1,8 @@
 -- WorldQuest - Cuerpos de colonos con Bandits (capa opcional, cliente)
 -- Si el mod Bandits (id Bandits2) esta cargado, cada colono aparece como un NPC
 -- amigable en su territorio. Si no esta, este archivo no hace nada.
+-- Los cuerpos los maneja el cliente del dueno de cada territorio; los datos de
+-- la colonia los cambia el servidor (ordenes cuerpoPedido, cuerpoAtendido, colonoMurio).
 
 WorldQuest = WorldQuest or {}
 WorldQuest.Cuerpos = WorldQuest.Cuerpos or {}
@@ -25,16 +27,27 @@ local nombrePorZombie = {}    -- zombie -> nombre (respaldo para detectar muerte
 local horaPedido = {}         -- nombre -> hora en que se pidio el cuerpo (diagnostico)
 local encontrados = {}        -- nombre -> true (cuerpo reconocido en esta carga)
 local sinCuerpo = {}          -- nombre -> revisiones seguidas sin encontrar su cuerpo
+local propios = {}            -- nombre -> true (pedido en esta sesion, antes de que llegue la respuesta del servidor)
+local atendidos = {}          -- nombre -> true (ya despedido en esta sesion)
 
 function Cuerpos.activo()
     return Bandit ~= nil and BanditBrain ~= nil
 end
 
--- Nombres de los cuerpos que creo WorldQuest (guardado en la partida)
-local function registro()
-    local datos = WorldQuest.Colonos.getDatos()
-    datos.cuerpos = datos.cuerpos or {}
-    return datos.cuerpos
+-- true si el cuerpo con ese nombre lo creo WorldQuest (guardado en la partida por el servidor)
+local function esNuestro(nombre)
+    if atendidos[nombre] then
+        return false
+    end
+    local cuerpos = WorldQuest.Colonos.getDatos().cuerpos
+    return propios[nombre] == true or (cuerpos ~= nil and cuerpos[nombre] == true)
+end
+
+-- Avisa al servidor que el cuerpo ya no es de la colonia
+local function atender(nombre)
+    atendidos[nombre] = true
+    propios[nombre] = nil
+    WorldQuest.Red.pedir("cuerpoAtendido", { nombre = nombre })
 end
 
 local function cerebroAmigable(zombie)
@@ -58,7 +71,7 @@ local function cuerposCercanos()
         if brain then
             porNombre[brain.fullname] = zombie
             nombrePorZombie[zombie] = brain.fullname
-            if registro()[brain.fullname] and not encontrados[brain.fullname] then
+            if esNuestro(brain.fullname) and not encontrados[brain.fullname] then
                 encontrados[brain.fullname] = true
                 print("[WorldQuest] Cuerpo encontrado para " .. brain.fullname .. " en " .. math.floor(zombie:getX()) .. "," .. math.floor(zombie:getY()))
             end
@@ -72,9 +85,8 @@ local function desvio(n)
 end
 
 local function pedirCuerpo(jugador, colono, territorio)
-    colono.clan = colono.clan or CLANES[ZombRand(#CLANES) + 1]
     sendClientCommand(jugador, "Spawner", "Clan", {
-        cid = colono.clan,
+        cid = CLANES[(colono.id % #CLANES) + 1],
         x = territorio.x + desvio(DISPERSION),
         y = territorio.y + desvio(DISPERSION),
         z = 0,
@@ -87,7 +99,9 @@ local function pedirCuerpo(jugador, colono, territorio)
     })
     pedidos[colono.id] = true
     horaPedido[colono.nombre] = getGameTime():getWorldAgeHours()
-    registro()[colono.nombre] = true
+    propios[colono.nombre] = true
+    atendidos[colono.nombre] = nil
+    WorldQuest.Red.pedir("cuerpoPedido", { nombre = colono.nombre })
     print("[WorldQuest] Cuerpo pedido para " .. colono.nombre)
 end
 
@@ -98,7 +112,7 @@ local function soltar(zombie, nombre)
     Bandit.ClearTasks(zombie)
     Bandit.SetProgram(zombie, PROGRAMA_SALIDA, {})
     Bandit.ForceSyncPart(zombie, { id = brain.id, sleeping = false, program = brain.program })
-    registro()[nombre] = nil
+    atender(nombre)
     print("[WorldQuest] " .. nombre .. " deja la base")
 end
 
@@ -106,13 +120,12 @@ end
 local function despedir(zombie, nombre)
     local bajas = WorldQuest.Colonos.getDatos().bajas or {}
     local motivo = bajas[nombre]
-    bajas[nombre] = nil
     if motivo ~= "muerto" and motivo ~= "desaparecido" then
         soltar(zombie, nombre)
         return
     end
 
-    registro()[nombre] = nil
+    atender(nombre)
     nombrePorZombie[zombie] = nil
     if motivo == "muerto" then
         local ok = pcall(function() zombie:Kill(nil) end)
@@ -145,7 +158,10 @@ local function alPasarDiezMinutos()
             nombresActuales[colono.nombre] = true
         end
 
-        if getCell():getGridSquare(territorio.x, territorio.y, 0) then
+        -- Solo el dueno del territorio pide los cuerpos (asi no salen repetidos)
+        if not WorldQuest.Territorios.esDueno(territorio, jugador) then
+            ticksCargado[territorio.id] = 0
+        elseif getCell():getGridSquare(territorio.x, territorio.y, 0) then
             ticksCargado[territorio.id] = (ticksCargado[territorio.id] or 0) + 1
             if ticksCargado[territorio.id] >= ESPERA_TICKS then
                 for _, colono in ipairs(colonos) do
@@ -169,9 +185,8 @@ local function alPasarDiezMinutos()
     end
 
     -- Cuerpos creados por WorldQuest cuyo colono ya no esta: se van
-    local creados = registro()
     for nombre, zombie in pairs(cuerpos) do
-        if creados[nombre] and not nombresActuales[nombre] then
+        if esNuestro(nombre) and not nombresActuales[nombre] then
             despedir(zombie, nombre)
         end
     end
@@ -247,7 +262,7 @@ local function onZombieDead(zombie)
         nombre = brain.fullname
     end
     nombrePorZombie[zombie] = nil
-    if not nombre or not registro()[nombre] then
+    if not nombre or not esNuestro(nombre) then
         return
     end
 
@@ -255,7 +270,6 @@ local function onZombieDead(zombie)
     for i = #lista, 1, -1 do
         local colono = lista[i]
         if colono.nombre == nombre then
-            table.remove(lista, i)
             -- Diagnostico: quien lo ataco por ultima vez
             local ok, atacante = pcall(function() return zombie:getAttackedBy() end)
             local quien = "desconocido"
@@ -270,13 +284,10 @@ local function onZombieDead(zombie)
             end
             print("[WorldQuest] " .. nombre .. " fue atacado por " .. quien)
             Cuerpos.diagnosticar(zombie, nombre, colono, quien)
-            registro()[nombre] = nil
-            local territorio = WorldQuest.Territorios.buscarPorId(colono.territorio)
-            local texto = getText("IGUI_WQ_ColonoMuerto", colono.nombre, territorio and territorio.nombre or "?")
-            if WorldQuest.Banner then
-                WorldQuest.Banner.mostrar(texto, "crisis")
-            end
-            print("[WorldQuest] " .. texto)
+            atendidos[nombre] = true
+            propios[nombre] = nil
+            -- El servidor saca al colono de la colonia y avisa a todos
+            WorldQuest.Red.pedir("colonoMurio", { nombre = nombre, quien = quien })
             return
         end
     end

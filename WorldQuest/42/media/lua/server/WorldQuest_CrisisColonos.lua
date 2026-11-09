@@ -40,13 +40,13 @@ Crisis.registrar({
         local robadas = 0
         Almacen.recorrerItems(territorio, function(item, contenedor)
             if robadas < COMIDA_ROBADA_LOCURA and item:IsFood() then
-                contenedor:DoRemoveItem(item)
+                Almacen.quitar(contenedor, item)
                 robadas = robadas + 1
             end
         end)
 
         quitarColono(peor)
-        Crisis.avisar(getText("IGUI_WQ_Locura", peor.nombre, territorio.nombre), "crisis")
+        WorldQuest.Red.avisar("IGUI_WQ_Locura", { peor.nombre, territorio.nombre }, "crisis")
         return true
     end,
 })
@@ -62,7 +62,7 @@ Crisis.registrar({
         print("[WorldQuest] Asalto: ataque " .. ataque .. " contra defensa " .. defensa)
 
         if defensa >= ataque then
-            Crisis.avisar(getText("IGUI_WQ_AsaltoRechazado", territorio.nombre), "aviso")
+            WorldQuest.Red.avisar("IGUI_WQ_AsaltoRechazado", { territorio.nombre }, "aviso")
             return true
         end
 
@@ -70,7 +70,7 @@ Crisis.registrar({
         Almacen.recorrerItems(territorio, function(item, contenedor)
             local valioso = item:IsFood() or Almacen.MATERIALES[item:getFullType()] ~= nil
             if valioso and ZombRand(100) < PORCENTAJE_SAQUEO then
-                contenedor:DoRemoveItem(item)
+                Almacen.quitar(contenedor, item)
             end
         end)
 
@@ -80,9 +80,9 @@ Crisis.registrar({
             local victima = colonos[ZombRand(#colonos) + 1]
             quitarColono(victima)
             Colonos.registrarBaja(victima, "muerto")
-            Crisis.avisar(getText("IGUI_WQ_AsaltoMuerte", victima.nombre, territorio.nombre), "crisis")
+            WorldQuest.Red.avisar("IGUI_WQ_AsaltoMuerte", { victima.nombre, territorio.nombre }, "crisis")
         else
-            Crisis.avisar(getText("IGUI_WQ_AsaltoRobo", territorio.nombre), "crisis")
+            WorldQuest.Red.avisar("IGUI_WQ_AsaltoRobo", { territorio.nombre }, "crisis")
         end
         return true
     end,

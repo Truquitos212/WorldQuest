@@ -207,6 +207,9 @@ Se elige al crear la partida:
 
 ## 11. Hoja de ruta
 
+> Orden real: la Fase 2 (base multijugador) se adelantó a la Fase 1, para que el
+> Centro de mando nazca conectado al servidor en vez de rehacerlo después.
+
 ### Hito 1 — "Lo que hay, sólido" (v0.3)
 - **Fase 0: estabilizar**
   - Probar producción, hambre, niveles, obras, locura y asaltantes.

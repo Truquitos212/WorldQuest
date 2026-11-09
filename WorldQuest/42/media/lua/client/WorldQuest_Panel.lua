@@ -90,13 +90,8 @@ end
 
 function VistaResumen:alMejorar()
     local t = self.ventana.territorio
-    local Niveles = WorldQuest.Niveles
-    if t and Niveles.mejorar(t) then
-        local texto = getText("IGUI_WQ_NivelSubido", t.nombre, Niveles.nombre(Niveles.datos(t)))
-        if WorldQuest.Banner then
-            WorldQuest.Banner.mostrar(texto, "aviso")
-        end
-        print("[WorldQuest] " .. texto)
+    if t then
+        WorldQuest.Red.pedir("mejorar", { id = t.id })
         self.ventana:refrescar(true)
     end
 end
@@ -171,8 +166,7 @@ end
 function VistaColonos:alCambiarRol(combo)
     local colono = self:seleccionado()
     if colono then
-        colono.rol = combo:getSelectedData()
-        print("[WorldQuest] " .. colono.nombre .. " ahora es " .. colono.rol)
+        WorldQuest.Red.pedir("rol", { colono = colono.id, rol = combo:getSelectedData() })
     end
 end
 
@@ -263,13 +257,8 @@ end
 
 function VistaConstruccion:alConstruir(boton)
     local t = self.ventana.territorio
-    local Proyectos = WorldQuest.Proyectos
-    if t and Proyectos.iniciar(t, boton.proyecto) then
-        local texto = getText("IGUI_WQ_ProyectoIniciado", Proyectos.nombre(boton.proyecto.id), t.nombre)
-        if WorldQuest.Banner then
-            WorldQuest.Banner.mostrar(texto, "aviso")
-        end
-        print("[WorldQuest] " .. texto)
+    if t then
+        WorldQuest.Red.pedir("construir", { id = t.id, proyecto = boton.proyecto.id })
         self.ventana:refrescar(true)
     end
 end
@@ -346,8 +335,7 @@ function VistaCrisis:render()
     local ahora = getGameTime():getWorldAgeHours()
     local hayAlgo = false
     for _, pendiente in ipairs(datos.pendientes) do
-        local ficha = Crisis.tipos[pendiente.tipo]
-        if ficha and ficha.textoAviso then
+        if pendiente.conAviso then
             local nombre = getText("IGUI_WQ_Crisis_" .. pendiente.tipo)
             local horas = WorldQuest.Reloj.minutosHasta(pendiente.hora)
             local linea

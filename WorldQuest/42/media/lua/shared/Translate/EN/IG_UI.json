@@ -103,5 +103,6 @@
     "IGUI_WQ_Panel_ObraMin": "Building: %1 (about %2 min left)",
     "IGUI_WQ_Panel_ObraDetenida": "Building: %1 (stopped: no builders)",
     "IGUI_WQ_Panel_Proyecto": "%1: %2 (about %3 min with one builder)",
-    "IGUI_WQ_Panel_Tirada": "Narrator tension: %1 (next roll: %2 percent; rolls every %3 min)"
+    "IGUI_WQ_Panel_Tirada": "Narrator tension: %1 (next roll: %2 percent; rolls every %3 min)",
+    "IGUI_WQ_NoEresDueno": "%1 is not yours"
 }

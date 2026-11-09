@@ -4,12 +4,11 @@
 local TIPOS = { "horda", "incendio", "comida", "tormenta", "locura", "asaltantes" }
 
 local function probarAhora(territorio, idTipo)
-    WorldQuest.Crisis.programar(idTipo, territorio, true)
-    WorldQuest.Crisis.procesarPendientes()
+    WorldQuest.Red.pedir("probarCrisis", { id = territorio.id, tipo = idTipo, ahora = true })
 end
 
 local function probarConAviso(territorio, idTipo)
-    WorldQuest.Crisis.programar(idTipo, territorio, false)
+    WorldQuest.Red.pedir("probarCrisis", { id = territorio.id, tipo = idTipo, ahora = false })
 end
 
 local function agregarSubmenu(context, menuPadre, titulo, territorio, funcion)
@@ -22,7 +21,7 @@ local function agregarSubmenu(context, menuPadre, titulo, territorio, funcion)
 end
 
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
-    if not WorldQuest.Opciones.pruebas() or not WorldQuest.Crisis then
+    if not WorldQuest.Opciones.pruebas() then
         return
     end
 

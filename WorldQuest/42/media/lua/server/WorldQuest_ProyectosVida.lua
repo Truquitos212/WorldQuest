@@ -18,7 +18,7 @@ local function alPasarCiclo()
                 t.mejoras = t.mejoras or {}
                 t.mejoras[id] = true
                 t.proyecto = nil
-                Crisis.avisar(getText("IGUI_WQ_ProyectoTerminado", Proyectos.nombre(id), t.nombre), "aviso")
+                WorldQuest.Red.avisar("IGUI_WQ_ProyectoTerminado", { { clave = "IGUI_WQ_Proyecto_" .. id }, t.nombre }, "aviso")
             end
         end
     end

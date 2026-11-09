@@ -37,9 +37,8 @@ local function juntarAlertas()
     local ahora = getGameTime():getWorldAgeHours()
 
     for _, pendiente in ipairs(datos.pendientes) do
-        local ficha = Crisis.tipos[pendiente.tipo]
         -- Solo las crisis con aviso: las de sorpresa no se muestran
-        if ficha and ficha.textoAviso then
+        if pendiente.conAviso then
             local nombre = getText("IGUI_WQ_Crisis_" .. pendiente.tipo)
             local horas = WorldQuest.Reloj.minutosHasta(pendiente.hora)
             local texto

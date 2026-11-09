@@ -4,7 +4,8 @@ WorldQuest = WorldQuest or {}
 WorldQuest.Almacen = WorldQuest.Almacen or {}
 
 local Almacen = WorldQuest.Almacen
-local MARCA = "WQ_Almacen" -- clave en el ModData del mueble
+local MARCA = "WQ_Almacen" -- clave en el ModData del mueble: id del territorio
+Almacen.CLAVE_NOMBRE = "WQ_AlmacenNombre" -- nombre propio del almacen (nil = nombre por defecto)
 
 -- Materiales que cuenta el almacen: tipo de item -> recurso
 Almacen.MATERIALES = {
@@ -18,16 +19,47 @@ function Almacen.tieneContenedor(objeto)
     return objeto ~= nil and objeto:getContainerCount() > 0
 end
 
--- Devuelve el id del territorio dueno del almacen, o nil si no es almacen
+local function nombreSprite(objeto)
+    local sprite = objeto:getSprite()
+    return sprite and sprite:getName() or nil
+end
+
+-- true si la posicion guardada p corresponde al objeto
+local function calza(p, objeto)
+    local casilla = objeto:getSquare()
+    return casilla ~= nil and p.x == casilla:getX() and p.y == casilla:getY() and p.z == casilla:getZ()
+        and Almacen.tieneContenedor(objeto) and (p.sprite == nil or p.sprite == nombreSprite(objeto))
+end
+
+-- Devuelve el id del territorio dueno del almacen, o nil si no es almacen.
+-- Si la marca del mueble todavia no llego al cliente, se busca por su posicion.
 function Almacen.territorioDe(objeto)
-    return objeto:getModData()[MARCA]
+    local marca = objeto:getModData()[MARCA]
+    if marca then
+        return marca
+    end
+    if WorldQuest.Territorios then
+        for _, t in ipairs(WorldQuest.Territorios.getDatos().lista) do
+            for _, p in ipairs(t.almacenes or {}) do
+                if calza(p, objeto) then
+                    return t.id
+                end
+            end
+        end
+    end
+    return nil
 end
 
 function Almacen.marcar(objeto, territorio)
     local casilla = objeto:getSquare()
     objeto:getModData()[MARCA] = territorio.id
     territorio.almacenes = territorio.almacenes or {}
-    table.insert(territorio.almacenes, { x = casilla:getX(), y = casilla:getY(), z = casilla:getZ() })
+    for _, p in ipairs(territorio.almacenes) do
+        if p.x == casilla:getX() and p.y == casilla:getY() and p.z == casilla:getZ() then
+            return
+        end
+    end
+    table.insert(territorio.almacenes, { x = casilla:getX(), y = casilla:getY(), z = casilla:getZ(), sprite = nombreSprite(objeto) })
 end
 
 function Almacen.desmarcar(objeto, territorio)
@@ -42,7 +74,9 @@ function Almacen.desmarcar(objeto, territorio)
     end
 end
 
--- Muebles marcados como almacen del territorio (solo los que estan cargados)
+-- Muebles marcados como almacen del territorio (solo los que estan cargados).
+-- Primero por la marca del mueble; si en esa casilla no hay ninguno marcado
+-- (la marca aun no llega a este cliente), el mueble guardado en esa posicion.
 function Almacen.objetos(territorio)
     local resultado = {}
     local celda = getCell()
@@ -50,10 +84,21 @@ function Almacen.objetos(territorio)
         local casilla = celda:getGridSquare(p.x, p.y, p.z)
         if casilla then
             local objetos = casilla:getObjects()
+            local encontrado = false
             for i = 0, objetos:size() - 1 do
                 local objeto = objetos:get(i)
                 if objeto:getModData()[MARCA] == territorio.id then
                     table.insert(resultado, objeto)
+                    encontrado = true
+                end
+            end
+            if not encontrado then
+                for i = 0, objetos:size() - 1 do
+                    local objeto = objetos:get(i)
+                    if calza(p, objeto) then
+                        table.insert(resultado, objeto)
+                        break
+                    end
                 end
             end
         end
@@ -101,8 +146,34 @@ function Almacen.gastar(territorio, costo)
     Almacen.recorrerItems(territorio, function(item, contenedor)
         local recurso = Almacen.MATERIALES[item:getFullType()]
         if recurso and (faltan[recurso] or 0) > 0 then
-            contenedor:DoRemoveItem(item)
+            Almacen.quitar(contenedor, item)
             faltan[recurso] = faltan[recurso] - 1
         end
     end)
+end
+
+-- ITEMS: en multijugador el servidor cambia el contenedor y avisa a los clientes
+
+-- Agrega un item por tipo (por ejemplo "Base.Plank"); devuelve el item o nil
+function Almacen.agregar(contenedor, tipo)
+    local item = contenedor:AddItem(tipo)
+    if item and isServer() then
+        pcall(sendAddItemToContainer, contenedor, item)
+    end
+    return item
+end
+
+-- Saca un item del contenedor
+function Almacen.quitar(contenedor, item)
+    contenedor:DoRemoveItem(item)
+    if isServer() then
+        pcall(sendRemoveItemFromContainer, contenedor, item)
+    end
+end
+
+-- Guarda los cambios del ModData del mueble y los manda a los clientes
+function Almacen.guardarMueble(objeto)
+    if isServer() then
+        pcall(function() objeto:transmitModData() end)
+    end
 end

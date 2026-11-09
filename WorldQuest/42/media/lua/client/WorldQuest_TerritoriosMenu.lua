@@ -1,19 +1,11 @@
 -- WorldQuest - Territorios: opciones en el menu de clic derecho (cliente)
+-- El cliente solo pregunta; el servidor valida y hace el cambio.
 
 WorldQuest = WorldQuest or {}
 
 local Territorios = WorldQuest.Territorios
+local Red = WorldQuest.Red
 local RADIO_INICIAL = 20
-local LARGO_MAXIMO_NOMBRE = 30
-
--- Limpia el texto escrito por el jugador; devuelve nil si queda vacio
-local function limpiarNombre(texto)
-    texto = texto:match("^%s*(.-)%s*$")
-    if texto == "" then
-        return nil
-    end
-    return string.sub(texto, 1, LARGO_MAXIMO_NOMBRE)
-end
 
 -- Ventana para escribir un nombre, centrada en pantalla
 local function pedirNombre(jugador, titulo, textoInicial, alConfirmar, param1, param2)
@@ -43,19 +35,8 @@ local function alNombrarNuevo(target, boton, jugador, posicion)
     if boton.internal ~= "OK" then
         return
     end
-
-    -- Revalidar: mientras la ventana estaba abierta pudo cambiar algo
-    if Territorios.buscarSuperpuesto(posicion.x, posicion.y, RADIO_INICIAL) then
-        jugador:Say(getText("IGUI_WQ_NoReclamable"))
-        return
-    end
-
-    local nombre = limpiarNombre(boton.parent.entry:getText()) or Territorios.nombreSugerido()
-    local territorio = Territorios.crear(nombre, posicion.x, posicion.y, RADIO_INICIAL)
-    territorio.dueno = jugador:getUsername()
-
-    jugador:Say(getText("IGUI_WQ_Reclamado", territorio.nombre))
-    print("[WorldQuest] Territorio reclamado: " .. territorio.nombre .. " en " .. posicion.x .. ", " .. posicion.y)
+    local nombre = Territorios.limpiarNombre(boton.parent.entry:getText()) or Territorios.nombreSugerido()
+    Red.pedir("reclamar", { x = posicion.x, y = posicion.y, nombre = nombre })
 end
 
 local function reclamarTerritorio(jugador)
@@ -73,17 +54,10 @@ local function alRenombrar(target, boton, jugador, territorio)
     if boton.internal ~= "OK" then
         return
     end
-
-    local nombre = limpiarNombre(boton.parent.entry:getText())
-    if not nombre then
-        return
+    local nombre = Territorios.limpiarNombre(boton.parent.entry:getText())
+    if nombre then
+        Red.pedir("renombrar", { id = territorio.id, nombre = nombre })
     end
-
-    local anterior = territorio.nombre
-    Territorios.renombrar(territorio, nombre)
-
-    jugador:Say(getText("IGUI_WQ_Renombrado", nombre))
-    print("[WorldQuest] Territorio renombrado: " .. anterior .. " -> " .. nombre)
 end
 
 local function renombrarTerritorio(jugador, territorio)
@@ -94,14 +68,9 @@ end
 -- ABANDONAR -----------------------------------------------------------
 
 local function alConfirmarAbandono(target, boton, jugador, territorio)
-    if boton.internal ~= "YES" then
-        return
+    if boton.internal == "YES" then
+        Red.pedir("abandonar", { id = territorio.id })
     end
-
-    Territorios.eliminar(territorio)
-
-    jugador:Say(getText("IGUI_WQ_Abandonado", territorio.nombre))
-    print("[WorldQuest] Territorio abandonado: " .. territorio.nombre)
 end
 
 local function abandonarTerritorio(jugador, territorio)
@@ -116,13 +85,15 @@ local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, t
     local x = math.floor(jugador:getX())
     local y = math.floor(jugador:getY())
 
-    -- Dentro de un territorio: mostrar cual es, renombrar o abandonar
+    -- Dentro de un territorio: mostrar cual es; si es tuyo, renombrar o abandonar
     local actual = Territorios.buscarEn(x, y)
     if actual then
         local info = context:addOption(getText("ContextMenu_WQ_TerritorioActual", actual.nombre), nil, nil)
         info.notAvailable = true
-        context:addOption(getText("ContextMenu_WQ_Renombrar"), jugador, renombrarTerritorio, actual)
-        context:addOption(getText("ContextMenu_WQ_Abandonar"), jugador, abandonarTerritorio, actual)
+        if Territorios.esDueno(actual, jugador) then
+            context:addOption(getText("ContextMenu_WQ_Renombrar"), jugador, renombrarTerritorio, actual)
+            context:addOption(getText("ContextMenu_WQ_Abandonar"), jugador, abandonarTerritorio, actual)
+        end
         return
     end
 

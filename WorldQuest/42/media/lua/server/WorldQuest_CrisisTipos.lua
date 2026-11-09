@@ -59,7 +59,7 @@ Crisis.registrar({
         end
 
         -- Ruido en el centro para que la horda no se distraiga en el camino
-        addSound(getPlayer(), territorio.x, territorio.y, 0, territorio.radio + DISTANCIA_HORDA + 10, 100)
+        pcall(addSound, nil, territorio.x, territorio.y, 0, territorio.radio + DISTANCIA_HORDA + 10, 100)
 
         print("[WorldQuest] Horda de " .. TAMANO_HORDA .. " desde " .. origenX .. ", " .. origenY)
         return true
@@ -123,7 +123,7 @@ Crisis.registrar({
                     for k = items:size() - 1, 0, -1 do
                         local item = items:get(k)
                         if item:IsFood() and ZombRand(100) < PORCENTAJE_PERDIDA then
-                            contenedor:DoRemoveItem(item)
+                            WorldQuest.Almacen.quitar(contenedor, item)
                             perdidas = perdidas + 1
                         end
                     end
@@ -137,8 +137,6 @@ Crisis.registrar({
 
 -- TORMENTA: con aviso. Tormenta global y frio extremo dentro del territorio --
 local MINUTOS_TORMENTA = 10
-local TEMPERATURA_FRIO = -15
-local CLIMA_TEMPERATURA = 4 -- numero interno de la temperatura en el clima
 
 Crisis.registrar({
     id = "tormenta",
@@ -152,38 +150,27 @@ Crisis.registrar({
             territorio = territorio.id,
             hasta = getGameTime():getWorldAgeHours() + horas,
         }
+        WorldQuest.Red.cambio()
         return true
     end,
 })
 
--- Cada minuto de juego: frio extremo solo si el jugador esta en el territorio
-local function actualizarFrio()
+-- Cada minuto de juego: el servidor da por terminado el frio cuando se acaba la tormenta
+-- (el efecto sobre cada jugador lo aplica el cliente en client/WorldQuest_Frio.lua)
+local function terminarFrio()
+    if isClient() then
+        return
+    end
     local datos = Crisis.getDatos()
     local frio = datos.frio
     if not frio then
         return
     end
-
-    local temperatura = getClimateManager():getClimateFloat(CLIMA_TEMPERATURA)
-    local territorio = Territorios.buscarPorId(frio.territorio)
-
-    -- Termino la tormenta o se abandono el territorio: todo vuelve a la normalidad
-    if not territorio or getGameTime():getWorldAgeHours() >= frio.hasta then
-        temperatura:setEnableAdmin(false)
+    if not Territorios.buscarPorId(frio.territorio) or getGameTime():getWorldAgeHours() >= frio.hasta then
         datos.frio = nil
+        WorldQuest.Red.cambio()
         print("[WorldQuest] Fin del frio extremo")
-        return
-    end
-
-    local jugador = getPlayer()
-    local dentro = jugador ~= nil and Territorios.contiene(territorio, jugador:getX(), jugador:getY())
-
-    if dentro then
-        temperatura:setEnableAdmin(true)
-        temperatura:setAdminValue(TEMPERATURA_FRIO)
-    else
-        temperatura:setEnableAdmin(false)
     end
 end
 
-Events.EveryOneMinute.Add(actualizarFrio)
+Events.EveryOneMinute.Add(terminarFrio)

@@ -116,3 +116,24 @@ function Territorios.buscarSuperpuesto(x, y, radio)
     end
     return nil
 end
+
+-- Limpia un nombre escrito por un jugador; devuelve nil si queda vacio
+Territorios.LARGO_MAXIMO_NOMBRE = 30
+function Territorios.limpiarNombre(texto)
+    if type(texto) ~= "string" then
+        return nil
+    end
+    texto = texto:match("^%s*(.-)%s*$")
+    if texto == "" then
+        return nil
+    end
+    return string.sub(texto, 1, Territorios.LARGO_MAXIMO_NOMBRE)
+end
+
+-- true si el jugador manda en el territorio (los territorios antiguos sin dueno son de todos)
+function Territorios.esDueno(territorio, jugador)
+    if not territorio or not jugador then
+        return false
+    end
+    return territorio.dueno == nil or territorio.dueno == jugador:getUsername()
+end

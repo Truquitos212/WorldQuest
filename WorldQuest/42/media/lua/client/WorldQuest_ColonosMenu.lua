@@ -5,37 +5,47 @@ WorldQuest = WorldQuest or {}
 WorldQuest.ColonosUI = WorldQuest.ColonosUI or {}
 
 local ColonosUI = WorldQuest.ColonosUI
+local Red = WorldQuest.Red
 
-local function alResponder(target, boton, propuesta, territorio)
+local function alResponder(target, boton, pid)
     if boton.internal == "YES" then
-        WorldQuest.Colonos.aceptar(propuesta, territorio)
+        Red.pedir("aceptarColono", { pid = pid })
+    else
+        Red.pedir("rechazarColono", { pid = pid })
     end
 end
 
-function ColonosUI.ofrecer(propuesta, territorio)
-    local texto = getText("IGUI_WQ_ColonoPide", propuesta.nombre,
-        getText("IGUI_WQ_Hab_" .. propuesta.especialidad),
-        tostring(propuesta.habilidades[propuesta.especialidad]),
-        territorio.nombre)
+-- El servidor pregunta si aceptamos a un sobreviviente
+function ColonosUI.ofrecer(args)
+    local texto = getText("IGUI_WQ_ColonoPide", args.nombre,
+        getText("IGUI_WQ_Hab_" .. args.especialidad),
+        tostring(args.nivel),
+        args.territorio)
 
     local ancho, alto = 500, 150
     local x = (getCore():getScreenWidth() - ancho) / 2
     local y = (getCore():getScreenHeight() - alto) / 2
     local ventana = ISModalDialog:new(x, y, ancho, alto, texto, true,
-        nil, alResponder, 0, propuesta, territorio)
+        nil, alResponder, 0, args.pid)
     ventana:initialise()
     ventana:addToUIManager()
 end
 
+Red.mensaje("ofrecerColono", ColonosUI.ofrecer)
+
 -- Opcion de prueba: forzar la llegada de un colono
+local function probarLlegada(territorio)
+    Red.pedir("probarLlegada", { id = territorio.id })
+end
+
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
     if not WorldQuest.Opciones.pruebas() then
         return
     end
     local jugador = getSpecificPlayer(numJugador)
     local territorio = WorldQuest.Territorios.buscarEn(math.floor(jugador:getX()), math.floor(jugador:getY()))
-    if territorio and WorldQuest.Colonos.ofrecerLlegada then
-        context:addOption(getText("ContextMenu_WQ_ProbarLlegada"), territorio, WorldQuest.Colonos.ofrecerLlegada)
+    if territorio then
+        context:addOption(getText("ContextMenu_WQ_ProbarLlegada"), territorio, probarLlegada)
     end
 end
 

@@ -45,9 +45,9 @@ end
 local function depositar(contenedor, tipos, cantidad)
     for i = 1, cantidad do
         if type(tipos) == "table" then
-            contenedor:AddItem(alAzar(tipos))
+            Almacen.agregar(contenedor, alAzar(tipos))
         else
-            contenedor:AddItem(tipos)
+            Almacen.agregar(contenedor, tipos)
         end
     end
 end
@@ -94,6 +94,9 @@ end
 
 -- Cada 10 minutos: en territorios cargados, se entrega lo producido
 local function alPasarDiezMinutos()
+    if isClient() then
+        return
+    end
     local lista = Colonos.getDatos().lista
     for i = #lista, 1, -1 do
         local colono = lista[i]
@@ -103,6 +106,7 @@ local function alPasarDiezMinutos()
                 local contenedor = contenedorDeposito(territorio)
                 if contenedor then
                     local vivo = true
+                    WorldQuest.Red.cambio()
                     while vivo and colono.trabajoPendiente > 0 do
                         colono.trabajoPendiente = colono.trabajoPendiente - 1
                         vivo = trabajar(colono, territorio, contenedor)
@@ -110,7 +114,7 @@ local function alPasarDiezMinutos()
                     if not vivo then
                         table.remove(lista, i)
                         Colonos.registrarBaja(colono, "desaparecido")
-                        Crisis.avisar(getText("IGUI_WQ_ExploradorMuerto", colono.nombre, territorio.nombre), "crisis")
+                        WorldQuest.Red.avisar("IGUI_WQ_ExploradorMuerto", { colono.nombre, territorio.nombre }, "crisis")
                     end
                 end
             end

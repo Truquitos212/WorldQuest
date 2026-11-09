@@ -30,7 +30,7 @@ local function comer(territorio)
         if comido < deudaTotal and item:IsFood() and not item:isRotten() then
             local calorias = item:getCalories()
             if calorias > 0 then
-                contenedor:DoRemoveItem(item)
+                Almacen.quitar(contenedor, item)
                 comido = comido + calorias
             end
         end
@@ -50,18 +50,45 @@ function Colonos.aceptar(propuesta, territorio)
     if #Colonos.delTerritorio(territorio) >= Colonos.cupo(territorio) then
         return
     end
+    propuesta.pid = nil
     Colonos.agregar(propuesta)
-    Crisis.avisar(getText("IGUI_WQ_ColonoUnido", propuesta.nombre, territorio.nombre), "aviso")
+    WorldQuest.Red.cambio()
+    WorldQuest.Red.avisar("IGUI_WQ_ColonoUnido", { propuesta.nombre, territorio.nombre }, "aviso")
 end
 
--- Genera un sobreviviente y le pregunta al jugador si lo acepta
+-- Genera un sobreviviente y le pregunta al dueno del territorio si lo acepta.
+-- La propuesta queda guardada en el servidor hasta que el dueno responda.
 function Colonos.ofrecerLlegada(territorio)
-    local propuesta = Colonos.generar(territorio)
-    if WorldQuest.ColonosUI then
-        WorldQuest.ColonosUI.ofrecer(propuesta, territorio)
-    else
-        Colonos.aceptar(propuesta, territorio)
+    local jugador = WorldQuest.Red.jugador(territorio.dueno)
+    if not jugador then
+        return -- el dueno no esta conectado: nadie puede responder
     end
+
+    local datos = Colonos.getDatos()
+    datos.propuestas = datos.propuestas or {}
+    datos.siguientePropuesta = (datos.siguientePropuesta or 0) + 1
+    local propuesta = Colonos.generar(territorio)
+    propuesta.pid = datos.siguientePropuesta
+    datos.propuestas[tostring(propuesta.pid)] = propuesta
+
+    WorldQuest.Red.enviar("ofrecerColono", {
+        pid = propuesta.pid,
+        nombre = propuesta.nombre,
+        especialidad = propuesta.especialidad,
+        nivel = propuesta.habilidades[propuesta.especialidad],
+        territorio = territorio.nombre,
+    }, jugador)
+end
+
+-- Saca una propuesta guardada (nil si ya no existe)
+function Colonos.tomarPropuesta(pid)
+    local datos = Colonos.getDatos()
+    if not datos.propuestas then
+        return nil
+    end
+    local propuesta = datos.propuestas[tostring(pid)]
+    datos.propuestas[tostring(pid)] = nil
+    return propuesta
 end
 
 local function intentarLlegada()
@@ -87,6 +114,10 @@ end
 
 -- Cada 10 minutos de juego: en los territorios cargados, comen lo que deben
 local function alPasarDiezMinutos()
+    if isClient() then
+        return
+    end
+    WorldQuest.Red.cambio()
     for _, territorio in ipairs(Territorios.getDatos().lista) do
         if Crisis.estaCargado(territorio) then
             comer(territorio)
@@ -121,7 +152,7 @@ local function alPasarCiclo()
                 if ciclosHambre >= MAX_CICLOS_HAMBRE or colono.animo <= 0 then
                     table.remove(lista, i)
                     seFue = true
-                    Crisis.avisar(getText("IGUI_WQ_ColonoSeVa", colono.nombre, territorio.nombre), "crisis")
+                    WorldQuest.Red.avisar("IGUI_WQ_ColonoSeVa", { colono.nombre, territorio.nombre }, "crisis")
                 end
             end
 
