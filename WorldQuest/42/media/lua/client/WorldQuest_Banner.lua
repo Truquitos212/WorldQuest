@@ -18,25 +18,31 @@ local POSICION_Y = 80
 local COLORES = {
     aviso = { r = 0.85, g = 0.6, b = 0.15 },  -- naranja: viene algo
     crisis = { r = 0.75, g = 0.2, b = 0.15 }, -- rojo: esta pasando
+    pista = { r = 0.3, g = 0.55, b = 0.85 },  -- azul: pista de primera vez
 }
+local POSICION_Y_PISTA = POSICION_Y + ALTO + 12
+local DURACION_PISTA_MS = 10000
 
 local PanelBanner = ISPanel:derive("WorldQuestBanner")
 
-function PanelBanner:new(texto, color)
-    local ancho = math.max(ANCHO_MINIMO, getTextManager():MeasureStringX(FUENTE, texto) + MARGEN * 2)
+function PanelBanner:new(texto, color, y, duracion, fuente)
+    fuente = fuente or FUENTE
+    local ancho = math.max(ANCHO_MINIMO, getTextManager():MeasureStringX(fuente, texto) + MARGEN * 2)
     local x = (getCore():getScreenWidth() - ancho) / 2
-    local o = ISPanel:new(x, POSICION_Y, ancho, ALTO)
+    local o = ISPanel:new(x, y or POSICION_Y, ancho, ALTO)
     setmetatable(o, self)
     self.__index = self
     o.texto = texto
     o.color = color
+    o.fuente = fuente
+    o.duracion = duracion or DURACION_MS
     o.inicio = getTimestampMs()
     return o
 end
 
 -- Opacidad actual: 1 casi todo el tiempo, baja a 0 en el ultimo segundo
 function PanelBanner:alfa()
-    local restante = DURACION_MS - (getTimestampMs() - self.inicio)
+    local restante = self.duracion - (getTimestampMs() - self.inicio)
     if restante <= 0 then
         return 0
     end
@@ -51,8 +57,8 @@ end
 
 function PanelBanner:render()
     local a = self:alfa()
-    local altoTexto = getTextManager():MeasureStringY(FUENTE, self.texto)
-    self:drawTextCentre(self.texto, self.width / 2, (self.height - altoTexto) / 2, 1, 1, 1, a, FUENTE)
+    local altoTexto = getTextManager():MeasureStringY(self.fuente, self.texto)
+    self:drawTextCentre(self.texto, self.width / 2, (self.height - altoTexto) / 2, 1, 1, 1, a, self.fuente)
 end
 
 function PanelBanner:update()
@@ -60,6 +66,9 @@ function PanelBanner:update()
         self:removeFromUIManager()
         if Banner.actual == self then
             Banner.actual = nil
+        end
+        if Banner.pista == self then
+            Banner.pista = nil
         end
     end
 end
@@ -74,4 +83,16 @@ function Banner.mostrar(texto, tipo)
     panel:addToUIManager()
     panel:setAlwaysOnTop(true)
     Banner.actual = panel
+end
+
+-- Pista de primera vez: mas abajo, en azul y con letra mas chica
+function Banner.mostrarPista(texto)
+    if Banner.pista then
+        Banner.pista:removeFromUIManager()
+    end
+    local panel = PanelBanner:new(texto, COLORES.pista, POSICION_Y_PISTA, DURACION_PISTA_MS, UIFont.Medium)
+    panel:initialise()
+    panel:addToUIManager()
+    panel:setAlwaysOnTop(true)
+    Banner.pista = panel
 end

@@ -1,4 +1,7 @@
--- WorldQuest - Panel de la colonia (cliente)
+-- WorldQuest - Centro de mando (cliente)
+-- Un solo boton abre el Centro de mando; todo el mod vive aqui en pestanas.
+-- Cada dato tiene un tooltip corto (pasa el mouse encima). Las acciones son
+-- ordenes al servidor (WorldQuest.Red.pedir).
 
 require "ISUI/ISCollapsableWindow"
 require "ISUI/ISTabPanel"
@@ -11,7 +14,7 @@ WorldQuest.Panel = WorldQuest.Panel or {}
 
 local Panel = WorldQuest.Panel
 
-local ANCHO, ALTO = 560, 460
+local ANCHO, ALTO = 640, 480
 local MARGEN = 12
 local FUENTE = UIFont.Small
 local FUENTE_TITULO = UIFont.Medium
@@ -29,32 +32,43 @@ local Y_ANIMO = Y_COMBO + 32
 local Y_HAMBRE = Y_ANIMO + ALTO_LINEA
 local Y_HABILIDADES = Y_HAMBRE + ALTO_LINEA + 8
 
-local BLANCO = { 1, 1, 1 }
-local GRIS = { 0.7, 0.7, 0.7 }
-local DORADO = { 1, 0.85, 0.5 }
-local ROJO = { 1, 0.5, 0.4 }
-local VERDE = { 0.5, 0.9, 0.5 }
+local function E()
+    return WorldQuest.Estilo.actual()
+end
 
--- Territorio a mostrar: el mas cercano al jugador
+local function ayuda(id)
+    return getText("IGUI_WQ_Ayuda_" .. id)
+end
+
+-- Territorio a mostrar: el propio mas cercano; si no tienes, el mas cercano de otro
 function Panel.territorioActual()
     local jugador = getPlayer()
     local lista = WorldQuest.Territorios.getDatos().lista
     if not jugador or #lista == 0 then
         return nil
     end
-    local mejor, mejorDistancia = nil, nil
+    local mejor, mejorDistancia, mejorPropio = nil, nil, false
     for _, t in ipairs(lista) do
+        local propio = WorldQuest.Territorios.esDueno(t, jugador)
         local dx = t.x - jugador:getX()
         local dy = t.y - jugador:getY()
         local distancia = dx * dx + dy * dy
-        if not mejorDistancia or distancia < mejorDistancia then
-            mejor, mejorDistancia = t, distancia
+        local gana = false
+        if not mejor then
+            gana = true
+        elseif propio ~= mejorPropio then
+            gana = propio
+        else
+            gana = distancia < mejorDistancia
+        end
+        if gana then
+            mejor, mejorDistancia, mejorPropio = t, distancia, propio
         end
     end
     return mejor
 end
 
--- VISTA BASE: panel transparente con ayudas para texto y barras --------
+-- VISTA BASE: panel transparente con texto, barras y tooltips -------------
 local Vista = ISPanel:derive("WorldQuestVista")
 
 function Vista:new(x, y, ancho, alto, ventana)
@@ -64,12 +78,39 @@ function Vista:new(x, y, ancho, alto, ventana)
     o.ventana = ventana
     o.background = false
     o.border = false
+    o.zonas = {}
     return o
 end
 
-function Vista:texto(str, x, y, color, fuente)
-    color = color or BLANCO
-    self:drawText(str, x, y, color[1], color[2], color[3], 1, fuente or FUENTE)
+function Vista:prerender()
+    self.zonas = {}
+    ISPanel.prerender(self)
+end
+
+-- Las vistas dibujan en dibujar(); despues se pinta el tooltip bajo el mouse
+function Vista:render()
+    self:dibujar()
+    WorldQuest.Ayuda.dibujarZonas(self, self.zonas)
+end
+
+function Vista:dibujar()
+end
+
+-- Zona con tooltip
+function Vista:zona(x, y, ancho, alto, texto)
+    if texto then
+        table.insert(self.zonas, { x = x, y = y, w = ancho, h = alto, texto = texto })
+    end
+end
+
+function Vista:texto(str, x, y, color, fuente, textoAyuda)
+    color = color or E().texto
+    fuente = fuente or FUENTE
+    self:drawText(str, x, y, color[1], color[2], color[3], 1, fuente)
+    if textoAyuda then
+        local tm = getTextManager()
+        self:zona(x, y, tm:MeasureStringX(fuente, str), tm:getFontHeight(fuente), textoAyuda)
+    end
 end
 
 function Vista:barra(x, y, ancho, valor, maximo, r, g, b)
@@ -79,16 +120,26 @@ function Vista:barra(x, y, ancho, valor, maximo, r, g, b)
     self:drawRectBorder(x, y, ancho, 10, 0.4, 1, 1, 1)
 end
 
--- PESTANA RESUMEN ------------------------------------------------------
-local VistaResumen = Vista:derive("WorldQuestVistaResumen")
+-- Texto largo en varias lineas; devuelve la y siguiente
+function Vista:parrafo(str, x, y, ancho, color)
+    for _, linea in ipairs(WorldQuest.Ayuda.envolver(str, ancho, FUENTE)) do
+        self:texto(linea, x, y, color)
+        y = y + ALTO_LINEA
+    end
+    return y
+end
 
-function VistaResumen:createChildren()
-    self.botonMejorar = ISButton:new(MARGEN, 0, 140, 24, getText("IGUI_WQ_Panel_Mejorar"), self, VistaResumen.alMejorar)
+-- PESTANA COLONIA ---------------------------------------------------------
+local VistaColonia = Vista:derive("WorldQuestVistaColonia")
+
+function VistaColonia:createChildren()
+    self.botonMejorar = ISButton:new(MARGEN, 0, 140, 24, getText("IGUI_WQ_Panel_Mejorar"), self, VistaColonia.alMejorar)
     self.botonMejorar:initialise()
+    self.botonMejorar:setTooltip(ayuda("Mejorar"))
     self:addChild(self.botonMejorar)
 end
 
-function VistaResumen:alMejorar()
+function VistaColonia:alMejorar()
     local t = self.ventana.territorio
     if t then
         WorldQuest.Red.pedir("mejorar", { id = t.id })
@@ -96,49 +147,56 @@ function VistaResumen:alMejorar()
     end
 end
 
-function VistaResumen:render()
+function VistaColonia:dibujar()
     local v = self.ventana
     local t = v.territorio
+    local e = E()
     if not t then
-        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, MARGEN, GRIS)
+        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, MARGEN, e.gris)
         self.botonMejorar:setVisible(false)
         return
     end
 
     local Niveles = WorldQuest.Niveles
     local r = v.recursos
-    local e = t.estructuras or { camas = 0, huertos = 0, cocinas = 0, generadores = 0 }
+    local est = t.estructuras or { camas = 0, huertos = 0, cocinas = 0, generadores = 0 }
     local y = MARGEN
 
-    self:texto(getText("IGUI_WQ_Panel_Nivel", Niveles.nombre(Niveles.datos(t))), MARGEN, y, DORADO, FUENTE_TITULO)
+    self:texto(getText("IGUI_WQ_Panel_Nivel", Niveles.nombre(Niveles.datos(t))), MARGEN, y, e.acento, FUENTE_TITULO, ayuda("Nivel"))
     y = y + ALTO_LINEA * 2
-    self:texto(getText("IGUI_WQ_Panel_Colonos", tostring(#v.colonos), tostring(v.cupo)), MARGEN, y)
+    if not v.propio then
+        self:texto(getText("IGUI_WQ_Panel_DeOtro", tostring(t.dueno)), MARGEN, y, e.gris, nil, ayuda("DeOtro"))
+        y = y + ALTO_LINEA
+    end
+    self:texto(getText("IGUI_WQ_Panel_Colonos", tostring(#v.colonos), tostring(v.cupo)), MARGEN, y, nil, nil, ayuda("Cupo"))
     y = y + ALTO_LINEA
-    self:texto(getText("IGUI_WQ_Panel_Comida", tostring(r.comidas), tostring(r.calorias)), MARGEN, y)
+    self:texto(getText("IGUI_WQ_Panel_Comida", tostring(r.comidas), tostring(r.calorias)), MARGEN, y, nil, nil, ayuda("Comida"))
     y = y + ALTO_LINEA
-    self:texto(getText("IGUI_WQ_Panel_Materiales", tostring(r.tablas), tostring(r.clavos), tostring(r.troncos)), MARGEN, y)
+    self:texto(getText("IGUI_WQ_Panel_Materiales", tostring(r.tablas), tostring(r.clavos), tostring(r.troncos)), MARGEN, y, nil, nil, ayuda("Materiales"))
     y = y + ALTO_LINEA
-    self:texto(getText("IGUI_WQ_Panel_Estructuras", tostring(e.camas), tostring(e.huertos), tostring(e.cocinas), tostring(e.generadores)), MARGEN, y)
+    self:texto(getText("IGUI_WQ_Panel_Estructuras", tostring(est.camas), tostring(est.huertos), tostring(est.cocinas), tostring(est.generadores)), MARGEN, y, nil, nil, ayuda("Estructuras"))
+    y = y + ALTO_LINEA
+    self:texto(getText("IGUI_WQ_Panel_Defensa", tostring(v.defensa)), MARGEN, y, nil, nil, ayuda("Defensa"))
     y = y + ALTO_LINEA * 2
 
     local siguiente = Niveles.siguiente(t)
     if not siguiente then
-        self:texto(getText("IGUI_WQ_NivelMaximo"), MARGEN, y, VERDE)
+        self:texto(getText("IGUI_WQ_NivelMaximo"), MARGEN, y, e.bien)
         self.botonMejorar:setVisible(false)
         return
     end
 
-    self:texto(getText("IGUI_WQ_Panel_Siguiente", Niveles.nombre(siguiente)), MARGEN, y, DORADO)
+    self:texto(getText("IGUI_WQ_Panel_Siguiente", Niveles.nombre(siguiente)), MARGEN, y, e.acento, nil, ayuda("Siguiente"))
     y = y + ALTO_LINEA
     self:texto(getText("IGUI_WQ_Panel_Costo", Niveles.textoCosto(siguiente.costo, siguiente.colonos)), MARGEN, y)
     y = y + ALTO_LINEA
     if not v.puedeMejorar and v.motivoMejorar then
-        self:texto(v.motivoMejorar, MARGEN, y, ROJO)
+        self:texto(v.motivoMejorar, MARGEN, y, e.alerta)
         y = y + ALTO_LINEA
     end
     self.botonMejorar:setY(y + 4)
     self.botonMejorar:setVisible(true)
-    self.botonMejorar:setEnable(v.puedeMejorar == true)
+    self.botonMejorar:setEnable(v.propio and v.puedeMejorar == true)
 end
 
 -- PESTANA COLONOS: lista a la izquierda, ficha a la derecha -------------
@@ -165,7 +223,7 @@ end
 
 function VistaColonos:alCambiarRol(combo)
     local colono = self:seleccionado()
-    if colono then
+    if colono and self.ventana.propio then
         WorldQuest.Red.pedir("rol", { colono = colono.id, rol = combo:getSelectedData() })
     end
 end
@@ -182,10 +240,11 @@ function VistaColonos:onMouseDown(x, y)
     return true
 end
 
-function VistaColonos:render()
+function VistaColonos:dibujar()
     local colonos = self.ventana.colonos
+    local e = E()
     if not self.ventana.territorio or #colonos == 0 then
-        self:texto(getText("IGUI_WQ_Panel_SinColonos"), MARGEN, MARGEN, GRIS)
+        self:texto(getText("IGUI_WQ_Panel_SinColonos"), MARGEN, MARGEN, e.gris, nil, ayuda("SinColonos"))
         self.comboRol:setVisible(false)
         return
     end
@@ -194,46 +253,49 @@ function VistaColonos:render()
     for i, colono in ipairs(colonos) do
         local y = MARGEN + (i - 1) * ALTO_FILA
         if colono.id == self.idSeleccionado then
-            self:drawRect(MARGEN - 4, y - 2, ANCHO_LISTA, ALTO_FILA - 2, 0.3, 0.3, 0.5, 0.7)
+            local s = e.seleccion
+            self:drawRect(MARGEN - 4, y - 2, ANCHO_LISTA, ALTO_FILA - 2, 0.3, s[1], s[2], s[3])
         end
         self:texto(colono.nombre, MARGEN, y)
-        local dias = WorldQuest.Colonos.minutosSinComer(colono)
-        if dias > 0 then
-            self:texto(getText("IGUI_WQ_Panel_HambreMin", tostring(dias)), MARGEN, y + ALTO_LINEA, ROJO)
+        local minutos = WorldQuest.Colonos.minutosSinComer(colono)
+        if minutos > 0 then
+            self:texto(getText("IGUI_WQ_Panel_HambreMin", tostring(minutos)), MARGEN, y + ALTO_LINEA, e.alerta)
         else
-            self:texto(getText("IGUI_WQ_Rol_" .. colono.rol), MARGEN, y + ALTO_LINEA, GRIS)
+            self:texto(getText("IGUI_WQ_Rol_" .. colono.rol), MARGEN, y + ALTO_LINEA, e.gris)
         end
         self:barra(MARGEN + 120, y + ALTO_LINEA + 3, 80, colono.animo, 100, 0.3, 0.75, 0.35)
+        self:zona(MARGEN + 120, y + ALTO_LINEA, 80, 14, ayuda("Animo"))
     end
     self:drawRect(ANCHO_LISTA + MARGEN, MARGEN, 1, self.height - MARGEN * 2, 0.3, 1, 1, 1)
 
     -- Ficha
     local colono = self:seleccionado()
     if not colono then
-        self:texto(getText("IGUI_WQ_Panel_Selecciona"), X_FICHA, MARGEN, GRIS)
+        self:texto(getText("IGUI_WQ_Panel_Selecciona"), X_FICHA, MARGEN, e.gris)
         self.comboRol:setVisible(false)
         return
     end
     self.comboRol:setVisible(true)
+    self.comboRol.disabled = not self.ventana.propio
 
-    self:texto(colono.nombre, X_FICHA, MARGEN, DORADO, FUENTE_TITULO)
-    self:texto(getText("IGUI_WQ_Panel_Rol"), X_FICHA, Y_ROL, GRIS)
-    self:texto(getText("IGUI_WQ_Panel_Animo"), X_FICHA, Y_ANIMO, GRIS)
+    self:texto(colono.nombre, X_FICHA, MARGEN, e.acento, FUENTE_TITULO)
+    self:texto(getText("IGUI_WQ_Panel_Rol"), X_FICHA, Y_ROL, e.gris, nil, ayuda("Rol"))
+    self:texto(getText("IGUI_WQ_Panel_Animo"), X_FICHA, Y_ANIMO, e.gris, nil, ayuda("Animo"))
     self:barra(X_FICHA + 70, Y_ANIMO + 3, 150, colono.animo, 100, 0.3, 0.75, 0.35)
     self:texto(tostring(colono.animo), X_FICHA + 228, Y_ANIMO)
 
-    local dias = WorldQuest.Colonos.minutosSinComer(colono)
-    if dias > 0 then
-        self:texto(getText("IGUI_WQ_Panel_HambreMin", tostring(dias)), X_FICHA, Y_HAMBRE, ROJO)
+    local minutos = WorldQuest.Colonos.minutosSinComer(colono)
+    if minutos > 0 then
+        self:texto(getText("IGUI_WQ_Panel_HambreMin", tostring(minutos)), X_FICHA, Y_HAMBRE, e.alerta, nil, ayuda("Hambre"))
     end
 
-    self:texto(getText("IGUI_WQ_Panel_Habilidades"), X_FICHA, Y_HABILIDADES, GRIS)
+    self:texto(getText("IGUI_WQ_Panel_Habilidades"), X_FICHA, Y_HABILIDADES, e.gris, nil, ayuda("Habilidades"))
     for i, id in ipairs(WorldQuest.Colonos.HABILIDADES) do
         local y = Y_HABILIDADES + i * (ALTO_LINEA + 2)
         local valor = colono.habilidades[id] or 0
-        local color = BLANCO
+        local color = e.texto
         if id == colono.especialidad then
-            color = DORADO
+            color = e.acento
         end
         self:texto(getText("IGUI_WQ_Hab_" .. id), X_FICHA, y, color)
         self:barra(X_FICHA + 110, y + 3, 110, valor, 10, 0.35, 0.55, 0.85)
@@ -241,21 +303,22 @@ function VistaColonos:render()
     end
 end
 
--- PESTANA CONSTRUCCION -------------------------------------------------
-local VistaConstruccion = Vista:derive("WorldQuestVistaConstruccion")
+-- PESTANA OBRAS ------------------------------------------------------------
+local VistaObras = Vista:derive("WorldQuestVistaObras")
 
-function VistaConstruccion:createChildren()
+function VistaObras:createChildren()
     self.botones = {}
     for i, proyecto in ipairs(WorldQuest.Proyectos.LISTA) do
-        local boton = ISButton:new(self.width - 120 - MARGEN, 0, 120, 22, getText("IGUI_WQ_Panel_Construir"), self, VistaConstruccion.alConstruir)
+        local boton = ISButton:new(self.width - 120 - MARGEN, 0, 120, 22, getText("IGUI_WQ_Panel_Construir"), self, VistaObras.alConstruir)
         boton:initialise()
+        boton:setTooltip(ayuda("Construir"))
         boton.proyecto = proyecto
         self:addChild(boton)
         self.botones[i] = boton
     end
 end
 
-function VistaConstruccion:alConstruir(boton)
+function VistaObras:alConstruir(boton)
     local t = self.ventana.territorio
     if t then
         WorldQuest.Red.pedir("construir", { id = t.id, proyecto = boton.proyecto.id })
@@ -263,12 +326,13 @@ function VistaConstruccion:alConstruir(boton)
     end
 end
 
-function VistaConstruccion:render()
+function VistaObras:dibujar()
     local v = self.ventana
     local t = v.territorio
+    local e = E()
     local Proyectos = WorldQuest.Proyectos
     if not t then
-        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, MARGEN, GRIS)
+        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, MARGEN, e.gris)
         for _, boton in ipairs(self.botones) do
             boton:setVisible(false)
         end
@@ -284,7 +348,7 @@ function VistaConstruccion:render()
             local minutos = math.ceil(t.proyecto.restante / porCiclo) * WorldQuest.Reloj.minutosCiclo()
             estado = getText("IGUI_WQ_Panel_ObraMin", Proyectos.nombre(t.proyecto.id), tostring(minutos))
         end
-        self:texto(estado, MARGEN, y, DORADO)
+        self:texto(estado, MARGEN, y, e.acento, nil, ayuda("EnObra"))
         y = y + ALTO_LINEA
         if definicion then
             self:barra(MARGEN, y + 2, self.width - MARGEN * 2, definicion.trabajo - t.proyecto.restante, definicion.trabajo, 0.85, 0.6, 0.15)
@@ -295,18 +359,19 @@ function VistaConstruccion:render()
     for i, proyecto in ipairs(Proyectos.LISTA) do
         local boton = self.botones[i]
         boton:setY(y + 2)
+        local textoAyuda = ayuda("Proyecto_" .. proyecto.id)
         if Proyectos.construido(t, proyecto.id) then
             boton:setVisible(false)
-            self:texto(Proyectos.nombre(proyecto.id), MARGEN, y, VERDE)
-            self:texto(getText("IGUI_WQ_Panel_Construido"), MARGEN, y + ALTO_LINEA, VERDE)
+            self:texto(Proyectos.nombre(proyecto.id), MARGEN, y, e.bien, nil, textoAyuda)
+            self:texto(getText("IGUI_WQ_Panel_Construido"), MARGEN, y + ALTO_LINEA, e.bien)
         else
             local estado = v.puedeProyecto[proyecto.id] or {}
             boton:setVisible(true)
-            boton:setEnable(estado.ok == true)
+            boton:setEnable(v.propio and estado.ok == true)
             self:texto(getText("IGUI_WQ_Panel_Proyecto", Proyectos.nombre(proyecto.id),
-                WorldQuest.Niveles.textoCosto(proyecto.costo), tostring(proyecto.trabajo * WorldQuest.Reloj.minutosCiclo())), MARGEN, y)
+                WorldQuest.Niveles.textoCosto(proyecto.costo), tostring(proyecto.trabajo * WorldQuest.Reloj.minutosCiclo())), MARGEN, y, nil, nil, textoAyuda)
             if not estado.ok and estado.motivo then
-                self:texto(estado.motivo, MARGEN, y + ALTO_LINEA, ROJO)
+                self:texto(estado.motivo, MARGEN, y + ALTO_LINEA, e.alerta)
             end
         end
         y = y + ALTO_LINEA * 2 + 10
@@ -316,31 +381,26 @@ end
 -- PESTANA CRISIS -------------------------------------------------------
 local VistaCrisis = Vista:derive("WorldQuestVistaCrisis")
 
-function VistaCrisis:render()
+function VistaCrisis:dibujar()
     local Crisis = WorldQuest.Crisis
-    if not Crisis then
-        return
-    end
+    local e = E()
     local datos = Crisis.getDatos()
-    local factor = 1
-    if WorldQuest.Modificadores then
-        factor = WorldQuest.Modificadores.factorNarrador() * WorldQuest.Opciones.frecuenciaCrisis()
-    end
+    local factor = WorldQuest.Modificadores.factorNarrador() * WorldQuest.Opciones.frecuenciaCrisis()
     local probabilidad = math.floor(math.min(datos.tension * 10 * factor, 80))
 
     local y = MARGEN
-    self:texto(getText("IGUI_WQ_Panel_Tirada", tostring(datos.tension), tostring(probabilidad), tostring(Crisis.CICLOS_NARRADOR * WorldQuest.Reloj.minutosCiclo())), MARGEN, y, DORADO)
+    self:texto(getText("IGUI_WQ_Panel_Tirada", tostring(datos.tension), tostring(probabilidad),
+        tostring(Crisis.CICLOS_NARRADOR * WorldQuest.Reloj.minutosCiclo())), MARGEN, y, e.acento, nil, ayuda("Tension"))
     y = y + ALTO_LINEA * 2
 
-    local ahora = getGameTime():getWorldAgeHours()
     local hayAlgo = false
     for _, pendiente in ipairs(datos.pendientes) do
         if pendiente.conAviso then
             local nombre = getText("IGUI_WQ_Crisis_" .. pendiente.tipo)
-            local horas = WorldQuest.Reloj.minutosHasta(pendiente.hora)
+            local minutos = WorldQuest.Reloj.minutosHasta(pendiente.hora)
             local linea
-            if horas > 0 then
-                linea = getText("IGUI_WQ_PendienteMin", nombre, tostring(horas))
+            if minutos > 0 then
+                linea = getText("IGUI_WQ_PendienteMin", nombre, tostring(minutos))
             else
                 linea = getText("IGUI_WQ_MapaEsperando", nombre)
             end
@@ -348,25 +408,135 @@ function VistaCrisis:render()
             if territorio then
                 linea = territorio.nombre .. ": " .. linea
             end
-            self:texto(linea, MARGEN, y, ROJO)
+            self:texto(linea, MARGEN, y, e.alerta, nil, ayuda("Pendiente"))
             y = y + ALTO_LINEA
             hayAlgo = true
         end
     end
 
     if datos.frio then
-        self:texto(getText("IGUI_WQ_Panel_Frio"), MARGEN, y, { 0.6, 0.8, 1 })
+        self:texto(getText("IGUI_WQ_Panel_Frio"), MARGEN, y, e.frio, nil, ayuda("Frio"))
         y = y + ALTO_LINEA
         hayAlgo = true
     end
 
     if not hayAlgo then
-        self:texto(getText("IGUI_WQ_Panel_SinCrisis"), MARGEN, y, GRIS)
+        self:texto(getText("IGUI_WQ_Panel_SinCrisis"), MARGEN, y, e.gris)
+    end
+end
+
+-- PESTANA MAPA: todos los territorios conocidos; clic para verlo en el mapa --
+local VistaMapa = Vista:derive("WorldQuestVistaMapa")
+
+local Y_LISTA_MAPA = MARGEN + 36
+
+local function abrirMapa(t)
+    local jugador = getPlayer()
+    if not jugador then
+        return
+    end
+    if not ISWorldMap_instance or not ISWorldMap_instance:isVisible() then
+        pcall(ISWorldMap.ShowWorldMap, jugador:getPlayerNum())
+    end
+    if t then
+        pcall(function()
+            ISWorldMap_instance.mapAPI:centerOn(t.x, t.y)
+        end)
+    end
+end
+
+function VistaMapa:createChildren()
+    self.botonMapa = ISButton:new(MARGEN, MARGEN, 140, 24, getText("IGUI_WQ_Panel_AbrirMapa"), self, VistaMapa.alAbrir)
+    self.botonMapa:initialise()
+    self.botonMapa:setTooltip(ayuda("AbrirMapa"))
+    self:addChild(self.botonMapa)
+end
+
+function VistaMapa:alAbrir()
+    abrirMapa(self.ventana.territorio)
+end
+
+function VistaMapa:onMouseDown(x, y)
+    if y >= Y_LISTA_MAPA then
+        local i = math.floor((y - Y_LISTA_MAPA) / ALTO_LINEA) + 1
+        local t = WorldQuest.Territorios.getDatos().lista[i]
+        if t then
+            abrirMapa(t)
+        end
+    end
+    return true
+end
+
+function VistaMapa:dibujar()
+    local e = E()
+    local jugador = getPlayer()
+    local lista = WorldQuest.Territorios.getDatos().lista
+    if #lista == 0 then
+        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, Y_LISTA_MAPA, e.gris)
+        return
+    end
+    for i, t in ipairs(lista) do
+        local y = Y_LISTA_MAPA + (i - 1) * ALTO_LINEA
+        local propio = WorldQuest.Territorios.esDueno(t, jugador)
+        local color = propio and e.acento or e.texto
+        local linea = getText("IGUI_WQ_Mapa_Fila", WorldQuest.Niveles.titulo(t), tostring(t.dueno or "?"),
+            tostring(#WorldQuest.Colonos.delTerritorio(t)))
+        self:texto(linea, MARGEN, y, color, nil, ayuda("FilaMapa"))
+    end
+end
+
+-- PESTANA REGISTRO: lo que ha pasado en la partida, lo mas nuevo arriba ----
+local VistaRegistro = Vista:derive("WorldQuestVistaRegistro")
+
+function VistaRegistro:dibujar()
+    local e = E()
+    local lista = WorldQuest.Red.getRegistro().lista
+    if #lista == 0 then
+        self:texto(getText("IGUI_WQ_Registro_Vacio"), MARGEN, MARGEN, e.gris)
+        return
+    end
+    local ahora = getGameTime():getWorldAgeHours()
+    local y = MARGEN
+    local anchoTexto = self.width - MARGEN * 2 - 90
+    for i = #lista, 1, -1 do
+        local entrada = lista[i]
+        local minutos = math.floor(WorldQuest.Reloj.minutosDePartida(ahora - (entrada.h or ahora)))
+        local hace = minutos < 1 and getText("IGUI_WQ_Registro_Recien") or getText("IGUI_WQ_Registro_Hace", tostring(minutos))
+        local color = e.texto
+        if entrada.tipo == "crisis" then
+            color = e.alerta
+        elseif entrada.tipo == "aviso" then
+            color = e.acento
+        end
+        self:texto(hace, MARGEN, y, e.gris)
+        y = self:parrafo(WorldQuest.Red.traducir(entrada.clave, entrada.p), MARGEN + 90, y, anchoTexto, color)
+        if y > self.height - ALTO_LINEA then
+            return
+        end
+    end
+end
+
+-- PESTANA AYUDA: las pistas que ya aparecieron ------------------------------
+local VistaAyuda = Vista:derive("WorldQuestVistaAyuda")
+
+function VistaAyuda:dibujar()
+    local e = E()
+    local y = MARGEN
+    local hay = false
+    for _, pista in ipairs(WorldQuest.Pistas.LISTA) do
+        if WorldQuest.Pistas.vista(pista.id) then
+            y = self:parrafo("- " .. WorldQuest.Pistas.texto(pista.id), MARGEN, y, self.width - MARGEN * 2, e.texto)
+            y = y + 4
+            hay = true
+        end
+    end
+    if not hay then
+        self:parrafo(getText("IGUI_WQ_Ayuda_SinPistas"), MARGEN, y, self.width - MARGEN * 2, e.gris)
     end
 end
 
 -- VENTANA ---------------------------------------------------------------
-local Ventana = ISCollapsableWindow:derive("WorldQuestPanelColonia")
+local Ventana = ISCollapsableWindow:derive("WorldQuestCentroDeMando")
 
 function Ventana:new(x, y)
     local o = ISCollapsableWindow:new(x, y, ANCHO, ALTO)
@@ -377,6 +547,8 @@ function Ventana:new(x, y)
     o.ultimoRefresco = 0
     o.colonos = {}
     o.cupo = 0
+    o.defensa = 0
+    o.propio = false
     o.recursos = { comidas = 0, calorias = 0, tablas = 0, clavos = 0, troncos = 0 }
     o.puedeProyecto = {}
     return o
@@ -399,10 +571,13 @@ function Ventana:createChildren()
         vista:initialise()
         self.pestanas:addView(getText(clave), vista)
     end
-    agregar(VistaResumen, "IGUI_WQ_Tab_Resumen")
+    agregar(VistaColonia, "IGUI_WQ_Tab_Resumen")
     agregar(VistaColonos, "IGUI_WQ_Tab_Colonos")
-    agregar(VistaConstruccion, "IGUI_WQ_Tab_Construccion")
+    agregar(VistaObras, "IGUI_WQ_Tab_Construccion")
     agregar(VistaCrisis, "IGUI_WQ_Tab_Crisis")
+    agregar(VistaMapa, "IGUI_WQ_Tab_Mapa")
+    agregar(VistaRegistro, "IGUI_WQ_Tab_Registro")
+    agregar(VistaAyuda, "IGUI_WQ_Tab_Ayuda")
 end
 
 -- Recalcula los datos como mucho una vez por segundo (contar el almacen cuesta)
@@ -417,13 +592,17 @@ function Ventana:refrescar(forzar)
     self.territorio = t
     if not t then
         self.colonos = {}
+        self.propio = false
+        self.title = getText("IGUI_WQ_Panel_Boton")
         return
     end
 
+    self.propio = WorldQuest.Territorios.esDueno(t, getPlayer())
     self.title = getText("IGUI_WQ_Panel_Titulo", WorldQuest.Niveles.titulo(t))
     self.recursos = WorldQuest.Almacen.contar(t)
     self.colonos = WorldQuest.Colonos.delTerritorio(t)
     self.cupo = WorldQuest.Colonos.cupo(t)
+    self.defensa = WorldQuest.Modificadores.defensa(t)
     self.puedeMejorar, self.motivoMejorar = WorldQuest.Niveles.puedeMejorar(t)
     self.puedeProyecto = {}
     for _, proyecto in ipairs(WorldQuest.Proyectos.LISTA) do
@@ -443,7 +622,7 @@ function Ventana:close()
     Panel.instancia = nil
 end
 
--- Abre o cierra el panel
+-- Abre o cierra el Centro de mando
 function Panel.alternar()
     if Panel.instancia then
         Panel.instancia:close()
@@ -455,7 +634,7 @@ function Panel.alternar()
     Panel.instancia = ventana
 end
 
--- Mientras no este el boton de la barra: se abre con clic derecho
+-- Tambien se abre con clic derecho
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
     context:addOption(getText("ContextMenu_WQ_AbrirPanel"), nil, Panel.alternar)
 end

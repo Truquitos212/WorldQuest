@@ -8,7 +8,9 @@ WorldQuest.Red = WorldQuest.Red or {}
 
 local Red = WorldQuest.Red
 Red.MODULO = "WorldQuest"
-Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis" }
+Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis", "WorldQuest_Registro" }
+local CLAVE_REGISTRO = "WorldQuest_Registro"
+local MAX_REGISTRO = 60
 
 local ordenes = {}      -- nombre -> function(jugador, args)   (servidor)
 local mensajes = {}     -- nombre -> function(args)            (cliente)
@@ -141,10 +143,30 @@ function Red.enviar(nombre, args, jugador)
     end
 end
 
--- Aviso grande en pantalla. tipo: "aviso" o "crisis"
+-- Registro de eventos de la partida (lo muestra la pestana Registro)
+function Red.getRegistro()
+    local datos = ModData.getOrCreate(CLAVE_REGISTRO)
+    datos.lista = datos.lista or {}
+    return datos
+end
+
+local function anotar(clave, p, tipo)
+    local lista = Red.getRegistro().lista
+    table.insert(lista, { h = getGameTime():getWorldAgeHours(), clave = clave, p = p, tipo = tipo })
+    while #lista > MAX_REGISTRO do
+        table.remove(lista, 1)
+    end
+    Red.cambio()
+end
+
+-- Aviso grande en pantalla. tipo: "aviso" o "crisis". Queda anotado en el registro.
 function Red.avisar(clave, args, tipo, jugador)
     print("[WorldQuest] Aviso " .. clave .. " (" .. textoLog(args) .. ")")
-    Red.enviar("aviso", { clave = clave, p = Red.empacar(args), tipo = tipo }, jugador)
+    local p = Red.empacar(args)
+    if not isClient() then
+        anotar(clave, p, tipo)
+    end
+    Red.enviar("aviso", { clave = clave, p = p, tipo = tipo }, jugador)
 end
 
 -- Frase sobre la cabeza de un jugador

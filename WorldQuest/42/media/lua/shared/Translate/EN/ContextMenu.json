@@ -28,10 +28,8 @@
     "ContextMenu_WQ_Proyecto": "%1 (%2 · %3 work)",
     "ContextMenu_WQ_ProyectoHecho": "%1 (built)",
     "ContextMenu_WQ_ProyectoBloqueado": "%1: %2",
-    "ContextMenu_WQ_ProyectoEnCurso": "Building: %1 (%2 work left)"
-,
-    "ContextMenu_WQ_AbrirPanel": "Open colony panel"
-,
+    "ContextMenu_WQ_ProyectoEnCurso": "Building: %1 (%2 work left)",
+    "ContextMenu_WQ_AbrirPanel": "Open command center",
     "ContextMenu_WQ_RenombrarAlmacen": "Rename storage",
     "ContextMenu_WQ_ProbarLlenar": "[Test] Fill storage"
 }
