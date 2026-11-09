@@ -30,3 +30,26 @@ Mod de colonia estilo RimWorld para Project Zomboid (Build 42.21).
 3. Desactivar MODO_PRUEBA en los menús de prueba.
 4. Preparar la publicación en el Workshop (poster, workshop.txt, descripción).
 5. Multijugador: separar cliente y servidor con comandos (hoy funciona en un jugador).
+
+## WorldQuest 2.0: modo estrategia (visión)
+
+Llevar la supervivencia a otro nivel: dejar de controlar a un personaje y manejar
+la colonia desde la vista isométrica, como un juego de estrategia.
+Inspiración: RimWorld, Command & Conquer y The Walking Dead.
+
+### Decisiones
+- El jugador es un **comandante invisible**: solo cámara y órdenes, como en RimWorld.
+- Bandits como requisito o como modo aparte: se decide después de investigar.
+
+### Ideas
+- Ubicar a los colonos: lista con "Ir a", marcados en el mapa y en el mundo, botón "Llamar".
+- Seleccionar colonos con el mouse y darles órdenes: mover, quedarse, trabajar.
+- Elegir dónde se construye cada obra con un cursor fantasma.
+- Que los colonos construyan y trabajen de verdad (caminar al sitio, animaciones),
+  y que al terminar aparezca la estructura real en el mundo.
+
+### Investigación pendiente
+1. Cámara: ¿se puede volver fantasma al personaje (invisible, sin colisión, sin daño)
+   desde un mod en una partida normal? ¿Se puede alejar más el zoom?
+2. Órdenes: cómo escribir un programa propio de Bandits que obedezca órdenes.
+3. Clics en el mundo: cómo saber qué casilla o qué NPC está bajo el mouse.
