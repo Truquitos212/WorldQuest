@@ -175,7 +175,37 @@ Se elige al crear la partida:
 
 ---
 
-## 10. Hoja de ruta
+## 10. Ritmo de partida
+- El mod mide el tiempo en **minutos reales**: calcula su propio reloj a partir de la duración
+  del día del sandbox. La duración del día queda como gusto de supervivencia y no cambia
+  el ritmo de la estrategia.
+- Producción, hambre y narrador funcionan por **ciclos cortos**; las obras se miden en
+  **minutos de trabajo**.
+- Opción de partida **Duración**: Rápida (~3 h), Normal (~6 h) y Larga (~12 h). Escala tiempos
+  y costos juntos; los multiplicadores de producción y costos ajustan fino dentro de cada una.
+
+### Ritmo objetivo (Normal)
+| Momento | Qué debería estar pasando |
+|---|---|
+| 0–15 min | Territorio, almacén, primeros colonos |
+| 15–30 min | Campamento, primeras obras, primera crisis |
+| 30–60 min | Asentamiento, primeros contactos y comercio |
+| ~1 h | Primera victoria posible, solo con una estrategia de apuro arriesgada |
+| 2–4 h | Partida típica: guerras, alianzas, Éxodo en marcha |
+| 6 h | Partida larga |
+| 12 h | Tope absoluto |
+
+### Reglas de cierre
+- **Cuenta regresiva visible**: cumplir una condición de victoria no gana al instante; hay que
+  mantenerla de 10 a 15 minutos, con el contador visible para todos en la tabla.
+- **El apuro tiene costo**: ganar temprano exige apostar casi todo a un objetivo y deja débil
+  a la facción si falla.
+- **Final por tiempo**: al acercarse el límite, el narrador sube la presión (crisis más seguidas
+  y más duras). Si nadie gana, los militares evacúan la zona y gana quien va primero en la tabla.
+
+---
+
+## 11. Hoja de ruta
 
 ### Hito 1 — "Lo que hay, sólido" (v0.3)
 - **Fase 0: estabilizar**
@@ -183,6 +213,7 @@ Se elige al crear la partida:
   - Resolver la muerte de colonos con cuerpo.
   - Reemplazar los MODO_PRUEBA por una opción de partida.
   - Opciones de sandbox (frecuencia de crisis, costos, producción).
+  - Reloj del mod y opción Duración de la partida (ritmo en minutos reales).
 - **Fase 1: Centro de mando**
   - Rehacer el panel como Centro de mando con pestañas: Colonia, Mapa, Diplomacia,
     Comercio, Objetivos, Registro y Ayuda.
@@ -212,7 +243,7 @@ Se elige al crear la partida:
   captura de territorios, observador, protección por desconexión).
 
 ### Hito 5 — "Ganar" (v1.0)
-- **Fase 10: victoria** (Éxodo, Dominación, Economía, tabla siempre visible, resumen final).
+- **Fase 10: victoria** (Éxodo, Dominación, Economía, cuenta regresiva, final por tiempo, tabla siempre visible, resumen final).
 - **Fase 11: pulido y publicación** (balance con amigos, rendimiento, sonidos, Workshop).
 
 ### Hito 6 — "Caos" (v1.1)
@@ -220,7 +251,7 @@ Se elige al crear la partida:
 
 ---
 
-## 11. Investigación pendiente
+## 12. Investigación pendiente
 1. Integrar la facción al creador de personajes del juego (si no, ventana propia al aparecer).
 2. Convertir un clic en el mapa a coordenadas del mundo.
 3. Escribir un programa propio de Bandits que obedezca órdenes.
