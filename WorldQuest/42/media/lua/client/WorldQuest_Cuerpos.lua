@@ -161,6 +161,19 @@ local function onZombieDead(zombie)
         local colono = lista[i]
         if colono.nombre == nombre then
             table.remove(lista, i)
+            -- Diagnostico: quien lo ataco por ultima vez
+            local ok, atacante = pcall(function() return zombie:getAttackedBy() end)
+            local quien = "desconocido"
+            if ok and atacante then
+                if instanceof(atacante, "IsoPlayer") then
+                    quien = "el jugador"
+                elseif atacante:getVariableBoolean("Bandit") and BanditBrain.Get(atacante) then
+                    quien = "el NPC " .. tostring(BanditBrain.Get(atacante).fullname)
+                else
+                    quien = "un zombie"
+                end
+            end
+            print("[WorldQuest] " .. nombre .. " fue atacado por " .. quien)
             registro()[nombre] = nil
             local territorio = WorldQuest.Territorios.buscarPorId(colono.territorio)
             local texto = getText("IGUI_WQ_ColonoMuerto", colono.nombre, territorio and territorio.nombre or "?")
