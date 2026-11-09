@@ -261,5 +261,17 @@
     "IGUI_WQ_Panel_SinRasgo": "Tu facción todavía no tiene rasgo de líder. Elige uno:",
     "IGUI_WQ_Panel_Efectos": "Efectos activos",
     "IGUI_WQ_Ayuda_Efectos": "Lo que cambian tu facción y el rasgo de su líder. Verde ayuda, rojo perjudica.",
-    "IGUI_WQ_RasgoElegido": "Rasgo del líder: %1"
+    "IGUI_WQ_RasgoElegido": "Rasgo del líder: %1",
+    "IGUI_WQ_Escenario": "Escenario: %1",
+    "IGUI_WQ_Escenario_vecinos": "Vecinos",
+    "IGUI_WQ_Escenario_triangulo": "Triángulo",
+    "IGUI_WQ_Escenario_malcomienzo": "Mal comienzo",
+    "IGUI_WQ_PuestoFuera": "El puesto de mando tiene que estar en un territorio de tu facción.",
+    "IGUI_WQ_PuestoMarcado": "Puesto de mando en %1",
+    "IGUI_WQ_PuestoSinComida": "No queda comida en el almacén para el puesto de mando.",
+    "IGUI_WQ_Alimentado": "Los colonos me trajeron comida (%1 kcal)",
+    "IGUI_WQ_Panel_Puesto": "Puesto de mando: %1",
+    "IGUI_WQ_Panel_SinPuesto": "Sin puesto de mando",
+    "IGUI_WQ_Ayuda_Puesto": "Lo marca el líder con clic derecho en su base. Mientras esté cerca y tenga hambre, los colonos le llevan comida del almacén.",
+    "IGUI_WQ_Pista_puesto": "Como líder, marca un puesto de mando en tu base con clic derecho: ahí los colonos te traen comida."
 }

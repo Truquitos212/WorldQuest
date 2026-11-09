@@ -7,6 +7,11 @@ option WorldQuest.Duracion = {
     page = WorldQuest, translation = WorldQuest_Duracion, valueTranslation = WorldQuest_Duracion,
 }
 
+option WorldQuest.ModoInicio = {
+    type = enum, numValues = 4, default = 1,
+    page = WorldQuest, translation = WorldQuest_ModoInicio, valueTranslation = WorldQuest_ModoInicio,
+}
+
 option WorldQuest.HerramientasPrueba = {
     type = boolean, default = false,
     page = WorldQuest, translation = WorldQuest_HerramientasPrueba,

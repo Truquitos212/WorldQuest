@@ -566,6 +566,13 @@ function VistaFaccion:dibujar()
         end
     end
     self:texto(getText("IGUI_WQ_Panel_TerritoriosFaccion", tostring(territorios)), MARGEN, y)
+    y = y + ALTO_LINEA
+    local puesto = f.puesto and WorldQuest.Territorios.buscarPorId(f.puesto.territorio)
+    if puesto then
+        self:texto(getText("IGUI_WQ_Panel_Puesto", puesto.nombre), MARGEN, y, nil, nil, ayuda("Puesto"))
+    else
+        self:texto(getText("IGUI_WQ_Panel_SinPuesto"), MARGEN, y, e.gris, nil, ayuda("Puesto"))
+    end
     y = y + ALTO_LINEA * 2
 
     self:texto(getText("IGUI_WQ_Panel_Miembros"), MARGEN, y, e.gris)

@@ -12,5 +12,11 @@
     "Sandbox_WorldQuest_Duracion_tooltip": "Marca el ritmo de colonias, obras y crisis. Rápida: unas 3 horas. Normal: unas 6. Larga: unas 12.",
     "Sandbox_WorldQuest_Duracion_option1": "Rápida",
     "Sandbox_WorldQuest_Duracion_option2": "Normal",
-    "Sandbox_WorldQuest_Duracion_option3": "Larga"
+    "Sandbox_WorldQuest_Duracion_option3": "Larga",
+    "Sandbox_WorldQuest_ModoInicio": "Modo de inicio",
+    "Sandbox_WorldQuest_ModoInicio_tooltip": "Dónde aparece cada jugador. Libre: donde elija. Justo: todos lo más lejos posible entre sí. Pueblo chico: todos en el mismo pueblo. Aleatorio: un escenario al azar.",
+    "Sandbox_WorldQuest_ModoInicio_option1": "Libre",
+    "Sandbox_WorldQuest_ModoInicio_option2": "Justo",
+    "Sandbox_WorldQuest_ModoInicio_option3": "Pueblo chico",
+    "Sandbox_WorldQuest_ModoInicio_option4": "Aleatorio (STERAK)"
 }

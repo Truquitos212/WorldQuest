@@ -12,5 +12,11 @@
     "Sandbox_WorldQuest_Duracion_tooltip": "Sets the pace of colonies, buildings and crises. Fast: about 3 hours. Normal: about 6. Long: about 12.",
     "Sandbox_WorldQuest_Duracion_option1": "Fast",
     "Sandbox_WorldQuest_Duracion_option2": "Normal",
-    "Sandbox_WorldQuest_Duracion_option3": "Long"
+    "Sandbox_WorldQuest_Duracion_option3": "Long",
+    "Sandbox_WorldQuest_ModoInicio": "Start mode",
+    "Sandbox_WorldQuest_ModoInicio_tooltip": "Where each player appears. Free: wherever they choose. Fair: everyone as far apart as possible. Small town: everyone in the same town. Random: a random scenario.",
+    "Sandbox_WorldQuest_ModoInicio_option1": "Free",
+    "Sandbox_WorldQuest_ModoInicio_option2": "Fair",
+    "Sandbox_WorldQuest_ModoInicio_option3": "Small town",
+    "Sandbox_WorldQuest_ModoInicio_option4": "Random (STERAK)"
 }

@@ -261,5 +261,17 @@
     "IGUI_WQ_Panel_SinRasgo": "Your faction has no leader trait yet. Choose one:",
     "IGUI_WQ_Panel_Efectos": "Active effects",
     "IGUI_WQ_Ayuda_Efectos": "What your faction and its leader's trait change. Green helps, red hurts.",
-    "IGUI_WQ_RasgoElegido": "Leader trait: %1"
+    "IGUI_WQ_RasgoElegido": "Leader trait: %1",
+    "IGUI_WQ_Escenario": "Scenario: %1",
+    "IGUI_WQ_Escenario_vecinos": "Neighbors",
+    "IGUI_WQ_Escenario_triangulo": "Triangle",
+    "IGUI_WQ_Escenario_malcomienzo": "Bad start",
+    "IGUI_WQ_PuestoFuera": "The command post has to be in a territory of your faction.",
+    "IGUI_WQ_PuestoMarcado": "Command post in %1",
+    "IGUI_WQ_PuestoSinComida": "There is no food left in the storage for the command post.",
+    "IGUI_WQ_Alimentado": "The colonists brought me food (%1 kcal)",
+    "IGUI_WQ_Panel_Puesto": "Command post: %1",
+    "IGUI_WQ_Panel_SinPuesto": "No command post",
+    "IGUI_WQ_Ayuda_Puesto": "The leader marks it with a right-click in their base. While nearby and hungry, colonists bring food from the storage.",
+    "IGUI_WQ_Pista_puesto": "As leader, mark a command post in your base with a right-click: colonists bring you food there."
 }

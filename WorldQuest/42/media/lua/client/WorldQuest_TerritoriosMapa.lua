@@ -143,6 +143,17 @@ local function dibujarTerritorio(mapa, territorio, lineas)
         mapa:drawRectBorder(ax - 4, ay - 4, 8, 8, 1, 0, 0, 0)
     end
 
+    -- Puesto de mando: un cuadro blanco con el color de la faccion adentro
+    local faccion = WorldQuest.Facciones.deTerritorio(territorio)
+    if faccion and faccion.puesto and faccion.puesto.territorio == territorio.id then
+        local px = api:worldToUIX(faccion.puesto.x + 0.5, faccion.puesto.y + 0.5)
+        local py = api:worldToUIY(faccion.puesto.x + 0.5, faccion.puesto.y + 0.5)
+        local c = WorldQuest.Facciones.color(faccion.color) or { r = 1, g = 1, b = 1 }
+        mapa:drawRect(px - 6, py - 6, 12, 12, 1, 1, 1, 1)
+        mapa:drawRect(px - 3, py - 3, 6, 6, 1, c.r, c.g, c.b)
+        mapa:drawRectBorder(px - 6, py - 6, 12, 12, 1, 0, 0, 0)
+    end
+
     -- Tamano en pantalla: distancia del centro a un punto del borde
     local dx = puntos[1].x - centroX
     local dy = puntos[1].y - centroY

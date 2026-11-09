@@ -32,5 +32,7 @@
     "ContextMenu_WQ_AbrirPanel": "Abrir Centro de mando",
     "ContextMenu_WQ_RenombrarAlmacen": "Renombrar almacén",
     "ContextMenu_WQ_ProbarLlenar": "[Prueba] Llenar almacén",
-    "ContextMenu_WQ_ReclamarSinFaccion": "Reclamar territorio (primero crea o únete a una facción)"
+    "ContextMenu_WQ_ReclamarSinFaccion": "Reclamar territorio (primero crea o únete a una facción)",
+    "ContextMenu_WQ_MarcarPuesto": "Marcar puesto de mando aquí",
+    "ContextMenu_WQ_MoverPuesto": "Mover puesto de mando aquí"
 }

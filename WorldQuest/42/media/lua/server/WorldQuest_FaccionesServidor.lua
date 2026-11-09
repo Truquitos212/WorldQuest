@@ -140,3 +140,73 @@ Red.orden("salirFaccion", function(jugador, args)
     f.miembros[u] = nil
     Red.decir(jugador, "IGUI_WQ_SalisteFaccion", { f.nombre })
 end)
+
+-- PUESTO DE MANDO ------------------------------------------------------------
+-- El lider marca un lugar en un territorio de su faccion. Mientras este cerca,
+-- los colonos le llevan comida del almacen de ese territorio.
+
+local RADIO_PUESTO = 4            -- casillas alrededor del puesto
+local CALORIAS_POR_COMIDA = 500   -- lo que le llevan cada vez, como maximo
+local ESPERA_HORAS = 0.2          -- tiempo minimo de juego entre comidas
+
+local ultimaComida = {}           -- usuario -> hora de juego
+
+local function cercaDe(jugador, x, y, z, radio)
+    local dx, dy = jugador:getX() - (x + 0.5), jugador:getY() - (y + 0.5)
+    return math.floor(jugador:getZ()) == z and (dx * dx + dy * dy) <= radio * radio
+end
+
+Red.orden("marcarPuesto", function(jugador, args)
+    local u = usuario(jugador)
+    local f = Facciones.de(u)
+    local x, y, z = tonumber(args.x), tonumber(args.y), tonumber(args.z) or 0
+    if not f or f.lider ~= u or not x or not y then
+        return
+    end
+    x, y, z = math.floor(x), math.floor(y), math.floor(z)
+    local t = Territorios.buscarEn(x, y)
+    if not t or t.faccion ~= f.id then
+        Red.decir(jugador, "IGUI_WQ_PuestoFuera")
+        return
+    end
+    if not cercaDe(jugador, x, y, z, RADIO_PUESTO) then
+        return
+    end
+    f.puesto = { x = x, y = y, z = z, territorio = t.id }
+    Red.decir(jugador, "IGUI_WQ_PuestoMarcado", { t.nombre })
+    print("[WorldQuest] Puesto de mando de " .. f.nombre .. " en " .. t.nombre)
+end)
+
+Red.orden("alimentarLider", function(jugador, args)
+    local u = usuario(jugador)
+    local f = Facciones.de(u)
+    if not f or f.lider ~= u or not f.puesto then
+        return
+    end
+    local p = f.puesto
+    local t = Territorios.buscarPorId(p.territorio)
+    if not t or t.faccion ~= f.id or not cercaDe(jugador, p.x, p.y, p.z, RADIO_PUESTO) then
+        return
+    end
+    local ahora = getGameTime():getWorldAgeHours()
+    if ultimaComida[u] and ahora - ultimaComida[u] < ESPERA_HORAS then
+        return
+    end
+    ultimaComida[u] = ahora
+
+    local calorias = 0
+    WorldQuest.Almacen.recorrerItems(t, function(item, contenedor)
+        if calorias < CALORIAS_POR_COMIDA and item:IsFood() and not item:isRotten() then
+            local c = item:getCalories()
+            if c > 0 then
+                WorldQuest.Almacen.quitar(contenedor, item)
+                calorias = calorias + c
+            end
+        end
+    end)
+    if calorias <= 0 then
+        Red.decir(jugador, "IGUI_WQ_PuestoSinComida")
+        return
+    end
+    Red.enviar("alimentado", { calorias = math.floor(calorias) }, jugador)
+end)

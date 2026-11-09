@@ -37,6 +37,10 @@ Pistas.LISTA = {
     { id = "faccion", cumple = function(j, t) return WorldQuest.Facciones.deJugador(j) == nil end },
     { id = "reclamar", cumple = function(j, t) return t == nil and WorldQuest.Facciones.deJugador(j) ~= nil end },
     { id = "almacen", cumple = function(j, t) return t ~= nil and #(t.almacenes or {}) == 0 end },
+    { id = "puesto", cumple = function(j, t)
+        local f = WorldQuest.Facciones.deJugador(j)
+        return t ~= nil and f ~= nil and f.lider == j:getUsername() and f.puesto == nil
+    end },
     { id = "colonos", cumple = function(j, t) return t ~= nil and #(t.almacenes or {}) > 0 and #colonos(t) == 0 end },
     { id = "roles", cumple = function(j, t)
         for _, c in ipairs(colonos(t)) do

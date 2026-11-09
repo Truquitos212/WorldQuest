@@ -26,6 +26,11 @@ function Opciones.produccion()
     return valor("Produccion", 1.0)
 end
 
+-- 1 libre, 2 justo, 3 pueblo chico, 4 aleatorio (STERAK)
+function Opciones.modoInicio()
+    return valor("ModoInicio", 1)
+end
+
 -- 1 rapida, 2 normal, 3 larga
 function Opciones.duracion()
     return valor("Duracion", 2)
