@@ -85,7 +85,12 @@ end
 
 -- Ciclos completos sin comer, sin contar la racion del ciclo actual
 function Colonos.ciclosSinComer(colono)
-    return math.max(0, math.ceil(colono.deuda / Colonos.RACION) - 1)
+    local racion = Colonos.RACION
+    local territorio = WorldQuest.Territorios.buscarPorId(colono.territorio)
+    if territorio and WorldQuest.Modificadores then
+        racion = WorldQuest.Modificadores.racion(territorio)
+    end
+    return math.max(0, math.ceil(colono.deuda / racion) - 1)
 end
 
 -- Registra por que un colono dejo la colonia, para saber que hacer con su cuerpo:

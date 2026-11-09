@@ -436,6 +436,22 @@ function VistaFaccion:createChildren()
     self.botonSalir:initialise()
     self.botonSalir:setTooltip(ayuda("SalirFaccion"))
     self:addChild(self.botonSalir)
+
+    -- Solo para facciones sin rasgo de lider (creadas antes de la Fase 3B)
+    self.comboRasgo = ISComboBox:new(MARGEN, 0, 200, 22, self, nil)
+    self.comboRasgo:initialise()
+    self:addChild(self.comboRasgo)
+    self.botonRasgo = ISButton:new(MARGEN + 210, 0, 140, 22, getText("IGUI_WQ_Panel_ElegirRasgo"), self, VistaFaccion.alElegirRasgo)
+    self.botonRasgo:initialise()
+    self:addChild(self.botonRasgo)
+    self.tipoRasgos = nil
+end
+
+function VistaFaccion:alElegirRasgo()
+    local rasgo = self.comboRasgo:getSelectedData()
+    if rasgo then
+        WorldQuest.Red.pedir("elegirRasgo", { rasgo = rasgo })
+    end
 end
 
 function VistaFaccion:alCrear()
@@ -471,6 +487,8 @@ function VistaFaccion:dibujar()
         self:texto(getText("IGUI_WQ_Panel_SinFaccion"), MARGEN, MARGEN, e.gris, nil, ayuda("SinFaccion"))
         self.botonCrear:setVisible(true)
         self.botonSalir:setVisible(false)
+        self.comboRasgo:setVisible(false)
+        self.botonRasgo:setVisible(false)
         return
     end
     self.botonCrear:setVisible(false)
@@ -490,6 +508,55 @@ function VistaFaccion:dibujar()
     self:texto(getText("IGUI_WQ_Panel_EmblemaFaccion", getText("IGUI_WQ_Emblema_" .. f.emblema)), MARGEN, y)
     y = y + ALTO_LINEA
     self:texto(getText("IGUI_WQ_Panel_Lider", f.lider), MARGEN, y, nil, nil, ayuda("Lider"))
+    y = y + ALTO_LINEA
+
+    -- Rasgo del lider
+    local B = WorldQuest.Balance
+    local esLider = f.lider == jugador:getUsername()
+    if f.rasgo then
+        local efectosRasgo = {}
+        for _, item in ipairs(B.lista(B.RASGOS[f.rasgo] or {})) do
+            table.insert(efectosRasgo, item.texto)
+        end
+        self:texto(getText("IGUI_WQ_Panel_Rasgo", getText("IGUI_WQ_Rasgo_" .. f.rasgo)), MARGEN, y, nil, nil,
+            table.concat(efectosRasgo, ", "))
+        self.comboRasgo:setVisible(false)
+        self.botonRasgo:setVisible(false)
+        y = y + ALTO_LINEA
+    elseif esLider then
+        if self.tipoRasgos ~= f.tipo then
+            self.comboRasgo:clear()
+            for _, rasgo in ipairs(B.RASGOS_DE[f.tipo] or {}) do
+                self.comboRasgo:addOptionWithData(getText("IGUI_WQ_Rasgo_" .. rasgo), rasgo)
+            end
+            self.tipoRasgos = f.tipo
+        end
+        self:texto(getText("IGUI_WQ_Panel_SinRasgo"), MARGEN, y, e.alerta)
+        y = y + ALTO_LINEA
+        self.comboRasgo:setY(y)
+        self.botonRasgo:setY(y)
+        self.comboRasgo:setVisible(true)
+        self.botonRasgo:setVisible(true)
+        y = y + 28
+    else
+        self.comboRasgo:setVisible(false)
+        self.botonRasgo:setVisible(false)
+    end
+
+    -- Efectos activos de la faccion y su lider
+    y = y + 4
+    self:texto(getText("IGUI_WQ_Panel_Efectos"), MARGEN, y, e.gris, nil, ayuda("Efectos"))
+    y = y + ALTO_LINEA
+    local x = MARGEN + 8
+    for _, item in ipairs(B.lista(B.efectos(f.tipo, f.rasgo))) do
+        local w = getTextManager():MeasureStringX(FUENTE, item.texto) + 14
+        if x + w > self.width - MARGEN then
+            x = MARGEN + 8
+            y = y + ALTO_LINEA
+        end
+        self:texto(item.texto, x, y, item.bueno and e.bien or e.alerta)
+        x = x + w
+    end
     y = y + ALTO_LINEA
 
     local territorios = 0

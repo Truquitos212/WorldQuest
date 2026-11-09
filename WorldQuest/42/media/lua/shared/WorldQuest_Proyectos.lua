@@ -68,5 +68,5 @@ function Proyectos.trabajoDiario(t)
             trabajo = trabajo + 1 + math.floor(colono.habilidades.construccion / 5)
         end
     end
-    return trabajo
+    return WorldQuest.Modificadores.obras(t, trabajo)
 end

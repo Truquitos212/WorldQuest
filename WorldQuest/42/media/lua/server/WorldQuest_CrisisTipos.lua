@@ -122,7 +122,7 @@ Crisis.registrar({
                     local items = contenedor:getItems()
                     for k = items:size() - 1, 0, -1 do
                         local item = items:get(k)
-                        if item:IsFood() and ZombRand(100) < PORCENTAJE_PERDIDA then
+                        if item:IsFood() and ZombRand(100) < WorldQuest.Modificadores.perdidaComida(territorio, PORCENTAJE_PERDIDA) then
                             WorldQuest.Almacen.quitar(contenedor, item)
                             perdidas = perdidas + 1
                         end

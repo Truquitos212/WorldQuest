@@ -142,7 +142,7 @@ local function alPasarCiclo()
             -- Solo se evalua el hambre si el almacen esta al alcance
             if Crisis.estaCargado(territorio) then
                 comer(territorio)
-                local ciclosHambre = math.floor(colono.deuda / Colonos.RACION)
+                local ciclosHambre = math.floor(colono.deuda / M.racion(territorio))
                 if ciclosHambre == 0 then
                     colono.animo = math.min(100, colono.animo + ANIMO_SI_COMEN + M.animoDiario(territorio))
                 else
@@ -158,8 +158,8 @@ local function alPasarCiclo()
 
             -- La racion de este ciclo queda pendiente
             if not seFue then
-                local tope = Colonos.RACION * MAX_CICLOS_DEUDA
-                colono.deuda = math.min(colono.deuda + Colonos.RACION, tope)
+                local racion = M.racion(territorio)
+                colono.deuda = math.min(colono.deuda + racion, racion * MAX_CICLOS_DEUDA)
             end
         end
     end

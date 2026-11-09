@@ -14,7 +14,7 @@ local FV = WorldQuest.FaccionVentana
 local Facciones = WorldQuest.Facciones
 local Red = WorldQuest.Red
 
-local ANCHO, ALTO = 520, 470
+local ANCHO, ALTO = 560, 600
 local MARGEN = 14
 local FUENTE = UIFont.Small
 local ALTO_LINEA = getTextManager():getFontHeight(FUENTE) + 4
@@ -53,7 +53,17 @@ function Ventana:createChildren()
     self:addChild(self.comboTipo)
     y = y + 30
     self.yDescripcion = y
-    y = y + ALTO_LINEA * 4 + 6
+    y = y + ALTO_LINEA * 9 + 6
+
+    -- Rasgo del lider (depende del tipo)
+    etiqueta(self, "IGUI_WQ_FV_Rasgo", y)
+    self.comboRasgo = ISComboBox:new(X_CAMPO, y - 2, 220, 22, self, nil)
+    self.comboRasgo:initialise()
+    self:addChild(self.comboRasgo)
+    self:llenarRasgos(Facciones.TIPOS[1])
+    y = y + 26
+    self.yRasgo = y
+    y = y + ALTO_LINEA + 6
 
     -- Nombre
     etiqueta(self, "IGUI_WQ_FV_Nombre", y)
@@ -102,7 +112,15 @@ function Ventana:createChildren()
     self:llenarUnirse()
 end
 
+function Ventana:llenarRasgos(tipo)
+    self.comboRasgo:clear()
+    for _, rasgo in ipairs(WorldQuest.Balance.RASGOS_DE[tipo] or {}) do
+        self.comboRasgo:addOptionWithData(getText("IGUI_WQ_Rasgo_" .. rasgo), rasgo)
+    end
+end
+
 function Ventana:alCambiarTipo(combo)
+    self:llenarRasgos(combo:getSelectedData())
     -- Si el jugador no cambio el nombre, sigue al tipo elegido
     local actual = self.entradaNombre:getText()
     for _, tipo in ipairs(Facciones.TIPOS) do
@@ -130,6 +148,7 @@ function Ventana:alCrear()
         nombre = nombre,
         color = self.comboColor:getSelectedData(),
         emblema = self.comboEmblema:getSelectedData(),
+        rasgo = self.comboRasgo:getSelectedData(),
     })
 end
 
@@ -162,14 +181,53 @@ function Ventana:render()
         self:drawText(et.texto, MARGEN, et.y, e.gris[1], e.gris[2], e.gris[3], 1, FUENTE)
     end
 
-    -- Descripcion del tipo elegido
+    -- Descripcion del tipo elegido, sus efectos y lo que llega mas adelante
+    local B = WorldQuest.Balance
     local tipo = self.comboTipo:getSelectedData()
+    local ancho = self.width - X_CAMPO - MARGEN
     local y = self.yDescripcion
-    for _, linea in ipairs(WorldQuest.Ayuda.envolver(getText("IGUI_WQ_FaccionDesc_" .. tostring(tipo)), self.width - X_CAMPO - MARGEN)) do
+    for _, linea in ipairs(WorldQuest.Ayuda.envolver(getText("IGUI_WQ_FaccionDesc_" .. tostring(tipo)), ancho)) do
         self:drawText(linea, X_CAMPO, y, 1, 1, 1, 1, FUENTE)
         y = y + ALTO_LINEA
     end
-    self:drawText(getText("IGUI_WQ_FV_EfectosPronto"), X_CAMPO, y, e.gris[1], e.gris[2], e.gris[3], 1, FUENTE)
+    y = y + 2
+    local efectos = {}
+    for _, item in ipairs(B.lista(B.FACCIONES[tipo] or {})) do
+        table.insert(efectos, item)
+    end
+    local x = X_CAMPO
+    for _, item in ipairs(efectos) do
+        local c = item.bueno and e.bien or e.alerta
+        local w = getTextManager():MeasureStringX(FUENTE, item.texto) + 12
+        if x + w > self.width - MARGEN then
+            x = X_CAMPO
+            y = y + ALTO_LINEA
+        end
+        self:drawText(item.texto, x, y, c[1], c[2], c[3], 1, FUENTE)
+        x = x + w
+    end
+    y = y + ALTO_LINEA
+    local pendientes = B.PENDIENTES[tipo]
+    if pendientes then
+        local nombres = {}
+        for _, id in ipairs(pendientes) do
+            table.insert(nombres, getText("IGUI_WQ_Pendiente_" .. id))
+        end
+        for _, linea in ipairs(WorldQuest.Ayuda.envolver(getText("IGUI_WQ_FV_Pendientes", table.concat(nombres, ", ")), ancho)) do
+            self:drawText(linea, X_CAMPO, y, e.gris[1], e.gris[2], e.gris[3], 1, FUENTE)
+            y = y + ALTO_LINEA
+        end
+    end
+
+    -- Efecto del rasgo elegido
+    local rasgo = self.comboRasgo:getSelectedData()
+    local textoRasgo = {}
+    for _, item in ipairs(B.lista(B.RASGOS[rasgo] or {})) do
+        table.insert(textoRasgo, item.texto)
+    end
+    if #textoRasgo > 0 then
+        self:drawText(table.concat(textoRasgo, "  "), X_CAMPO, self.yRasgo, e.bien[1], e.bien[2], e.bien[3], 1, FUENTE)
+    end
 
     self:drawText(getText("IGUI_WQ_FV_SeccionUnirse"), MARGEN, self.yUnirse, e.acento[1], e.acento[2], e.acento[3], 1, UIFont.Medium)
     if self.cantidadFacciones == 0 then

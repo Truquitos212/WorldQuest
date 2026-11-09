@@ -5,6 +5,15 @@ WorldQuest.Modificadores = WorldQuest.Modificadores or {}
 
 local M = WorldQuest.Modificadores
 
+-- Efecto de la faccion duena del territorio (tabla en WorldQuest_Balance.lua)
+local function efecto(t, clave)
+    if WorldQuest.Balance then
+        return WorldQuest.Balance.valor(t, clave)
+    end
+    return nil
+end
+M.efecto = efecto
+
 local function nivel(t)
     return t.nivel or 1
 end
@@ -30,7 +39,7 @@ function M.cupo(t)
     if WorldQuest.Niveles then
         tope = WorldQuest.Niveles.datos(t).cupoMax
     end
-    return math.min(tope, 3 + M.estructura(t, "camas"))
+    return math.max(1, math.min(tope, 3 + M.estructura(t, "camas") + (efecto(t, "cupo") or 0)))
 end
 
 -- Narrador mas agresivo mientras mas grande sea la base mas grande
@@ -48,15 +57,20 @@ function M.tamanoHorda(t, base)
     if M.tieneMejora(t, "muralla") then
         tamano = tamano * 0.6
     end
+    tamano = tamano * (efecto(t, "horda") or 1)
     return math.max(1, math.floor(tamano))
 end
 
 -- Avisos: la torre de vigilancia avisa 5 minutos antes (solo crisis con aviso)
 function M.minutosAviso(t, base)
-    if base > 0 and M.tieneMejora(t, "torre") then
-        return base + 5
+    if base <= 0 then
+        return base
     end
-    return base
+    local minutos = base + (efecto(t, "aviso") or 0)
+    if M.tieneMejora(t, "torre") then
+        minutos = minutos + 5
+    end
+    return minutos
 end
 
 -- true si dos territorios son del mismo dueno (misma faccion, o mismo jugador si no tienen)
@@ -71,8 +85,12 @@ end
 function M.probabilidadLlegada(base, territorio)
     for _, t in ipairs(WorldQuest.Territorios.getDatos().lista) do
         if M.tieneMejora(t, "radio") and (territorio == nil or mismoDueno(t, territorio)) then
-            return base * 2
+            base = base * 2
+            break
         end
+    end
+    if territorio then
+        base = base * (efecto(territorio, "llegadas") or 1)
     end
     return base
 end
@@ -92,15 +110,20 @@ function M.animoDiario(t)
             break
         end
     end
-    return extra
+    return extra + (efecto(t, "animo") or 0)
 end
 
 -- Produccion diaria de un rol: huertos ayudan al agricultor, el taller al constructor
 function M.produccion(t, rol, base)
     if rol == "agricultor" then
-        return base + math.min(5, math.floor(M.estructura(t, "huertos") / 4))
-    elseif rol == "constructor" and M.tieneMejora(t, "taller") then
-        return base * 2
+        return (base + math.min(5, math.floor(M.estructura(t, "huertos") / 4))) * (efecto(t, "agricultor") or 1)
+    elseif rol == "constructor" then
+        if M.tieneMejora(t, "taller") then
+            base = base * 2
+        end
+        return base * (efecto(t, "troncos") or 1)
+    elseif rol == "explorador" then
+        return base * (efecto(t, "botin") or 1)
     end
     return base
 end
@@ -121,5 +144,43 @@ function M.defensa(t)
     if M.tieneMejora(t, "muralla") then
         defensa = defensa + 15
     end
-    return defensa
+    return math.floor(defensa * (efecto(t, "defensa") or 1))
+end
+
+-- Comida que come cada colono por ciclo en este territorio
+function M.racion(t)
+    return WorldQuest.Colonos.RACION * (efecto(t, "racion") or 1)
+end
+
+-- Animo bajo el cual un colono puede enloquecer (la resistencia lo baja)
+function M.umbralLocura(t, base)
+    return base - (efecto(t, "resistenciaLocura") or 0)
+end
+
+-- Riesgo (en %) de que un explorador no vuelva
+function M.riesgoExplorador(t, base)
+    return base * (efecto(t, "riesgo") or 1)
+end
+
+-- Porcentaje de comida que se pierde en la crisis de comida
+function M.perdidaComida(t, base)
+    return base * (efecto(t, "perdidaComida") or 1)
+end
+
+-- Porcentaje de comida y materiales que se llevan los asaltantes si ganan
+function M.saqueo(t, base)
+    return base * (efecto(t, "saqueo") or 1)
+end
+
+-- Trabajo de obra que aporta el territorio por ciclo, con la velocidad de la faccion
+function M.obras(t, base)
+    return base * (efecto(t, "obras") or 1)
+end
+
+-- Maximo de territorios de una faccion (nil = sin limite)
+function M.maxTerritorios(f)
+    if not f or not WorldQuest.Balance then
+        return nil
+    end
+    return WorldQuest.Balance.efectos(f.tipo, f.rasgo).maxTerritorios
 end

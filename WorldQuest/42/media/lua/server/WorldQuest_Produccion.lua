@@ -70,7 +70,7 @@ local function trabajar(colono, territorio, contenedor)
         end
 
     elseif colono.rol == "explorador" then
-        local riesgo = math.max(1, RIESGO_EXPLORADOR - math.floor(colono.habilidades.combate / 2))
+        local riesgo = math.max(1, M.riesgoExplorador(territorio, RIESGO_EXPLORADOR - math.floor(colono.habilidades.combate / 2)))
         if ZombRand(100) < riesgo then
             return false
         end

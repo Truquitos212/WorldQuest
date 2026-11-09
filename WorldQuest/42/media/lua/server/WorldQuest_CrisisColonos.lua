@@ -28,8 +28,9 @@ Crisis.registrar({
     minutosAviso = 0,
     ejecutar = function(territorio)
         local peor = nil
+        local umbral = M.umbralLocura(territorio, UMBRAL_LOCURA)
         for _, colono in ipairs(Colonos.delTerritorio(territorio)) do
-            if colono.animo < UMBRAL_LOCURA and (not peor or colono.animo < peor.animo) then
+            if colono.animo < umbral and (not peor or colono.animo < peor.animo) then
                 peor = colono
             end
         end
@@ -69,7 +70,7 @@ Crisis.registrar({
         -- Saqueo de comida y materiales
         Almacen.recorrerItems(territorio, function(item, contenedor)
             local valioso = item:IsFood() or Almacen.MATERIALES[item:getFullType()] ~= nil
-            if valioso and ZombRand(100) < PORCENTAJE_SAQUEO then
+            if valioso and ZombRand(100) < M.saqueo(territorio, PORCENTAJE_SAQUEO) then
                 Almacen.quitar(contenedor, item)
             end
         end)

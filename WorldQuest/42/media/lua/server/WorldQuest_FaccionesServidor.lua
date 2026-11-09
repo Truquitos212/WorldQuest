@@ -28,7 +28,7 @@ Red.orden("crearFaccion", function(jugador, args)
     end
     local nombre = Territorios.limpiarNombre(args.nombre)
     if not nombre or not Facciones.tipoValido(args.tipo) or not Facciones.color(args.color)
-        or not Facciones.emblemaValido(args.emblema) then
+        or not Facciones.emblemaValido(args.emblema) or not WorldQuest.Balance.rasgoValido(args.tipo, args.rasgo) then
         return
     end
     if Facciones.porNombre(nombre) then
@@ -43,6 +43,7 @@ Red.orden("crearFaccion", function(jugador, args)
         nombre = nombre,
         color = args.color,
         emblema = args.emblema,
+        rasgo = args.rasgo,
         lider = u,
         miembros = { [u] = true },
         solicitudes = {},
@@ -52,6 +53,17 @@ Red.orden("crearFaccion", function(jugador, args)
     migrar(u, f)
     Red.avisar("IGUI_WQ_FaccionCreada", { nombre, { clave = "IGUI_WQ_Faccion_" .. f.tipo } }, "aviso")
     print("[WorldQuest] Faccion creada: " .. nombre .. " (" .. f.tipo .. ") por " .. u)
+end)
+
+-- Para facciones creadas antes de que existieran los rasgos: el lider elige uno, una vez
+Red.orden("elegirRasgo", function(jugador, args)
+    local u = usuario(jugador)
+    local f = Facciones.de(u)
+    if not f or f.lider ~= u or f.rasgo or not WorldQuest.Balance.rasgoValido(f.tipo, args.rasgo) then
+        return
+    end
+    f.rasgo = args.rasgo
+    Red.decir(jugador, "IGUI_WQ_RasgoElegido", { { clave = "IGUI_WQ_Rasgo_" .. f.rasgo } })
 end)
 
 Red.orden("pedirUnion", function(jugador, args)

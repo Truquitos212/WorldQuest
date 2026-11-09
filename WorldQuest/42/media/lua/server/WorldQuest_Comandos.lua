@@ -107,6 +107,19 @@ Red.orden("reclamar", function(jugador, args)
         Red.decir(jugador, "IGUI_WQ_SinFaccion")
         return
     end
+    local maximo = WorldQuest.Modificadores.maxTerritorios(faccion)
+    if maximo then
+        local tiene = 0
+        for _, t in ipairs(Territorios.getDatos().lista) do
+            if t.faccion == faccion.id then
+                tiene = tiene + 1
+            end
+        end
+        if tiene >= maximo then
+            Red.decir(jugador, "IGUI_WQ_MaxTerritorios", { tostring(maximo) })
+            return
+        end
+    end
     if Territorios.buscarSuperpuesto(x, y, RADIO_INICIAL) then
         Red.decir(jugador, "IGUI_WQ_NoReclamable")
         return
