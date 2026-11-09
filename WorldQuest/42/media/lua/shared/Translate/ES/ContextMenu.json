@@ -29,4 +29,6 @@
     "ContextMenu_WQ_ProyectoHecho": "%1 (construido)",
     "ContextMenu_WQ_ProyectoBloqueado": "%1: %2",
     "ContextMenu_WQ_ProyectoEnCurso": "En obra: %1 (faltan %2 de trabajo)"
+,
+    "ContextMenu_WQ_AbrirPanel": "Abrir panel de la colonia"
 }

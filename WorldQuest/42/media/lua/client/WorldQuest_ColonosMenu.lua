@@ -1,19 +1,11 @@
--- WorldQuest - Colonos: ventana de llegada, lista y roles en el clic derecho (cliente)
+-- WorldQuest - Colonos: ventana de llegada (cliente)
+-- La lista, la ficha y los roles estan en el panel de la colonia
 
 WorldQuest = WorldQuest or {}
 WorldQuest.ColonosUI = WorldQuest.ColonosUI or {}
 
 local ColonosUI = WorldQuest.ColonosUI
 local MODO_PRUEBA = true
-local ROLES = { "ninguno", "agricultor", "explorador", "constructor", "guardia", "medico" }
-
-local function nombreHabilidad(id)
-    return getText("IGUI_WQ_Hab_" .. id)
-end
-
-local function nombreRol(id)
-    return getText("IGUI_WQ_Rol_" .. id)
-end
 
 local function alResponder(target, boton, propuesta, territorio)
     if boton.internal == "YES" then
@@ -23,7 +15,7 @@ end
 
 function ColonosUI.ofrecer(propuesta, territorio)
     local texto = getText("IGUI_WQ_ColonoPide", propuesta.nombre,
-        nombreHabilidad(propuesta.especialidad),
+        getText("IGUI_WQ_Hab_" .. propuesta.especialidad),
         tostring(propuesta.habilidades[propuesta.especialidad]),
         territorio.nombre)
 
@@ -36,61 +28,15 @@ function ColonosUI.ofrecer(propuesta, territorio)
     ventana:addToUIManager()
 end
 
-local function asignarRol(colono, rol)
-    colono.rol = rol
-    print("[WorldQuest] " .. colono.nombre .. " ahora es " .. rol)
-end
-
-local function agregarColono(context, submenu, colono)
-    local dias = WorldQuest.Colonos.diasSinComer(colono)
-    local texto
-    if dias > 0 then
-        texto = getText("ContextMenu_WQ_ColonoHambre", colono.nombre, tostring(dias))
-    else
-        texto = getText("ContextMenu_WQ_ColonoInfo", colono.nombre, nombreRol(colono.rol), tostring(colono.animo))
-    end
-
-    local opcion = submenu:addOption(texto)
-    local menuColono = ISContextMenu:getNew(context)
-    submenu:addSubMenu(opcion, menuColono)
-
-    local especialidad = menuColono:addOption(getText("ContextMenu_WQ_Especialidad",
-        nombreHabilidad(colono.especialidad), tostring(colono.habilidades[colono.especialidad])))
-    especialidad.notAvailable = true
-
-    for _, rol in ipairs(ROLES) do
-        local opcionRol = menuColono:addOption(getText("ContextMenu_WQ_AsignarRol", nombreRol(rol)), colono, asignarRol, rol)
-        if colono.rol == rol then
-            opcionRol.notAvailable = true
-        end
-    end
-end
-
+-- Opcion de prueba: forzar la llegada de un colono
 local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, test)
-    local Colonos = WorldQuest.Colonos
-    local jugador = getSpecificPlayer(numJugador)
-    local territorio = WorldQuest.Territorios.buscarEn(math.floor(jugador:getX()), math.floor(jugador:getY()))
-    if not territorio then
+    if not MODO_PRUEBA then
         return
     end
-
-    local colonos = Colonos.delTerritorio(territorio)
-    local opcion = context:addOption(getText("ContextMenu_WQ_Colonos",
-        tostring(#colonos), tostring(Colonos.cupo(territorio))))
-    local submenu = ISContextMenu:getNew(context)
-    context:addSubMenu(opcion, submenu)
-
-    if #colonos == 0 then
-        local vacio = submenu:addOption(getText("ContextMenu_WQ_SinColonos"))
-        vacio.notAvailable = true
-    end
-
-    for _, colono in ipairs(colonos) do
-        agregarColono(context, submenu, colono)
-    end
-
-    if MODO_PRUEBA and Colonos.ofrecerLlegada then
-        submenu:addOption(getText("ContextMenu_WQ_ProbarLlegada"), territorio, Colonos.ofrecerLlegada)
+    local jugador = getSpecificPlayer(numJugador)
+    local territorio = WorldQuest.Territorios.buscarEn(math.floor(jugador:getX()), math.floor(jugador:getY()))
+    if territorio and WorldQuest.Colonos.ofrecerLlegada then
+        context:addOption(getText("ContextMenu_WQ_ProbarLlegada"), territorio, WorldQuest.Colonos.ofrecerLlegada)
     end
 end
 

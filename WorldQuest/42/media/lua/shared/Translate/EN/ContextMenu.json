@@ -29,4 +29,6 @@
     "ContextMenu_WQ_ProyectoHecho": "%1 (built)",
     "ContextMenu_WQ_ProyectoBloqueado": "%1: %2",
     "ContextMenu_WQ_ProyectoEnCurso": "Building: %1 (%2 work left)"
+,
+    "ContextMenu_WQ_AbrirPanel": "Open colony panel"
 }
