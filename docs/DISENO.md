@@ -163,7 +163,12 @@ Se elige al crear la partida:
 ### Modo Caos: tres enemigos controlados por el juego
 - **Los Militares**: quieren barrer la zona. Redadas periódicas, controles, los más fuertes
   en combate directo.
-- **Los Criminales**: su propia base; crecen saqueando a todos.
+- **Los Fugados (rama dura)**: los presos que solo quieren arrasar. Tienen su propia base
+  y crecen saqueando a todos. Comparten origen y estilo con la facción Los Fugados.
+  - Si un jugador es de Los Fugados: al principio lo atacan menos, pero le exigen tributo.
+    Si paga, lo dejan tranquilo y arriesga su reputación con los demás (pueden verlo como traidor).
+    Si no paga, pasa a ser su primer objetivo.
+  - Diplomacia única: puede negociar con ellos (por ejemplo, desviar un ataque), con riesgo.
 - **La Horda que piensa**: se divide, flanquea y aparece en los momentos críticos
   (cuando alguien está por ganar o en plena guerra).
 - Obliga a aliarse. Si ganan los enemigos, pierden todos.
