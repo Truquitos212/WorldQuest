@@ -31,4 +31,6 @@
     "ContextMenu_WQ_ProyectoEnCurso": "Building: %1 (%2 work left)"
 ,
     "ContextMenu_WQ_AbrirPanel": "Open colony panel"
+,
+    "ContextMenu_WQ_RenombrarAlmacen": "Rename storage"
 }

@@ -94,4 +94,7 @@
     "IGUI_WQ_Panel_Tension": "Storyteller tension: %1 (daily chance: %2 percent)",
     "IGUI_WQ_Panel_SinCrisis": "No crises announced",
     "IGUI_WQ_Panel_Frio": "Extreme cold active"
+,
+    "IGUI_WQ_AlmacenNombreDefecto": "%1 storage",
+    "IGUI_WQ_NombreAlmacen": "Storage name:"
 }

@@ -94,4 +94,7 @@
     "IGUI_WQ_Panel_Tension": "Tensión del narrador: %1 (probabilidad diaria: %2 por ciento)",
     "IGUI_WQ_Panel_SinCrisis": "No hay crisis anunciadas",
     "IGUI_WQ_Panel_Frio": "Frío extremo activo"
+,
+    "IGUI_WQ_AlmacenNombreDefecto": "Almacén de %1",
+    "IGUI_WQ_NombreAlmacen": "Nombre del almacén:"
 }

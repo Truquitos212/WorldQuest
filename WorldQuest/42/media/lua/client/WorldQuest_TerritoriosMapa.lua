@@ -136,6 +136,14 @@ local function dibujarTerritorio(mapa, territorio, lineas)
     dibujarRelleno(mapa, centroX, centroY, puntos, color)
     dibujarBorde(mapa, puntos, color)
 
+    -- Almacenes: un cuadrito cafe en cada mueble marcado
+    for _, p in ipairs(territorio.almacenes or {}) do
+        local ax = api:worldToUIX(p.x + 0.5, p.y + 0.5)
+        local ay = api:worldToUIY(p.x + 0.5, p.y + 0.5)
+        mapa:drawRect(ax - 4, ay - 4, 8, 8, 1, 0.55, 0.35, 0.15)
+        mapa:drawRectBorder(ax - 4, ay - 4, 8, 8, 1, 0, 0, 0)
+    end
+
     -- Tamano en pantalla: distancia del centro a un punto del borde
     local dx = puntos[1].x - centroX
     local dy = puntos[1].y - centroY

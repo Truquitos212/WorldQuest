@@ -31,4 +31,6 @@
     "ContextMenu_WQ_ProyectoEnCurso": "En obra: %1 (faltan %2 de trabajo)"
 ,
     "ContextMenu_WQ_AbrirPanel": "Abrir panel de la colonia"
+,
+    "ContextMenu_WQ_RenombrarAlmacen": "Renombrar almacén"
 }

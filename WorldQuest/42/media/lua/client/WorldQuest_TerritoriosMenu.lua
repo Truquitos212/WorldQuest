@@ -52,6 +52,7 @@ local function alNombrarNuevo(target, boton, jugador, posicion)
 
     local nombre = limpiarNombre(boton.parent.entry:getText()) or Territorios.nombreSugerido()
     local territorio = Territorios.crear(nombre, posicion.x, posicion.y, RADIO_INICIAL)
+    territorio.dueno = jugador:getUsername()
 
     jugador:Say(getText("IGUI_WQ_Reclamado", territorio.nombre))
     print("[WorldQuest] Territorio reclamado: " .. territorio.nombre .. " en " .. posicion.x .. ", " .. posicion.y)

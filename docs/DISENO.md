@@ -216,7 +216,7 @@ Se elige al crear la partida:
 - **Fase 11: pulido y publicación** (balance con amigos, rendimiento, sonidos, Workshop).
 
 ### Hito 6 — "Caos" (v1.1)
-- **Fase 12: modo Caos** (Militares, Criminales y la Horda que piensa; dificultad).
+- **Fase 12: modo Caos** (Militares, Fugados de rama dura y la Horda que piensa; dificultad).
 
 ---
 
