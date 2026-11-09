@@ -79,6 +79,7 @@ Crisis.registrar({
         if ataque - defensa > DIFERENCIA_MORTAL and #colonos > 0 then
             local victima = colonos[ZombRand(#colonos) + 1]
             quitarColono(victima)
+            Colonos.registrarBaja(victima, "muerto")
             Crisis.avisar(getText("IGUI_WQ_AsaltoMuerte", victima.nombre, territorio.nombre), "crisis")
         else
             Crisis.avisar(getText("IGUI_WQ_AsaltoRobo", territorio.nombre), "crisis")

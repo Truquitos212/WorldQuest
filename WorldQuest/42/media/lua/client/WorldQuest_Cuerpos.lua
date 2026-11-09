@@ -23,6 +23,8 @@ local ticksCargado = {}       -- id territorio -> ticks seguidos cargado
 local pedidos = {}            -- id colono -> true (cuerpo pedido en esta carga)
 local nombrePorZombie = {}    -- zombie -> nombre (respaldo para detectar muertes)
 local horaPedido = {}         -- nombre -> hora en que se pidio el cuerpo (diagnostico)
+local encontrados = {}        -- nombre -> true (cuerpo reconocido en esta carga)
+local sinCuerpo = {}          -- nombre -> revisiones seguidas sin encontrar su cuerpo
 
 function Cuerpos.activo()
     return Bandit ~= nil and BanditBrain ~= nil
@@ -56,6 +58,10 @@ local function cuerposCercanos()
         if brain then
             porNombre[brain.fullname] = zombie
             nombrePorZombie[zombie] = brain.fullname
+            if registro()[brain.fullname] and not encontrados[brain.fullname] then
+                encontrados[brain.fullname] = true
+                print("[WorldQuest] Cuerpo encontrado para " .. brain.fullname .. " en " .. math.floor(zombie:getX()) .. "," .. math.floor(zombie:getY()))
+            end
         end
     end
     return porNombre
@@ -96,6 +102,30 @@ local function soltar(zombie, nombre)
     print("[WorldQuest] " .. nombre .. " deja la base")
 end
 
+-- Segun por que se fue el colono: su cuerpo muere, desaparece o sigue por su cuenta
+local function despedir(zombie, nombre)
+    local bajas = WorldQuest.Colonos.getDatos().bajas or {}
+    local motivo = bajas[nombre]
+    bajas[nombre] = nil
+    if motivo ~= "muerto" and motivo ~= "desaparecido" then
+        soltar(zombie, nombre)
+        return
+    end
+
+    registro()[nombre] = nil
+    nombrePorZombie[zombie] = nil
+    if motivo == "muerto" then
+        local ok = pcall(function() zombie:Kill(nil) end)
+        if not ok then
+            zombie:setHealth(0)
+        end
+    else
+        zombie:removeFromWorld()
+        zombie:removeFromSquare()
+    end
+    print("[WorldQuest] Cuerpo de " .. nombre .. ": " .. motivo)
+end
+
 local function alPasarDiezMinutos()
     if not Cuerpos.activo() then
         return
@@ -121,6 +151,11 @@ local function alPasarDiezMinutos()
                 for _, colono in ipairs(colonos) do
                     if not cuerpos[colono.nombre] and not pedidos[colono.id] then
                         pedirCuerpo(jugador, colono, territorio)
+                    elseif not cuerpos[colono.nombre] then
+                        sinCuerpo[colono.nombre] = (sinCuerpo[colono.nombre] or 0) + 1
+                        if sinCuerpo[colono.nombre] == 3 then
+                            print("[WorldQuest] El cuerpo de " .. colono.nombre .. " no aparece cerca de la base")
+                        end
                     end
                 end
             end
@@ -137,7 +172,7 @@ local function alPasarDiezMinutos()
     local creados = registro()
     for nombre, zombie in pairs(cuerpos) do
         if creados[nombre] and not nombresActuales[nombre] then
-            soltar(zombie, nombre)
+            despedir(zombie, nombre)
         end
     end
 end

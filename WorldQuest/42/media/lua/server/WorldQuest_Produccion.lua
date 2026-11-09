@@ -109,6 +109,7 @@ local function alPasarDiezMinutos()
                     end
                     if not vivo then
                         table.remove(lista, i)
+                        Colonos.registrarBaja(colono, "desaparecido")
                         Crisis.avisar(getText("IGUI_WQ_ExploradorMuerto", colono.nombre, territorio.nombre), "crisis")
                     end
                 end

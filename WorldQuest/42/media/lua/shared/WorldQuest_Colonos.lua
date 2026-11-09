@@ -87,3 +87,11 @@ end
 function Colonos.ciclosSinComer(colono)
     return math.max(0, math.ceil(colono.deuda / Colonos.RACION) - 1)
 end
+
+-- Registra por que un colono dejo la colonia, para saber que hacer con su cuerpo:
+-- "muerto", "desaparecido" o sin registro (se fue por su cuenta)
+function Colonos.registrarBaja(colono, motivo)
+    local datos = Colonos.getDatos()
+    datos.bajas = datos.bajas or {}
+    datos.bajas[colono.nombre] = motivo
+end
