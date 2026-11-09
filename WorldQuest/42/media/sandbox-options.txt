@@ -2,6 +2,11 @@ VERSION = 1,
 
 /***** WORLDQUEST *****/
 
+option WorldQuest.Duracion = {
+    type = enum, numValues = 3, default = 2,
+    page = WorldQuest, translation = WorldQuest_Duracion, valueTranslation = WorldQuest_Duracion,
+}
+
 option WorldQuest.HerramientasPrueba = {
     type = boolean, default = false,
     page = WorldQuest, translation = WorldQuest_HerramientasPrueba,

@@ -1,4 +1,4 @@
--- WorldQuest - Colonos: produccion diaria segun el rol
+-- WorldQuest - Colonos: produccion por ciclo segun el rol
 
 require "WorldQuest_Crisis"
 
@@ -83,7 +83,7 @@ local function trabajar(colono, territorio, contenedor)
     return true
 end
 
--- Cada dia: los colonos con rol suman un dia de trabajo pendiente
+-- Cada ciclo: los colonos con rol suman un ciclo de trabajo pendiente
 local function alPasarDia()
     for _, colono in ipairs(Colonos.getDatos().lista) do
         if colono.rol ~= "ninguno" then
@@ -117,5 +117,5 @@ local function alPasarDiezMinutos()
     end
 end
 
-Events.EveryDays.Add(alPasarDia)
+WorldQuest.Reloj.alCiclo(alPasarDia)
 Events.EveryTenMinutes.Add(alPasarDiezMinutos)

@@ -25,7 +25,7 @@ end
 -- LOCURA: de sorpresa. El colono mas triste huye con comida
 Crisis.registrar({
     id = "locura",
-    horasAviso = 0,
+    minutosAviso = 0,
     ejecutar = function(territorio)
         local peor = nil
         for _, colono in ipairs(Colonos.delTerritorio(territorio)) do
@@ -54,7 +54,7 @@ Crisis.registrar({
 -- ASALTANTES: con aviso. Ataque contra defensa
 Crisis.registrar({
     id = "asaltantes",
-    horasAviso = 8,
+    minutosAviso = 10,
     textoAviso = "IGUI_WQ_AvisoAsaltantes",
     ejecutar = function(territorio)
         local ataque = 10 + 10 * (territorio.nivel or 1) + ZombRand(20)

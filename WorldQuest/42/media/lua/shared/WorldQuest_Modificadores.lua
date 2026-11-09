@@ -51,10 +51,10 @@ function M.tamanoHorda(t, base)
     return math.max(1, math.floor(tamano))
 end
 
--- Avisos: la torre de vigilancia avisa 6 horas antes (solo crisis con aviso)
-function M.horasAviso(t, base)
+-- Avisos: la torre de vigilancia avisa 5 minutos antes (solo crisis con aviso)
+function M.minutosAviso(t, base)
     if base > 0 and M.tieneMejora(t, "torre") then
-        return base + 6
+        return base + 5
     end
     return base
 end

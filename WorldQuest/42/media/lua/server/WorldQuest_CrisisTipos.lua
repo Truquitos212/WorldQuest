@@ -41,7 +41,7 @@ local DISPERSION_HORDA = 4
 
 Crisis.registrar({
     id = "horda",
-    horasAviso = 6,
+    minutosAviso = 8,
     textoAviso = "IGUI_WQ_AvisoHorda",
     textoInicio = "IGUI_WQ_InicioHorda",
     ejecutar = function(territorio)
@@ -71,7 +71,7 @@ local FOCOS_INCENDIO = 3
 
 Crisis.registrar({
     id = "incendio",
-    horasAviso = 0,
+    minutosAviso = 0,
     textoInicio = "IGUI_WQ_InicioIncendio",
     ejecutar = function(territorio)
         -- Casillas interiores (las que pertenecen a una habitacion)
@@ -109,7 +109,7 @@ local PORCENTAJE_PERDIDA = 30
 
 Crisis.registrar({
     id = "comida",
-    horasAviso = 0,
+    minutosAviso = 0,
     textoInicio = "IGUI_WQ_InicioComida",
     ejecutar = function(territorio)
         local perdidas = 0
@@ -136,20 +136,21 @@ Crisis.registrar({
 })
 
 -- TORMENTA: con aviso. Tormenta global y frio extremo dentro del territorio --
-local HORAS_TORMENTA = 12
+local MINUTOS_TORMENTA = 10
 local TEMPERATURA_FRIO = -15
 local CLIMA_TEMPERATURA = 4 -- numero interno de la temperatura en el clima
 
 Crisis.registrar({
     id = "tormenta",
-    horasAviso = 4,
+    minutosAviso = 6,
     textoAviso = "IGUI_WQ_AvisoTormenta",
     textoInicio = "IGUI_WQ_InicioTormenta",
     ejecutar = function(territorio)
-        getClimateManager():triggerCustomWeatherStage(3, HORAS_TORMENTA)
+        local horas = WorldQuest.Reloj.horasDeJuego(MINUTOS_TORMENTA)
+        getClimateManager():triggerCustomWeatherStage(3, horas)
         Crisis.getDatos().frio = {
             territorio = territorio.id,
-            hasta = getGameTime():getWorldAgeHours() + HORAS_TORMENTA,
+            hasta = getGameTime():getWorldAgeHours() + horas,
         }
         return true
     end,

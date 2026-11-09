@@ -26,6 +26,11 @@ function Opciones.produccion()
     return valor("Produccion", 1.0)
 end
 
+-- 1 rapida, 2 normal, 3 larga
+function Opciones.duracion()
+    return valor("Duracion", 2)
+end
+
 function Opciones.costos()
     return valor("Costos", 1.0)
 end

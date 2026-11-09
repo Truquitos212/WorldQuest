@@ -7,5 +7,10 @@
     "Sandbox_WorldQuest_Produccion": "Colonist production",
     "Sandbox_WorldQuest_Produccion_tooltip": "Multiplies what colonists deliver each day.",
     "Sandbox_WorldQuest_Costos": "Level and building costs",
-    "Sandbox_WorldQuest_Costos_tooltip": "Multiplies the materials required by level upgrades and buildings."
+    "Sandbox_WorldQuest_Costos_tooltip": "Multiplies the materials required by level upgrades and buildings.",
+    "Sandbox_WorldQuest_Duracion": "Match length",
+    "Sandbox_WorldQuest_Duracion_tooltip": "Sets the pace of colonies, buildings and crises. Fast: about 3 hours. Normal: about 6. Long: about 12.",
+    "Sandbox_WorldQuest_Duracion_option1": "Fast",
+    "Sandbox_WorldQuest_Duracion_option2": "Normal",
+    "Sandbox_WorldQuest_Duracion_option3": "Long"
 }

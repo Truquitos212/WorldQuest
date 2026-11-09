@@ -7,7 +7,9 @@ local Crisis = WorldQuest.Crisis
 local Territorios = WorldQuest.Territorios
 local CLAVE_DATOS = "WorldQuest_Crisis"
 
--- Narrador: la tension sube un punto por cada dia sin crisis
+-- Narrador: tira el dado cada CICLOS_NARRADOR ciclos; la tension sube un punto
+-- por cada tirada sin crisis
+Crisis.CICLOS_NARRADOR = 3
 local PROBABILIDAD_POR_TENSION = 10 -- % por punto de tension
 local PROBABILIDAD_MAXIMA = 80      -- % tope
 
@@ -58,19 +60,19 @@ function Crisis.programar(idTipo, territorio, inmediata)
 
     local espera = 0
     if not inmediata then
-        espera = WorldQuest.Modificadores.horasAviso(territorio, ficha.horasAviso or 0)
+        espera = WorldQuest.Modificadores.minutosAviso(territorio, ficha.minutosAviso or 0)
     end
 
     table.insert(Crisis.getDatos().pendientes, {
         tipo = idTipo,
         territorio = territorio.id,
-        hora = horaActual() + espera,
+        hora = horaActual() + WorldQuest.Reloj.horasDeJuego(espera),
     })
 
     if ficha.textoAviso then
         Crisis.avisar(getText(ficha.textoAviso, territorio.nombre), "aviso")
     end
-    print("[WorldQuest] Crisis programada: " .. idTipo .. " en " .. territorio.nombre .. " (en " .. espera .. " horas)")
+    print("[WorldQuest] Crisis programada: " .. idTipo .. " en " .. territorio.nombre .. " (en " .. espera .. " min)")
 end
 
 -- Ejecuta las crisis pendientes cuya hora llego, si el territorio esta cargado
@@ -107,7 +109,7 @@ local function tipoAlAzar()
     return ids[ZombRand(#ids) + 1]
 end
 
--- Una vez al dia: el narrador decide si hay crisis
+-- El narrador decide si hay crisis
 function Crisis.tirarDado()
     local lista = Territorios.getDatos().lista
     if #lista == 0 then
@@ -132,5 +134,9 @@ function Crisis.tirarDado()
     Crisis.programar(tipo, lista[ZombRand(#lista) + 1])
 end
 
-Events.EveryDays.Add(Crisis.tirarDado)
-Events.EveryTenMinutes.Add(Crisis.procesarPendientes)
+WorldQuest.Reloj.alCiclo(function(ciclo)
+    if ciclo % Crisis.CICLOS_NARRADOR == 0 then
+        Crisis.tirarDado()
+    end
+end)
+Events.EveryOneMinute.Add(Crisis.procesarPendientes)

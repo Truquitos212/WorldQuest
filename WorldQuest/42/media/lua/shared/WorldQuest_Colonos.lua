@@ -7,7 +7,7 @@ local Colonos = WorldQuest.Colonos
 local CLAVE_DATOS = "WorldQuest_Colonos"
 
 Colonos.CUPO_BASE = 3
-Colonos.CALORIAS_DIARIAS = 2000
+Colonos.RACION = 250              -- calorias que come cada colono por ciclo
 Colonos.HABILIDADES = { "agricultura", "exploracion", "construccion", "combate", "medicina" }
 
 local NOMBRES = {
@@ -78,7 +78,12 @@ function Colonos.agregar(colono)
     return colono
 end
 
--- Dias completos sin comer, sin contar la racion de hoy
-function Colonos.diasSinComer(colono)
-    return math.max(0, math.ceil(colono.deuda / Colonos.CALORIAS_DIARIAS) - 1)
+-- Minutos de partida sin comer (para el panel)
+function Colonos.minutosSinComer(colono)
+    return Colonos.ciclosSinComer(colono) * WorldQuest.Reloj.minutosCiclo()
+end
+
+-- Ciclos completos sin comer, sin contar la racion del ciclo actual
+function Colonos.ciclosSinComer(colono)
+    return math.max(0, math.ceil(colono.deuda / Colonos.RACION) - 1)
 end

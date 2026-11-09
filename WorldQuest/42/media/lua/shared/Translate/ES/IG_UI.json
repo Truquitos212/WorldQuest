@@ -97,5 +97,11 @@
 ,
     "IGUI_WQ_AlmacenNombreDefecto": "Almacén de %1",
     "IGUI_WQ_NombreAlmacen": "Nombre del almacén:",
-    "IGUI_WQ_SinAlmacen": "No hay almacén cargado en %1"
+    "IGUI_WQ_SinAlmacen": "No hay almacén cargado en %1",
+    "IGUI_WQ_PendienteMin": "%1 en %2 min",
+    "IGUI_WQ_Panel_HambreMin": "¡Hambre! (%1 min sin comer)",
+    "IGUI_WQ_Panel_ObraMin": "En obra: %1 (faltan unos %2 min)",
+    "IGUI_WQ_Panel_ObraDetenida": "En obra: %1 (detenida: no hay constructores)",
+    "IGUI_WQ_Panel_Proyecto": "%1: %2 (unos %3 min con un constructor)",
+    "IGUI_WQ_Panel_Tirada": "Tensión del narrador: %1 (próxima tirada: %2 por ciento; tira cada %3 min)"
 }

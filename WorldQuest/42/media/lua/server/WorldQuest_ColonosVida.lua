@@ -1,4 +1,4 @@
--- WorldQuest - Colonos: vida diaria (comer, animo, llegadas)
+-- WorldQuest - Colonos: vida por ciclo (comer, animo, llegadas)
 
 require "WorldQuest_Crisis"
 
@@ -6,12 +6,13 @@ local Colonos = WorldQuest.Colonos
 local Territorios = WorldQuest.Territorios
 local Almacen = WorldQuest.Almacen
 local Crisis = WorldQuest.Crisis
+local M = WorldQuest.Modificadores
 
-local PROBABILIDAD_LLEGADA = 20   -- % por dia
+local PROBABILIDAD_LLEGADA = 20      -- % por ciclo (la radio la duplica)
 local ANIMO_SI_COMEN = 5
-local ANIMO_POR_DIA_DE_HAMBRE = 15
-local MAX_DIAS_HAMBRE = 5
-local MAX_DIAS_DEUDA = 7          -- tope de comida atrasada
+local ANIMO_POR_CICLO_DE_HAMBRE = 8
+local MAX_CICLOS_HAMBRE = 5
+local MAX_CICLOS_DEUDA = 7           -- tope de comida atrasada
 
 -- Los colonos del territorio comen del almacen hasta pagar lo que deben
 local function comer(territorio)
@@ -64,7 +65,7 @@ function Colonos.ofrecerLlegada(territorio)
 end
 
 local function intentarLlegada()
-    if ZombRand(100) >= PROBABILIDAD_LLEGADA then
+    if ZombRand(100) >= M.probabilidadLlegada(PROBABILIDAD_LLEGADA) then
         return
     end
 
@@ -84,7 +85,7 @@ end
 
 -- EVENTOS -------------------------------------------------------------
 
--- Cada 10 minutos: en los territorios cargados, comen lo que deben
+-- Cada 10 minutos de juego: en los territorios cargados, comen lo que deben
 local function alPasarDiezMinutos()
     for _, territorio in ipairs(Territorios.getDatos().lista) do
         if Crisis.estaCargado(territorio) then
@@ -93,8 +94,8 @@ local function alPasarDiezMinutos()
     end
 end
 
--- Cada dia: hambre, animo, partidas y llegadas
-local function alPasarDia()
+-- Cada ciclo: hambre, animo, partidas y llegadas
+local function alPasarCiclo()
     local lista = Colonos.getDatos().lista
 
     for i = #lista, 1, -1 do
@@ -110,24 +111,24 @@ local function alPasarDia()
             -- Solo se evalua el hambre si el almacen esta al alcance
             if Crisis.estaCargado(territorio) then
                 comer(territorio)
-                local diasHambre = math.floor(colono.deuda / Colonos.CALORIAS_DIARIAS)
-                if diasHambre == 0 then
-                    colono.animo = math.min(100, colono.animo + ANIMO_SI_COMEN)
+                local ciclosHambre = math.floor(colono.deuda / Colonos.RACION)
+                if ciclosHambre == 0 then
+                    colono.animo = math.min(100, colono.animo + ANIMO_SI_COMEN + M.animoDiario(territorio))
                 else
-                    colono.animo = math.max(0, colono.animo - ANIMO_POR_DIA_DE_HAMBRE * diasHambre)
+                    colono.animo = math.max(0, colono.animo - ANIMO_POR_CICLO_DE_HAMBRE * ciclosHambre)
                 end
 
-                if diasHambre >= MAX_DIAS_HAMBRE or colono.animo <= 0 then
+                if ciclosHambre >= MAX_CICLOS_HAMBRE or colono.animo <= 0 then
                     table.remove(lista, i)
                     seFue = true
                     Crisis.avisar(getText("IGUI_WQ_ColonoSeVa", colono.nombre, territorio.nombre), "crisis")
                 end
             end
 
-            -- La racion de hoy queda pendiente
+            -- La racion de este ciclo queda pendiente
             if not seFue then
-                local tope = Colonos.CALORIAS_DIARIAS * MAX_DIAS_DEUDA
-                colono.deuda = math.min(colono.deuda + Colonos.CALORIAS_DIARIAS, tope)
+                local tope = Colonos.RACION * MAX_CICLOS_DEUDA
+                colono.deuda = math.min(colono.deuda + Colonos.RACION, tope)
             end
         end
     end
@@ -136,4 +137,4 @@ local function alPasarDia()
 end
 
 Events.EveryTenMinutes.Add(alPasarDiezMinutos)
-Events.EveryDays.Add(alPasarDia)
+WorldQuest.Reloj.alCiclo(alPasarCiclo)

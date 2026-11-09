@@ -203,9 +203,9 @@ function VistaColonos:render()
             self:drawRect(MARGEN - 4, y - 2, ANCHO_LISTA, ALTO_FILA - 2, 0.3, 0.3, 0.5, 0.7)
         end
         self:texto(colono.nombre, MARGEN, y)
-        local dias = WorldQuest.Colonos.diasSinComer(colono)
+        local dias = WorldQuest.Colonos.minutosSinComer(colono)
         if dias > 0 then
-            self:texto(getText("IGUI_WQ_Panel_Hambre", tostring(dias)), MARGEN, y + ALTO_LINEA, ROJO)
+            self:texto(getText("IGUI_WQ_Panel_HambreMin", tostring(dias)), MARGEN, y + ALTO_LINEA, ROJO)
         else
             self:texto(getText("IGUI_WQ_Rol_" .. colono.rol), MARGEN, y + ALTO_LINEA, GRIS)
         end
@@ -228,9 +228,9 @@ function VistaColonos:render()
     self:barra(X_FICHA + 70, Y_ANIMO + 3, 150, colono.animo, 100, 0.3, 0.75, 0.35)
     self:texto(tostring(colono.animo), X_FICHA + 228, Y_ANIMO)
 
-    local dias = WorldQuest.Colonos.diasSinComer(colono)
+    local dias = WorldQuest.Colonos.minutosSinComer(colono)
     if dias > 0 then
-        self:texto(getText("IGUI_WQ_Panel_Hambre", tostring(dias)), X_FICHA, Y_HAMBRE, ROJO)
+        self:texto(getText("IGUI_WQ_Panel_HambreMin", tostring(dias)), X_FICHA, Y_HAMBRE, ROJO)
     end
 
     self:texto(getText("IGUI_WQ_Panel_Habilidades"), X_FICHA, Y_HABILIDADES, GRIS)
@@ -289,8 +289,13 @@ function VistaConstruccion:render()
     local y = MARGEN
     if t.proyecto then
         local definicion = Proyectos.buscar(t.proyecto.id)
-        self:texto(getText("IGUI_WQ_Panel_EnObra", Proyectos.nombre(t.proyecto.id),
-            tostring(t.proyecto.restante), tostring(Proyectos.trabajoDiario(t))), MARGEN, y, DORADO)
+        local porCiclo = Proyectos.trabajoDiario(t)
+        local estado = getText("IGUI_WQ_Panel_ObraDetenida", Proyectos.nombre(t.proyecto.id))
+        if porCiclo > 0 then
+            local minutos = math.ceil(t.proyecto.restante / porCiclo) * WorldQuest.Reloj.minutosCiclo()
+            estado = getText("IGUI_WQ_Panel_ObraMin", Proyectos.nombre(t.proyecto.id), tostring(minutos))
+        end
+        self:texto(estado, MARGEN, y, DORADO)
         y = y + ALTO_LINEA
         if definicion then
             self:barra(MARGEN, y + 2, self.width - MARGEN * 2, definicion.trabajo - t.proyecto.restante, definicion.trabajo, 0.85, 0.6, 0.15)
@@ -309,8 +314,8 @@ function VistaConstruccion:render()
             local estado = v.puedeProyecto[proyecto.id] or {}
             boton:setVisible(true)
             boton:setEnable(estado.ok == true)
-            self:texto(getText("ContextMenu_WQ_Proyecto", Proyectos.nombre(proyecto.id),
-                WorldQuest.Niveles.textoCosto(proyecto.costo), tostring(proyecto.trabajo)), MARGEN, y)
+            self:texto(getText("IGUI_WQ_Panel_Proyecto", Proyectos.nombre(proyecto.id),
+                WorldQuest.Niveles.textoCosto(proyecto.costo), tostring(proyecto.trabajo * WorldQuest.Reloj.minutosCiclo())), MARGEN, y)
             if not estado.ok and estado.motivo then
                 self:texto(estado.motivo, MARGEN, y + ALTO_LINEA, ROJO)
             end
@@ -335,7 +340,7 @@ function VistaCrisis:render()
     local probabilidad = math.floor(math.min(datos.tension * 10 * factor, 80))
 
     local y = MARGEN
-    self:texto(getText("IGUI_WQ_Panel_Tension", tostring(datos.tension), tostring(probabilidad)), MARGEN, y, DORADO)
+    self:texto(getText("IGUI_WQ_Panel_Tirada", tostring(datos.tension), tostring(probabilidad), tostring(Crisis.CICLOS_NARRADOR * WorldQuest.Reloj.minutosCiclo())), MARGEN, y, DORADO)
     y = y + ALTO_LINEA * 2
 
     local ahora = getGameTime():getWorldAgeHours()
@@ -344,10 +349,10 @@ function VistaCrisis:render()
         local ficha = Crisis.tipos[pendiente.tipo]
         if ficha and ficha.textoAviso then
             local nombre = getText("IGUI_WQ_Crisis_" .. pendiente.tipo)
-            local horas = math.ceil(pendiente.hora - ahora)
+            local horas = WorldQuest.Reloj.minutosHasta(pendiente.hora)
             local linea
             if horas > 0 then
-                linea = getText("IGUI_WQ_MapaPendiente", nombre, tostring(horas))
+                linea = getText("IGUI_WQ_PendienteMin", nombre, tostring(horas))
             else
                 linea = getText("IGUI_WQ_MapaEsperando", nombre)
             end

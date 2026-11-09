@@ -1,4 +1,4 @@
--- WorldQuest - Proyectos y estructuras: avance diario
+-- WorldQuest - Proyectos y estructuras: avance por ciclo
 
 require "WorldQuest_Crisis"
 
@@ -7,7 +7,7 @@ local Proyectos = WorldQuest.Proyectos
 local Estructuras = WorldQuest.Estructuras
 local Crisis = WorldQuest.Crisis
 
-local function alPasarDia()
+local function alPasarCiclo()
     for _, t in ipairs(Territorios.getDatos().lista) do
         Estructuras.actualizar(t)
 
@@ -24,4 +24,4 @@ local function alPasarDia()
     end
 end
 
-Events.EveryDays.Add(alPasarDia)
+WorldQuest.Reloj.alCiclo(alPasarCiclo)

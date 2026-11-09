@@ -7,5 +7,10 @@
     "Sandbox_WorldQuest_Produccion": "Producción de los colonos",
     "Sandbox_WorldQuest_Produccion_tooltip": "Multiplica lo que entregan los colonos cada día.",
     "Sandbox_WorldQuest_Costos": "Costo de niveles y obras",
-    "Sandbox_WorldQuest_Costos_tooltip": "Multiplica los materiales que piden las mejoras de nivel y las obras."
+    "Sandbox_WorldQuest_Costos_tooltip": "Multiplica los materiales que piden las mejoras de nivel y las obras.",
+    "Sandbox_WorldQuest_Duracion": "Duración de la partida",
+    "Sandbox_WorldQuest_Duracion_tooltip": "Marca el ritmo de colonias, obras y crisis. Rápida: unas 3 horas. Normal: unas 6. Larga: unas 12.",
+    "Sandbox_WorldQuest_Duracion_option1": "Rápida",
+    "Sandbox_WorldQuest_Duracion_option2": "Normal",
+    "Sandbox_WorldQuest_Duracion_option3": "Larga"
 }

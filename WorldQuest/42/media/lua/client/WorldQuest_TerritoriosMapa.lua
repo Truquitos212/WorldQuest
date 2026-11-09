@@ -41,10 +41,10 @@ local function juntarAlertas()
         -- Solo las crisis con aviso: las de sorpresa no se muestran
         if ficha and ficha.textoAviso then
             local nombre = getText("IGUI_WQ_Crisis_" .. pendiente.tipo)
-            local horas = math.ceil(pendiente.hora - ahora)
+            local horas = WorldQuest.Reloj.minutosHasta(pendiente.hora)
             local texto
             if horas > 0 then
-                texto = getText("IGUI_WQ_MapaPendiente", nombre, tostring(horas))
+                texto = getText("IGUI_WQ_PendienteMin", nombre, tostring(horas))
             else
                 texto = getText("IGUI_WQ_MapaEsperando", nombre)
             end
