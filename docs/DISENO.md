@@ -53,3 +53,49 @@ Inspiración: RimWorld, Command & Conquer y The Walking Dead.
    desde un mod en una partida normal? ¿Se puede alejar más el zoom?
 2. Órdenes: cómo escribir un programa propio de Bandits que obedezca órdenes.
 3. Clics en el mundo: cómo saber qué casilla o qué NPC está bajo el mouse.
+
+### Mapa como centro de mando (reemplaza al comandante fantasma)
+- Sin debug, el juego deshace el modo fantasma, el modo dios y el noclip: el comandante fantasma no es viable.
+- El comandante se queda en un **puesto de mando** en la base principal (zona "viva").
+- Se juega desde el mapa: colonos como íconos, seleccionar, "Ir aquí", colocar obras, ver amenazas y expediciones.
+- Lo cercano se ve con cuerpos; lo lejano (otras bases, expediciones, caravanas) se simula.
+- Los colonos alimentan al comandante mientras está en el puesto de mando.
+
+## Multijugador: facciones, diplomacia y victoria
+
+### Facciones
+- Cada jugador lidera una facción: comandante, colonos y territorios.
+
+### Diplomacia
+- Ventana con cada facción y su estado: guerra, neutral, pacto comercial o alianza.
+- Propuestas (paz, alianza, comercio, tributo) y reputación según lo que hace cada facción.
+
+### Economía y comercio
+- Caravanas simuladas entre bases, visibles en el mapa, que pueden ser emboscadas.
+- Especialización de bases para obligar a comerciar.
+- Puntos de interés en el mapa que dan bonos y generan conflicto.
+
+### Conflicto
+- Asaltos entre jugadores (ataque contra defensa), sabotaje y espionaje.
+- En vivo si es cerca de un jugador; simulado si es lejos.
+
+### Modo estándar: varias formas de ganar en la misma partida
+- **Éxodo**: completar primero el megaproyecto de evacuación (se puede sabotear).
+- **Dominación**: controlar la mayoría de los puntos de interés o eliminar a las demás facciones.
+- **Economía**: llegar primero a cierta riqueza total.
+
+### Modo Caos
+- Una facción enemiga controlada por el juego que crece cada día, elige objetivos
+  (el más débil o el que va ganando) y escala de asaltos chicos a oleadas.
+- Obliga a aliarse. Victoria: destruir sus fortalezas o completar el Éxodo antes de que arrase.
+  Si gana el enemigo, pierden todos.
+
+### Orden de desarrollo
+1. Base multijugador (servidor dueño de los datos, comandos cliente-servidor).
+2. Facciones y dueños.
+3. Mapa de mando.
+4. Diplomacia.
+5. Comercio y caravanas.
+6. Conflicto entre jugadores.
+7. Condiciones de victoria.
+8. Modo Caos.
