@@ -136,6 +136,10 @@ function M.defensa(t)
             defensa = defensa + 5 + colono.habilidades.combate * 2
         else
             defensa = defensa + colono.habilidades.combate
+            -- Orden "defender aqui" del mapa de mando: suma como medio guardia
+            if colono.orden and colono.orden.tipo == "defender" then
+                defensa = defensa + 3 + colono.habilidades.combate
+            end
         end
     end
     if M.tieneMejora(t, "torre") then

@@ -88,6 +88,40 @@ function Cuerpos.soyResponsable(territorio, jugador)
     return f == nil or f.lider == jugador:getUsername()
 end
 
+-- Cuerpos amigables cargados cerca de este jugador, por nombre (se recalcula cada segundo)
+local cachePosiciones, cacheMs = {}, 0
+function Cuerpos.cercanos()
+    if not Cuerpos.activo() then
+        return {}
+    end
+    local ahora = getTimestampMs()
+    if ahora - cacheMs < 1000 then
+        return cachePosiciones
+    end
+    cacheMs = ahora
+    cachePosiciones = {}
+    local zombies = getCell():getZombieList()
+    for i = 0, zombies:size() - 1 do
+        local zombie = zombies:get(i)
+        local brain = cerebroAmigable(zombie)
+        if brain then
+            cachePosiciones[brain.fullname] = zombie
+        end
+    end
+    return cachePosiciones
+end
+
+-- Cambia el programa de Bandits del cuerpo de un colono, con el menu del propio mod
+-- ("Companion" lo sigue, "Camper" se queda). Devuelve true si lo encontro.
+function Cuerpos.cambiarPrograma(nombre, programa)
+    local zombie = Cuerpos.cercanos()[nombre]
+    if not zombie or not BanditMenu or not BanditMenu.SwitchProgram then
+        return false
+    end
+    local ok = pcall(BanditMenu.SwitchProgram, getPlayer(), zombie, programa)
+    return ok
+end
+
 local function desvio(n)
     return ZombRand(n * 2 + 1) - n
 end

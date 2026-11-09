@@ -48,6 +48,7 @@ Pistas.LISTA = {
         end
         return false
     end },
+    { id = "mando", cumple = function(j, t) return #colonos(t) >= 2 end },
     { id = "hambre", cumple = function(j, t)
         for _, c in ipairs(colonos(t)) do
             if WorldQuest.Colonos.ciclosSinComer(c) > 0 then return true end
