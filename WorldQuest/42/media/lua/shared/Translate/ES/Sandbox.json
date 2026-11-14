@@ -22,5 +22,11 @@
     "Sandbox_WorldQuest_NieblaDeGuerra": "Niebla de guerra",
     "Sandbox_WorldQuest_NieblaDeGuerra_tooltip": "Solo ves lo que tienes cerca. Lo demás queda como estaba la última vez que lo viste.",
     "Sandbox_WorldQuest_LimiteHoras": "Límite de la partida (horas)",
-    "Sandbox_WorldQuest_LimiteHoras_tooltip": "Si nadie gana antes, gana quien va primero. Con 0 se usa el de la duración: 6, 10 o 12 horas. Tope: 12."
+    "Sandbox_WorldQuest_LimiteHoras_tooltip": "Si nadie gana antes, gana quien va primero. Con 0 se usa el de la duración: 6, 10 o 12 horas. Tope: 12.",
+    "Sandbox_WorldQuest_ModoJuego": "Modo de juego",
+    "Sandbox_WorldQuest_ModoJuego_tooltip": "Estándar: las facciones compiten entre ellas. Caos: además hay tres enemigos del juego que obligan a aliarse; si ganan, pierden todos.",
+    "Sandbox_WorldQuest_ModoJuego_option1": "Estándar",
+    "Sandbox_WorldQuest_ModoJuego_option2": "Caos",
+    "Sandbox_WorldQuest_CaosDificultad": "Dificultad del Caos",
+    "Sandbox_WorldQuest_CaosDificultad_tooltip": "Multiplica la fuerza de los enemigos del modo Caos y lo rápido que sube la amenaza."
 }

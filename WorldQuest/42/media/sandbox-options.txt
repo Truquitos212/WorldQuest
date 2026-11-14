@@ -41,3 +41,13 @@ option WorldQuest.LimiteHoras = {
     type = integer, min = 0, max = 12, default = 0,
     page = WorldQuest, translation = WorldQuest_LimiteHoras,
 }
+
+option WorldQuest.ModoJuego = {
+    type = enum, numValues = 2, default = 1,
+    page = WorldQuest, translation = WorldQuest_ModoJuego, valueTranslation = WorldQuest_ModoJuego,
+}
+
+option WorldQuest.CaosDificultad = {
+    type = double, min = 0.5, max = 2.0, default = 1.0,
+    page = WorldQuest, translation = WorldQuest_CaosDificultad,
+}

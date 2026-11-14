@@ -77,7 +77,12 @@ end
 function Tabla:prerender()
     local lista = V.tabla()
     local filas = self.plegada and 0 or #lista
-    self:setHeight(ALTO_FILA_TABLA + 10 + filas * ALTO_FILA_TABLA + ((not self.plegada and V.terminada()) and ALTO_FILA_TABLA or 0))
+    local extra = 0
+    if not self.plegada and V.extraTabla then
+        local ok, texto = pcall(V.extraTabla)
+        extra = (ok and texto) and 1 or 0
+    end
+    self:setHeight(ALTO_FILA_TABLA + 10 + (filas + extra) * ALTO_FILA_TABLA + ((not self.plegada and V.terminada()) and ALTO_FILA_TABLA or 0))
     ISPanel.prerender(self)
 end
 
@@ -113,6 +118,14 @@ function Tabla:render()
             self:drawTextRight(estado, self.width - 50, y, 1, 0.45, 0.35, 1, FUENTE)
         end
         y = y + ALTO_FILA_TABLA
+    end
+    -- Linea extra de otros sistemas (la amenaza del modo Caos)
+    if V.extraTabla then
+        local ok, texto, cr, cg, cb = pcall(V.extraTabla)
+        if ok and texto then
+            self:drawText(texto, 6, y, cr or 1, cg or 0.4, cb or 0.3, 1, FUENTE)
+            y = y + ALTO_FILA_TABLA
+        end
     end
     if V.terminada() then
         local ganador = d.ganador.faccion and Facciones.porId(d.ganador.faccion)

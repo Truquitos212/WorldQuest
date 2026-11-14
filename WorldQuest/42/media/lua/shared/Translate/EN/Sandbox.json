@@ -22,5 +22,11 @@
     "Sandbox_WorldQuest_NieblaDeGuerra": "Fog of war",
     "Sandbox_WorldQuest_NieblaDeGuerra_tooltip": "You only see what is near you. The rest stays as it was the last time you saw it.",
     "Sandbox_WorldQuest_LimiteHoras": "Game limit (hours)",
-    "Sandbox_WorldQuest_LimiteHoras_tooltip": "If nobody wins before, whoever is first wins. With 0 it uses the duration's: 6, 10 or 12 hours. Max: 12."
+    "Sandbox_WorldQuest_LimiteHoras_tooltip": "If nobody wins before, whoever is first wins. With 0 it uses the duration's: 6, 10 or 12 hours. Max: 12.",
+    "Sandbox_WorldQuest_ModoJuego": "Game mode",
+    "Sandbox_WorldQuest_ModoJuego_tooltip": "Standard: factions compete with each other. Chaos: there are also three game-controlled enemies that force alliances; if they win, everyone loses.",
+    "Sandbox_WorldQuest_ModoJuego_option1": "Standard",
+    "Sandbox_WorldQuest_ModoJuego_option2": "Chaos",
+    "Sandbox_WorldQuest_CaosDificultad": "Chaos difficulty",
+    "Sandbox_WorldQuest_CaosDificultad_tooltip": "Multiplies the strength of the Chaos enemies and how fast the threat rises."
 }

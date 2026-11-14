@@ -55,9 +55,7 @@ B.FACCIONES = {
 }
 
 -- Efectos que llegan con sistemas futuros (se muestran como pendientes)
-B.PENDIENTES = {
-    fugados = { "caos" },
-}
+B.PENDIENTES = {}
 
 -- Rasgos de lider
 B.RASGOS = {

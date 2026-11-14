@@ -46,6 +46,11 @@ function Opciones.modoJuego()
     return valor("ModoJuego", 1)
 end
 
+-- Multiplica la fuerza de los enemigos del modo Caos
+function Opciones.caosDificultad()
+    return valor("CaosDificultad", 1.0)
+end
+
 -- Horas de partida antes del final por tiempo (0 = segun la duracion)
 function Opciones.limiteHoras()
     return valor("LimiteHoras", 0)

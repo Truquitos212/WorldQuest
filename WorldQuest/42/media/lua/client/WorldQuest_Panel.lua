@@ -82,14 +82,15 @@ Panel.ayuda = ayuda
 Panel.extra = Panel.extra or {}   -- { orden, clase, clave }
 
 -- Agrega una pestana al Centro de mando. orden: donde va (Resumen 10 ... Ayuda 110)
-function Panel.registrar(orden, clase, clave)
+-- si: funcion opcional; la pestana solo aparece si devuelve true al abrir la ventana
+function Panel.registrar(orden, clase, clave, si)
     for _, p in ipairs(Panel.extra) do
         if p.clave == clave then
-            p.orden, p.clase = orden, clase
+            p.orden, p.clase, p.si = orden, clase, si
             return
         end
     end
-    table.insert(Panel.extra, { orden = orden, clase = clase, clave = clave })
+    table.insert(Panel.extra, { orden = orden, clase = clase, clave = clave, si = si })
 end
 
 function Vista:new(x, y, ancho, alto, ventana)
@@ -895,7 +896,9 @@ function Ventana:createChildren()
         { orden = 110, clase = VistaAyuda, clave = "IGUI_WQ_Tab_Ayuda" },
     }
     for _, p in ipairs(Panel.extra) do
-        table.insert(lista, p)
+        if not p.si or p.si() then
+            table.insert(lista, p)
+        end
     end
     table.sort(lista, function(a, b) return a.orden < b.orden end)
     self.vistas = {}
