@@ -8,9 +8,20 @@ WorldQuest.Red = WorldQuest.Red or {}
 
 local Red = WorldQuest.Red
 Red.MODULO = "WorldQuest"
-Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis", "WorldQuest_Registro", "WorldQuest_Facciones" }
+Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis", "WorldQuest_Registro", "WorldQuest_Facciones",
+    "WorldQuest_Expediciones" }
+
+-- Otros archivos agregan sus claves de datos para que viajen a los clientes
+function Red.agregarClave(clave)
+    for _, c in ipairs(Red.CLAVES) do
+        if c == clave then
+            return
+        end
+    end
+    table.insert(Red.CLAVES, clave)
+end
 local CLAVE_REGISTRO = "WorldQuest_Registro"
-local MAX_REGISTRO = 60
+local MAX_REGISTRO = 150
 
 local ordenes = {}      -- nombre -> function(jugador, args)   (servidor)
 local mensajes = {}     -- nombre -> function(args)            (cliente)
@@ -150,9 +161,9 @@ function Red.getRegistro()
     return datos
 end
 
-local function anotar(clave, p, tipo)
+local function anotar(clave, p, tipo, faccion)
     local lista = Red.getRegistro().lista
-    table.insert(lista, { h = getGameTime():getWorldAgeHours(), clave = clave, p = p, tipo = tipo })
+    table.insert(lista, { h = getGameTime():getWorldAgeHours(), clave = clave, p = p, tipo = tipo, faccion = faccion })
     while #lista > MAX_REGISTRO do
         table.remove(lista, 1)
     end
@@ -167,6 +178,24 @@ function Red.avisar(clave, args, tipo, jugador)
         anotar(clave, p, tipo)
     end
     Red.enviar("aviso", { clave = clave, p = p, tipo = tipo }, jugador)
+end
+
+-- Aviso solo para los miembros conectados de una faccion; queda en su registro privado
+function Red.avisarFaccion(f, clave, args, tipo)
+    if not f then
+        return
+    end
+    print("[WorldQuest] Aviso a " .. tostring(f.nombre) .. ": " .. clave .. " (" .. textoLog(args) .. ")")
+    local p = Red.empacar(args)
+    if not isClient() then
+        anotar(clave, p, tipo, f.id)
+    end
+    for usuario, _ in pairs(f.miembros or {}) do
+        local jugador = Red.jugador(usuario)
+        if jugador and (isServer() or jugador:getUsername() == usuario) then
+            Red.enviar("aviso", { clave = clave, p = p, tipo = tipo }, jugador)
+        end
+    end
 end
 
 -- Frase sobre la cabeza de un jugador

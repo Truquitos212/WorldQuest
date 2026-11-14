@@ -26,11 +26,26 @@ function M.estructura(t, id)
     return (t.estructuras and t.estructuras[id]) or 0
 end
 
+-- Colonos que estan en la base (los de expedicion no cuentan)
 local function colonosDe(t)
+    local resultado = {}
     if WorldQuest.Colonos then
-        return WorldQuest.Colonos.delTerritorio(t)
+        for _, c in ipairs(WorldQuest.Colonos.delTerritorio(t)) do
+            if not c.expedicion then
+                table.insert(resultado, c)
+            end
+        end
     end
-    return {}
+    return resultado
+end
+M.colonosEnBase = colonosDe
+
+-- Efecto de la especializacion de la base (WorldQuest_Economia.lua)
+local function especial(t, clave, neutro)
+    if WorldQuest.Economia then
+        return WorldQuest.Economia.efectoEspecialidad(t, clave, neutro)
+    end
+    return neutro
 end
 
 -- Cupo de colonos: 3 base + 1 por cama, con tope segun el nivel
@@ -110,20 +125,24 @@ function M.animoDiario(t)
             break
         end
     end
-    return extra + (efecto(t, "animo") or 0)
+    return extra + (efecto(t, "animo") or 0) + especial(t, "animo", 0)
 end
 
 -- Produccion diaria de un rol: huertos ayudan al agricultor, el taller al constructor
 function M.produccion(t, rol, base)
     if rol == "agricultor" then
-        return (base + math.min(5, math.floor(M.estructura(t, "huertos") / 4))) * (efecto(t, "agricultor") or 1)
+        return (base + math.min(5, math.floor(M.estructura(t, "huertos") / 4))) * (efecto(t, "agricultor") or 1) * especial(t, "agricultor", 1)
     elseif rol == "constructor" then
         if M.tieneMejora(t, "taller") then
             base = base * 2
         end
-        return base * (efecto(t, "troncos") or 1)
+        return base * (efecto(t, "troncos") or 1) * especial(t, "troncos", 1)
     elseif rol == "explorador" then
-        return base * (efecto(t, "botin") or 1)
+        return base * (efecto(t, "botin") or 1) * especial(t, "botin", 1)
+    elseif rol == "metal" then
+        return base * (efecto(t, "metal") or 1) * especial(t, "metal", 1)
+    elseif rol == "medico" then
+        return base * especial(t, "medicina", 1)
     end
     return base
 end
@@ -148,7 +167,7 @@ function M.defensa(t)
     if M.tieneMejora(t, "muralla") then
         defensa = defensa + 15
     end
-    return math.floor(defensa * (efecto(t, "defensa") or 1))
+    return math.floor(defensa * (efecto(t, "defensa") or 1) * especial(t, "defensa", 1))
 end
 
 -- Comida que come cada colono por ciclo en este territorio

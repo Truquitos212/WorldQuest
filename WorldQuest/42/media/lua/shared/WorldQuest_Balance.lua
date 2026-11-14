@@ -4,8 +4,8 @@
 -- parecido. Todos los numeros se ajustan jugando: cambiarlos aqui basta.
 --
 -- Claves de efecto:
---   multiplicadores (1 = sin cambio): agricultor, troncos, botin, obras, defensa,
---     horda, llegadas, racion, riesgo, perdidaComida, saqueo
+--   multiplicadores (1 = sin cambio): agricultor, troncos, metal, botin, obras, defensa,
+--     horda, llegadas, racion, riesgo, perdidaComida, saqueo, velocidad
 --   sumas (0 = sin cambio): cupo, animo (por ciclo), resistenciaLocura, aviso (minutos)
 --   limite: maxTerritorios
 
@@ -14,17 +14,17 @@ WorldQuest.Balance = WorldQuest.Balance or {}
 
 local B = WorldQuest.Balance
 
-B.MULT = { agricultor = true, troncos = true, botin = true, obras = true, defensa = true, horda = true,
-    llegadas = true, racion = true, riesgo = true, perdidaComida = true, saqueo = true }
+B.MULT = { agricultor = true, troncos = true, metal = true, botin = true, obras = true, defensa = true, horda = true,
+    llegadas = true, racion = true, riesgo = true, perdidaComida = true, saqueo = true, velocidad = true }
 B.SUMA = { cupo = true, animo = true, resistenciaLocura = true, aviso = true }
 
 -- true si subir el numero le conviene a la faccion (para pintar verde o rojo)
-B.BUENO_SUBIR = { agricultor = true, troncos = true, botin = true, obras = true, defensa = true,
+B.BUENO_SUBIR = { agricultor = true, troncos = true, metal = true, velocidad = true, botin = true, obras = true, defensa = true,
     llegadas = true, cupo = true, animo = true, resistenciaLocura = true, aviso = true,
     horda = false, racion = false, riesgo = false, perdidaComida = false, saqueo = false, maxTerritorios = false }
 
 -- Orden para mostrar los efectos
-B.ORDEN = { "defensa", "horda", "saqueo", "agricultor", "troncos", "botin", "riesgo", "obras",
+B.ORDEN = { "defensa", "horda", "saqueo", "agricultor", "troncos", "metal", "botin", "riesgo", "velocidad", "obras",
     "llegadas", "cupo", "animo", "resistenciaLocura", "racion", "perdidaComida", "aviso", "maxTerritorios" }
 
 -- Efectos de cada faccion (lo que hoy se puede aplicar con los sistemas que existen)
@@ -33,8 +33,8 @@ B.FACCIONES = {
     leales      = { defensa = 1.3, resistenciaLocura = 10, racion = 1.25 },
     -- Fuerte: comida. Menor: animo. Debilidad: combate
     comuna      = { agricultor = 1.5, animo = 2, defensa = 0.75 },
-    -- Fuerte: obras rapidas. Menor: mas troncos. Debilidad: poca comida
-    chatarreros = { obras = 1.5, troncos = 1.3, agricultor = 0.6 },
+    -- Fuerte: obras rapidas. Menor: mas madera y metal. Debilidad: poca comida
+    chatarreros = { obras = 1.5, troncos = 1.3, metal = 1.4, agricultor = 0.6 },
     -- Fuerte: expediciones seguras (en lugar del comercio). Menor: mejor botin. Debilidad: 2 territorios
     caravana    = { riesgo = 0.5, botin = 1.2, maxTerritorios = 2 },
     -- Fuerte: saqueo. Menor: expediciones menos riesgosas. Debilidad: mala fama, llegan menos colonos
@@ -42,7 +42,7 @@ B.FACCIONES = {
     -- Fuerte: atraen colonos. Menor: casi no enloquecen. Debilidad: economia lenta
     devotos     = { llegadas = 1.5, cupo = 1, resistenciaLocura = 15, agricultor = 0.85, troncos = 0.85, botin = 0.85 },
     -- Fuerte: movilidad (expediciones). Menor: (mercenarios, Fase 8). Debilidad: bases fragiles
-    moteros     = { botin = 1.3, riesgo = 0.6, defensa = 0.75, horda = 1.2 },
+    moteros     = { botin = 1.3, riesgo = 0.6, velocidad = 1.5, defensa = 0.75, horda = 1.2 },
     -- Fuerte: resisten asedios. Menor: racionan bien. Debilidad: crecen lento
     preppers    = { defensa = 1.2, saqueo = 0.5, perdidaComida = 0.25, racion = 0.85, llegadas = 0.5, cupo = -1 },
     -- Fuerte: combate y hordas. Menor: (criminales, Fase 8). Debilidad: poca disciplina
@@ -52,7 +52,6 @@ B.FACCIONES = {
 -- Efectos que llegan con sistemas futuros (se muestran como pendientes)
 B.PENDIENTES = {
     leales = { "mercenarios" },
-    chatarreros = { "metal" },
     caravana = { "comercio", "mercenarios" },
     carroneros = { "asaltos", "reputacion" },
     moteros = { "comercio", "asaltos", "mercenarios" },

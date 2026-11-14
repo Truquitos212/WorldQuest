@@ -34,5 +34,6 @@
     "ContextMenu_WQ_ProbarLlenar": "[Test] Fill storage",
     "ContextMenu_WQ_ReclamarSinFaccion": "Claim territory (create or join a faction first)",
     "ContextMenu_WQ_MarcarPuesto": "Mark command post here",
-    "ContextMenu_WQ_MoverPuesto": "Move command post here"
+    "ContextMenu_WQ_MoverPuesto": "Move command post here",
+    "ContextMenu_WQ_AlmacenRecursos": "Resources: %1"
 }

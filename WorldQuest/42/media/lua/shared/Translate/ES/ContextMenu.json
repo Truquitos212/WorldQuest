@@ -34,5 +34,6 @@
     "ContextMenu_WQ_ProbarLlenar": "[Prueba] Llenar almacén",
     "ContextMenu_WQ_ReclamarSinFaccion": "Reclamar territorio (primero crea o únete a una facción)",
     "ContextMenu_WQ_MarcarPuesto": "Marcar puesto de mando aquí",
-    "ContextMenu_WQ_MoverPuesto": "Mover puesto de mando aquí"
+    "ContextMenu_WQ_MoverPuesto": "Mover puesto de mando aquí",
+    "ContextMenu_WQ_AlmacenRecursos": "Recursos: %1"
 }

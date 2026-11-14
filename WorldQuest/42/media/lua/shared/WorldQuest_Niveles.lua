@@ -3,6 +3,7 @@
 require "WorldQuest_Territorios"
 require "WorldQuest_Almacen"
 require "WorldQuest_Colonos"
+require "WorldQuest_Recursos"
 
 WorldQuest = WorldQuest or {}
 WorldQuest.Niveles = WorldQuest.Niveles or {}
@@ -11,12 +12,11 @@ local Niveles = WorldQuest.Niveles
 
 Niveles.LISTA = {
     { id = "refugio",      radio = 20, cupoMax = 3 },
-    { id = "campamento",   radio = 30, cupoMax = 5,  colonos = 2, costo = { tablas = 20,  clavos = 40 } },
-    { id = "asentamiento", radio = 40, cupoMax = 8,  colonos = 4, costo = { tablas = 50,  clavos = 100, troncos = 20 } },
-    { id = "fortaleza",    radio = 50, cupoMax = 12, colonos = 7, costo = { tablas = 100, clavos = 200, troncos = 40 } },
+    { id = "campamento",   radio = 30, cupoMax = 5,  colonos = 2, costo = { madera = 20,  metal = 4 } },
+    { id = "asentamiento", radio = 40, cupoMax = 8,  colonos = 4, costo = { madera = 110, metal = 12, comida = 3000 } },
+    { id = "fortaleza",    radio = 50, cupoMax = 12, colonos = 7, costo = { madera = 220, metal = 30, medicina = 10, municion = 40 } },
 }
 
-local ORDEN_RECURSOS = { "tablas", "clavos", "troncos" }
 
 function Niveles.datos(t)
     return Niveles.LISTA[t.nivel or 1]
@@ -35,18 +35,14 @@ function Niveles.titulo(t)
     return t.nombre .. " (" .. Niveles.nombre(Niveles.datos(t)) .. ")"
 end
 
--- "20 tablas, 40 clavos, 2 colonos"
+-- "20 madera, 4 metal, 2 colonos"
 function Niveles.textoCosto(costo, colonos)
-    local partes = {}
-    for _, recurso in ipairs(ORDEN_RECURSOS) do
-        if costo[recurso] then
-            table.insert(partes, costo[recurso] .. " " .. getText("IGUI_WQ_Recurso_" .. recurso))
-        end
-    end
+    local texto = WorldQuest.Recursos.texto(costo or {})
     if colonos then
-        table.insert(partes, colonos .. " " .. getText("IGUI_WQ_Recurso_colonos"))
+        local extra = colonos .. " " .. getText("IGUI_WQ_Recurso_colonos")
+        texto = (texto ~= "" and (texto .. ", ") or "") .. extra
     end
-    return table.concat(partes, ", ")
+    return texto
 end
 
 -- true, o false y el motivo
@@ -60,11 +56,8 @@ function Niveles.puedeMejorar(t)
         return false, getText("IGUI_WQ_FaltanColonos", tostring(siguiente.colonos))
     end
 
-    local recursos = WorldQuest.Almacen.contar(t)
-    for recurso, cantidad in pairs(siguiente.costo) do
-        if (recursos[recurso] or 0) < cantidad then
-            return false, getText("IGUI_WQ_FaltanRecursos")
-        end
+    if not WorldQuest.Almacen.alcanza(WorldQuest.Almacen.contar(t), siguiente.costo) then
+        return false, getText("IGUI_WQ_FaltanRecursos")
     end
 
     -- El circulo mas grande no puede chocar con otro territorio

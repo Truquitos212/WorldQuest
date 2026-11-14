@@ -56,6 +56,7 @@ Crisis.registrar({
 Crisis.registrar({
     id = "asaltantes",
     minutosAviso = 10,
+    origen = 60,
     textoAviso = "IGUI_WQ_AvisoAsaltantes",
     ejecutar = function(territorio)
         local ataque = 10 + 10 * (territorio.nivel or 1) + ZombRand(20)

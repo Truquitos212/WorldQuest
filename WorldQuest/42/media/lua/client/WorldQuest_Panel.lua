@@ -14,7 +14,7 @@ WorldQuest.Panel = WorldQuest.Panel or {}
 
 local Panel = WorldQuest.Panel
 
-local ANCHO, ALTO = 700, 480
+local ANCHO, ALTO = 940, 540
 local MARGEN = 12
 local FUENTE = UIFont.Small
 local FUENTE_TITULO = UIFont.Medium
@@ -70,6 +70,27 @@ end
 
 -- VISTA BASE: panel transparente con texto, barras y tooltips -------------
 local Vista = ISPanel:derive("WorldQuestVista")
+
+-- Lo que usan las pestanas que viven en otros archivos
+Panel.Vista = Vista
+Panel.MARGEN = MARGEN
+Panel.ALTO_LINEA = ALTO_LINEA
+Panel.FUENTE = FUENTE
+Panel.FUENTE_TITULO = FUENTE_TITULO
+Panel.E = E
+Panel.ayuda = ayuda
+Panel.extra = Panel.extra or {}   -- { orden, clase, clave }
+
+-- Agrega una pestana al Centro de mando. orden: donde va (Resumen 10 ... Ayuda 110)
+function Panel.registrar(orden, clase, clave)
+    for _, p in ipairs(Panel.extra) do
+        if p.clave == clave then
+            p.orden, p.clase = orden, clase
+            return
+        end
+    end
+    table.insert(Panel.extra, { orden = orden, clase = clase, clave = clave })
+end
 
 function Vista:new(x, y, ancho, alto, ventana)
     local o = ISPanel:new(x, y, ancho, alto)
@@ -170,10 +191,31 @@ function VistaColonia:dibujar()
     end
     self:texto(getText("IGUI_WQ_Panel_Colonos", tostring(#v.colonos), tostring(v.cupo)), MARGEN, y, nil, nil, ayuda("Cupo"))
     y = y + ALTO_LINEA
-    self:texto(getText("IGUI_WQ_Panel_Comida", tostring(r.comidas), tostring(r.calorias)), MARGEN, y, nil, nil, ayuda("Comida"))
+    -- Los cinco recursos en una fila, cada uno con su ayuda
+    local R = WorldQuest.Recursos
+    local x = MARGEN
+    for _, id in ipairs(R.LISTA) do
+        local valor = r[id] or 0
+        local texto = getText("IGUI_WQ_Panel_RecursoValor", R.nombre(id), R.corto(valor))
+        if id == "comida" then
+            texto = getText("IGUI_WQ_Panel_RecursoKcal", R.nombre(id), R.corto(valor))
+        end
+        self:texto(texto, x, y, valor > 0 and e.texto or e.gris, nil, ayuda("Recurso_" .. id))
+        x = x + getTextManager():MeasureStringX(FUENTE, texto) + 18
+    end
+    if (r.cigarros or 0) > 0 then
+        self:texto(getText("IGUI_WQ_Panel_RecursoValor", R.nombre("cigarros"), R.corto(r.cigarros)), x, y, e.gris, nil, ayuda("Recurso_cigarros"))
+    end
     y = y + ALTO_LINEA
-    self:texto(getText("IGUI_WQ_Panel_Materiales", tostring(r.tablas), tostring(r.clavos), tostring(r.troncos)), MARGEN, y, nil, nil, ayuda("Materiales"))
+    self:texto(getText("IGUI_WQ_Panel_Riqueza", R.corto(v.riqueza or 0)), MARGEN, y, nil, nil, ayuda("Riqueza"))
+    local esp = WorldQuest.Economia.especialidad(t)
+    local textoEsp = esp and getText("IGUI_WQ_Panel_Especialidad", getText("IGUI_WQ_Esp_" .. esp.id)) or getText("IGUI_WQ_Panel_SinEspecialidad")
+    self:texto(textoEsp, MARGEN + 200, y, esp and e.bien or e.gris, nil, esp and ayuda("Esp_" .. esp.id) or ayuda("Especialidad"))
     y = y + ALTO_LINEA
+    if t.entregas and next(t.entregas) then
+        self:texto(getText("IGUI_WQ_Panel_Entregas", R.texto(t.entregas)), MARGEN, y, e.acento, nil, ayuda("Entregas"))
+        y = y + ALTO_LINEA
+    end
     self:texto(getText("IGUI_WQ_Panel_Estructuras", tostring(est.camas), tostring(est.huertos), tostring(est.cocinas), tostring(est.generadores)), MARGEN, y, nil, nil, ayuda("Estructuras"))
     y = y + ALTO_LINEA
     self:texto(getText("IGUI_WQ_Panel_Defensa", tostring(v.defensa)), MARGEN, y, nil, nil, ayuda("Defensa"))
@@ -637,31 +679,85 @@ function VistaMapa:alAbrir()
 end
 
 function VistaMapa:onMouseDown(x, y)
-    if y >= Y_LISTA_MAPA then
-        local i = math.floor((y - Y_LISTA_MAPA) / ALTO_LINEA) + 1
-        local t = WorldQuest.Territorios.getDatos().lista[i]
-        if t then
-            abrirMapa(t)
+    for _, fila in ipairs(self.filas or {}) do
+        if y >= fila.y and y < fila.y + ALTO_LINEA then
+            fila.accion()
+            return true
         end
     end
     return true
 end
 
+-- Territorios que el jugador conoce (con la niebla de guerra, solo los vistos)
+function Panel.territoriosConocidos()
+    if WorldQuest.Niebla then
+        return WorldQuest.Niebla.territoriosConocidos()
+    end
+    return WorldQuest.Territorios.getDatos().lista
+end
+
 function VistaMapa:dibujar()
     local e = E()
     local jugador = getPlayer()
-    local lista = WorldQuest.Territorios.getDatos().lista
+    local lista = Panel.territoriosConocidos()
+    self.filas = {}
+    local y = Y_LISTA_MAPA
     if #lista == 0 then
-        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, Y_LISTA_MAPA, e.gris)
-        return
+        self:texto(getText("IGUI_WQ_Panel_SinTerritorio"), MARGEN, y, e.gris)
+        y = y + ALTO_LINEA
     end
-    for i, t in ipairs(lista) do
-        local y = Y_LISTA_MAPA + (i - 1) * ALTO_LINEA
+    for _, t in ipairs(lista) do
         local propio = WorldQuest.Territorios.esDueno(t, jugador)
         local color = propio and e.acento or e.texto
         local linea = getText("IGUI_WQ_Mapa_Fila", WorldQuest.Niveles.titulo(t), WorldQuest.Facciones.nombreDueno(t),
-            tostring(#WorldQuest.Colonos.delTerritorio(t)))
+            tostring(t.colonosVistos or #WorldQuest.Colonos.delTerritorio(t)))
+        if t.vistoHace then
+            linea = linea .. "  " .. getText("IGUI_WQ_Niebla_Hace", tostring(t.vistoHace))
+            color = e.gris
+        end
         self:texto(linea, MARGEN, y, color, nil, ayuda("FilaMapa"))
+        local destino = t
+        table.insert(self.filas, { y = y, accion = function() abrirMapa(destino) end })
+        y = y + ALTO_LINEA
+        if y > self.height / 2 then
+            break
+        end
+    end
+
+    -- Viajes de la faccion: clic para llamarlos de vuelta
+    local f = WorldQuest.Facciones.deJugador(jugador)
+    if not f then
+        return
+    end
+    y = y + ALTO_LINEA
+    self:texto(getText("IGUI_WQ_Panel_Viajes"), MARGEN, y, e.acento, nil, ayuda("Viajes"))
+    y = y + ALTO_LINEA
+    local hay = false
+    local ahora = getGameTime():getWorldAgeHours()
+    for _, v in ipairs(WorldQuest.Economia.getExpediciones().lista) do
+        if v.faccion == f.id then
+            hay = true
+            local _, _, estado = WorldQuest.Economia.posicionViaje(v, ahora)
+            local minutos = WorldQuest.Reloj.minutosHasta(v.vuelta or v.llegada)
+            local linea = getText("IGUI_WQ_Panel_Viaje", getText("IGUI_WQ_Viaje_" .. tostring(v.tipo)),
+                table.concat(v.nombres or {}, ", "), getText("IGUI_WQ_ViajeEstado_" .. estado), tostring(minutos))
+            local puedeLlamar = not v.vuelta and v.tipo == "exploracion"
+            if puedeLlamar then
+                linea = linea .. "  " .. getText("IGUI_WQ_Panel_ClicVolver")
+            end
+            self:texto(linea, MARGEN + 8, y, puedeLlamar and e.texto or e.gris)
+            if puedeLlamar then
+                local id = v.id
+                table.insert(self.filas, { y = y, accion = function() WorldQuest.Red.pedir("llamarExpedicion", { id = id }) end })
+            end
+            y = y + ALTO_LINEA
+            if y > self.height - ALTO_LINEA then
+                break
+            end
+        end
+    end
+    if not hay then
+        self:texto(getText("IGUI_WQ_Panel_SinViajes"), MARGEN + 8, y, e.gris, nil, ayuda("Expedicion"))
     end
 end
 
@@ -678,8 +774,14 @@ function VistaRegistro:dibujar()
     local ahora = getGameTime():getWorldAgeHours()
     local y = MARGEN
     local anchoTexto = self.width - MARGEN * 2 - 90
+    local mia = WorldQuest.Facciones.deJugador(getPlayer())
+    local todo = WorldQuest.Conflicto and WorldQuest.Conflicto.esObservador(mia)
     for i = #lista, 1, -1 do
         local entrada = lista[i]
+        if entrada.faccion and not todo and not (mia and mia.id == entrada.faccion) then
+            entrada = nil
+        end
+        if entrada then
         local minutos = math.floor(WorldQuest.Reloj.minutosDePartida(ahora - (entrada.h or ahora)))
         local hace = minutos < 1 and getText("IGUI_WQ_Registro_Recien") or getText("IGUI_WQ_Registro_Hace", tostring(minutos))
         local color = e.texto
@@ -692,6 +794,7 @@ function VistaRegistro:dibujar()
         y = self:parrafo(WorldQuest.Red.traducir(entrada.clave, entrada.p), MARGEN + 90, y, anchoTexto, color)
         if y > self.height - ALTO_LINEA then
             return
+        end
         end
     end
 end
@@ -729,7 +832,7 @@ function Ventana:new(x, y)
     o.cupo = 0
     o.defensa = 0
     o.propio = false
-    o.recursos = { comidas = 0, calorias = 0, tablas = 0, clavos = 0, troncos = 0 }
+    o.recursos = WorldQuest.Recursos.vacio()
     o.puedeProyecto = {}
     return o
 end
@@ -746,19 +849,27 @@ function Ventana:createChildren()
     self:addChild(self.pestanas)
 
     local altoVista = self.pestanas.height - (self.pestanas.tabHeight or 24)
-    local function agregar(clase, clave)
-        local vista = clase:new(0, 0, self.width, altoVista, self)
-        vista:initialise()
-        self.pestanas:addView(getText(clave), vista)
+    local lista = {
+        { orden = 10, clase = VistaColonia, clave = "IGUI_WQ_Tab_Resumen" },
+        { orden = 20, clase = VistaColonos, clave = "IGUI_WQ_Tab_Colonos" },
+        { orden = 30, clase = VistaObras, clave = "IGUI_WQ_Tab_Construccion" },
+        { orden = 40, clase = VistaCrisis, clave = "IGUI_WQ_Tab_Crisis" },
+        { orden = 50, clase = VistaFaccion, clave = "IGUI_WQ_Tab_Faccion" },
+        { orden = 80, clase = VistaMapa, clave = "IGUI_WQ_Tab_Mapa" },
+        { orden = 100, clase = VistaRegistro, clave = "IGUI_WQ_Tab_Registro" },
+        { orden = 110, clase = VistaAyuda, clave = "IGUI_WQ_Tab_Ayuda" },
+    }
+    for _, p in ipairs(Panel.extra) do
+        table.insert(lista, p)
     end
-    agregar(VistaColonia, "IGUI_WQ_Tab_Resumen")
-    agregar(VistaColonos, "IGUI_WQ_Tab_Colonos")
-    agregar(VistaObras, "IGUI_WQ_Tab_Construccion")
-    agregar(VistaCrisis, "IGUI_WQ_Tab_Crisis")
-    agregar(VistaFaccion, "IGUI_WQ_Tab_Faccion")
-    agregar(VistaMapa, "IGUI_WQ_Tab_Mapa")
-    agregar(VistaRegistro, "IGUI_WQ_Tab_Registro")
-    agregar(VistaAyuda, "IGUI_WQ_Tab_Ayuda")
+    table.sort(lista, function(a, b) return a.orden < b.orden end)
+    self.vistas = {}
+    for _, p in ipairs(lista) do
+        local vista = p.clase:new(0, 0, self.width, altoVista, self)
+        vista:initialise()
+        self.pestanas:addView(getText(p.clave), vista)
+        self.vistas[p.clave] = vista
+    end
 end
 
 -- Recalcula los datos como mucho una vez por segundo (contar el almacen cuesta)
@@ -784,6 +895,7 @@ function Ventana:refrescar(forzar)
     self.colonos = WorldQuest.Colonos.delTerritorio(t)
     self.cupo = WorldQuest.Colonos.cupo(t)
     self.defensa = WorldQuest.Modificadores.defensa(t)
+    self.riqueza = WorldQuest.Economia.riquezaTerritorio(t)
     self.puedeMejorar, self.motivoMejorar = WorldQuest.Niveles.puedeMejorar(t)
     self.puedeProyecto = {}
     for _, proyecto in ipairs(WorldQuest.Proyectos.LISTA) do

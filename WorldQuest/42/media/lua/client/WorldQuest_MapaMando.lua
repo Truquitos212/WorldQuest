@@ -75,6 +75,11 @@ end
 -- Posicion en el mundo: el cuerpo si esta cargado, el punto de defensa, o un
 -- anillo alrededor del centro del territorio
 local function posicion(colono, territorio, indice, total)
+    local viaje = WorldQuest.Economia and WorldQuest.Economia.expedicionDe(colono)
+    if viaje then
+        local x, y = WorldQuest.Economia.posicionViaje(viaje)
+        return x + (indice % 3) * 1.5, y + math.floor(indice / 3) * 1.5
+    end
     local cuerpo = WorldQuest.Cuerpos and WorldQuest.Cuerpos.cercanos()[colono.nombre]
     if cuerpo then
         return cuerpo:getX(), cuerpo:getY()
@@ -118,9 +123,101 @@ local function dibujarObras(mapa)
     end
 end
 
+-- Linea punteada entre dos puntos de la pantalla
+local function punteada(mapa, x1, y1, x2, y2, r, g, b, a)
+    local dx, dy = x2 - x1, y2 - y1
+    local largo = math.sqrt(dx * dx + dy * dy)
+    if largo < 1 then
+        return
+    end
+    local pasos = math.min(200, math.floor(largo / 8))
+    for i = 0, pasos - 1, 2 do
+        local f1, f2 = i / pasos, (i + 1) / pasos
+        mapa.javaObject:DrawLine(nil, x1 + dx * f1, y1 + dy * f1, x1 + dx * f2, y1 + dy * f2, 2, r, g, b, a)
+    end
+end
+Mando.punteada = punteada
+
+-- Viajes de la faccion (expediciones y otros): linea al destino e icono donde van
+local function dibujarViajes(mapa)
+    local Eco = WorldQuest.Economia
+    local jugador = getPlayer()
+    local f = jugador and WorldQuest.Facciones.deJugador(jugador)
+    if not Eco or not f then
+        return
+    end
+    local api = mapa.mapAPI
+    local ahora = getGameTime():getWorldAgeHours()
+    for _, v in ipairs(Eco.getExpediciones().lista) do
+        local visible = v.faccion == f.id or (WorldQuest.Niebla and WorldQuest.Niebla.veViaje(f, v))
+        if visible then
+            local propio = v.faccion == f.id
+            local x, y, estado = Eco.posicionViaje(v, ahora)
+            local sx, sy = api:worldToUIX(x, y), api:worldToUIY(x, y)
+            local r, g, b = 0.35, 0.65, 1
+            if not propio then
+                r, g, b = 1, 0.45, 0.3
+            end
+            if propio then
+                local destinoX = estado == "vuelta" and v.ox or v.dx
+                local destinoY = estado == "vuelta" and v.oy or v.dy
+                punteada(mapa, sx, sy, api:worldToUIX(destinoX, destinoY), api:worldToUIY(destinoX, destinoY), r, g, b, 0.8)
+            end
+            mapa:drawRect(sx - 9, sy - 9, 18, 18, 0.9, 0.05, 0.05, 0.05)
+            mapa:drawRectBorder(sx - 9, sy - 9, 18, 18, 1, r, g, b)
+            local letra = getText("IGUI_WQ_Viaje_Letra_" .. tostring(v.tipo))
+            mapa:drawTextCentre(letra, sx, sy - 7, r, g, b, 1, UIFont.Small)
+            if propio then
+                mapa:drawText(tostring(#(v.colonos or {})), sx + 11, sy - 7, 1, 1, 1, 1, UIFont.Small)
+            end
+        end
+    end
+end
+
+-- Amenazas avisadas contra territorios propios: se acercan desde donde vienen
+local function dibujarAmenazas(mapa)
+    local jugador = getPlayer()
+    local f = jugador and WorldQuest.Facciones.deJugador(jugador)
+    if not f or not WorldQuest.Crisis then
+        return
+    end
+    local api = mapa.mapAPI
+    local ahora = getGameTime():getWorldAgeHours()
+    for _, p in ipairs(WorldQuest.Crisis.getDatos().pendientes) do
+        local t = WorldQuest.Territorios.buscarPorId(p.territorio)
+        if p.conAviso and p.ox and t and t.faccion == f.id then
+            local total = math.max(0.0001, (p.hora or ahora) - (p.desde or ahora))
+            local avance = math.max(0, math.min(1, (ahora - (p.desde or ahora)) / total))
+            -- Desde el origen hasta el borde del territorio
+            local dx, dy = t.x - p.ox, t.y - p.oy
+            local largo = math.max(1, math.sqrt(dx * dx + dy * dy))
+            local bordeX, bordeY = t.x - dx / largo * t.radio, t.y - dy / largo * t.radio
+            local wx = p.ox + (bordeX - p.ox) * avance
+            local wy = p.oy + (bordeY - p.oy) * avance
+            local sx, sy = api:worldToUIX(wx, wy), api:worldToUIY(wx, wy)
+            punteada(mapa, sx, sy, api:worldToUIX(bordeX, bordeY), api:worldToUIY(bordeX, bordeY), 1, 0.3, 0.2, 0.7)
+            mapa:drawRect(sx - 8, sy - 8, 16, 16, 0.95, 0.75, 0.15, 0.1)
+            mapa:drawRectBorder(sx - 8, sy - 8, 16, 16, 1, 0, 0, 0)
+            mapa:drawTextCentre("!", sx, sy - 7, 1, 1, 1, 1, UIFont.Small)
+            mapa:drawText(getText("IGUI_WQ_Crisis_" .. p.tipo), sx + 11, sy - 7, 1, 0.6, 0.5, 1, UIFont.Small)
+        end
+    end
+end
+
 local function dibujar(mapa)
     iconos = {}
     dibujarObras(mapa)
+    dibujarAmenazas(mapa)
+    dibujarViajes(mapa)
+    if WorldQuest.MapaMando.extras then
+        for _, funcion in ipairs(WorldQuest.MapaMando.extras) do
+            local ok, err = pcall(funcion, mapa)
+            if not ok and not Mando.errorExtra then
+                Mando.errorExtra = true
+                print("[WorldQuest] Error en un dibujo del mapa: " .. tostring(err))
+            end
+        end
+    end
     local lista = colonosPropios()
     if #lista == 0 then
         return
@@ -248,6 +345,36 @@ function Mando.guardarEscuadra()
         nil, alNombrarEscuadra, getPlayer():getPlayerNum(), ids)
     ventana:initialise()
     ventana:addToUIManager()
+end
+
+function Mando.enviarExpedicion(wx, wy)
+    local ids = Mando.idsSeleccion()
+    if #ids > 0 then
+        Red.pedir("expedicion", { colonos = ids, x = math.floor(wx), y = math.floor(wy) })
+        Mando.limpiar()
+    end
+end
+
+-- Tooltip del menu de clic derecho
+function Mando.tooltip(texto)
+    local tip = ISToolTip:new()
+    tip:initialise()
+    tip:setVisible(false)
+    tip.description = texto
+    return tip
+end
+
+-- Otros archivos agregan dibujos al mapa y opciones al clic derecho
+Mando.extras = Mando.extras or {}
+Mando.opcionesMenu = Mando.opcionesMenu or {}
+Mando.quiereMenu = Mando.quiereMenu or {}   -- funcion(wx, wy, t) -> true si hay opciones sin seleccion
+
+function Mando.agregarDibujo(funcion)
+    table.insert(Mando.extras, funcion)
+end
+
+function Mando.agregarOpcion(funcion)
+    table.insert(Mando.opcionesMenu, funcion)
 end
 
 function Mando.seleccionarEscuadra(escuadra)
@@ -538,7 +665,14 @@ local function instalar()
         local t = WorldQuest.Territorios.buscarEn(math.floor(wx), math.floor(wy))
         local obra = t and t.proyecto and WorldQuest.Territorios.esDueno(t, jugador) and t.faccion ~= nil
         local n = Mando.cantidadSeleccion()
-        if n == 0 and not obra then
+        local extra = false
+        for _, pregunta in ipairs(Mando.quiereMenu or {}) do
+            local ok, si = pcall(pregunta, wx, wy, t)
+            if ok and si then
+                extra = true
+            end
+        end
+        if n == 0 and not obra and not extra then
             return derechoOriginal(self, x, y)
         end
 
@@ -554,6 +688,13 @@ local function instalar()
             context:addOption(getText("IGUI_WQ_Mando_Defender"), "defender", ordenar, wx, wy)
             context:addOption(getText("IGUI_WQ_Mando_Llamar"), "llamar", ordenar, wx, wy)
             context:addOption(getText("IGUI_WQ_Mando_Volver"), "volver", ordenar, wx, wy)
+            if not t or not WorldQuest.Territorios.esDueno(t, jugador) then
+                local opcion = context:addOption(getText("IGUI_WQ_Mando_Expedicion"), wx, Mando.enviarExpedicion, wy)
+                opcion.toolTip = Mando.tooltip(getText("IGUI_WQ_Ayuda_Expedicion"))
+            end
+        end
+        for _, funcion in ipairs(Mando.opcionesMenu or {}) do
+            pcall(funcion, context, wx, wy, t, n)
         end
         return true
     end

@@ -20,7 +20,7 @@ local function colonosPropios(jugador, ids)
         buscados[tonumber(id) or -1] = true
     end
     for _, colono in ipairs(Colonos.getDatos().lista) do
-        if buscados[colono.id] then
+        if buscados[colono.id] and not colono.expedicion then
             local t = Territorios.buscarPorId(colono.territorio)
             if t and t.faccion == f.id then
                 table.insert(resultado, colono)

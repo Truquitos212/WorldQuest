@@ -20,6 +20,9 @@ local CANTIDADES_PRUEBA = {
     ["Base.Nails"] = 200,
     ["Base.Log"] = 40,
     ["Base.TinnedBeans"] = 20,
+    ["Base.ScrapMetal"] = 40,
+    ["Base.Bandage"] = 15,
+    ["Base.Bullets9mm"] = 60,
 }
 
 -- AYUDAS ----------------------------------------------------------------

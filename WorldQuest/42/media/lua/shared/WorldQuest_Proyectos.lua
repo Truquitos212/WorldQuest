@@ -11,10 +11,10 @@ local Proyectos = WorldQuest.Proyectos
 
 Proyectos.LISTA = {
     -- tamano: lado en casillas de la silueta que se coloca en el mapa o en el mundo
-    { id = "torre",   costo = { tablas = 30, clavos = 30 },                trabajo = 3, tamano = 2 },
-    { id = "taller",  costo = { tablas = 20, clavos = 20 },                trabajo = 2, tamano = 3 },
-    { id = "muralla", costo = { tablas = 60, clavos = 80, troncos = 20 },  trabajo = 6, tamano = 1, nivel = 2 },
-    { id = "radio",   costo = { tablas = 15, clavos = 15 },                trabajo = 2, tamano = 1, nivel = 2 },
+    { id = "torre",   costo = { madera = 30, metal = 3 },               trabajo = 3, tamano = 2 },
+    { id = "taller",  costo = { madera = 20, metal = 4 },               trabajo = 2, tamano = 3 },
+    { id = "muralla", costo = { madera = 120, metal = 10 },             trabajo = 6, tamano = 1, nivel = 2 },
+    { id = "radio",   costo = { madera = 15, metal = 8 },               trabajo = 2, tamano = 1, nivel = 2 },
 }
 
 function Proyectos.buscar(id)
@@ -43,11 +43,8 @@ function Proyectos.puedeIniciar(t, proyecto)
         local nivel = WorldQuest.Niveles.LISTA[proyecto.nivel]
         return false, getText("IGUI_WQ_ProyectoRequiereNivel", WorldQuest.Niveles.nombre(nivel))
     end
-    local recursos = WorldQuest.Almacen.contar(t)
-    for recurso, cantidad in pairs(proyecto.costo) do
-        if (recursos[recurso] or 0) < cantidad then
-            return false, getText("IGUI_WQ_FaltanRecursos")
-        end
+    if not WorldQuest.Almacen.alcanza(WorldQuest.Almacen.contar(t), proyecto.costo) then
+        return false, getText("IGUI_WQ_FaltanRecursos")
     end
     return true
 end

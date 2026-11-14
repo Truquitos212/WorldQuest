@@ -26,7 +26,8 @@ local PROBABILIDAD_MEJORA = 10      -- % por dia de trabajo
 local RIESGO_EXPLORADOR = 8         -- % base de no volver
 
 local COSECHA = { "Base.Potato", "Base.Carrots", "Base.Cabbage", "Base.Tomato" }
-local BOTIN = { "Base.TinnedBeans", "Base.TinnedSoup", "Base.CannedCorn", "Base.Bandage", "Base.Nails", "Base.Plank" }
+local BOTIN = { "Base.TinnedBeans", "Base.TinnedSoup", "Base.CannedCorn", "Base.Bandage", "Base.Nails", "Base.Plank",
+    "Base.ScrapMetal", "Base.Bullets9mm", "Base.ShotgunShells", "Base.Pills", "Base.Cigarettes" }
 
 local function alAzar(lista)
     return lista[ZombRand(#lista) + 1]
@@ -67,6 +68,16 @@ local function trabajar(colono, territorio, contenedor)
         -- Si hay una obra, el constructor trabaja en ella en vez de cortar troncos
         if not territorio.proyecto then
             depositar(contenedor, "Base.Log", producir(territorio, "constructor", 1 + math.floor(habilidad / 4)))
+            -- Con taller, ademas recuperan chatarra
+            if M.tieneMejora(territorio, "taller") then
+                depositar(contenedor, "Base.ScrapMetal", producir(territorio, "metal", 1 + math.floor(habilidad / 5)))
+            end
+        end
+
+    elseif colono.rol == "medico" then
+        -- Prepara vendas: mas mientras mejor sea
+        if ZombRand(100) < 30 + habilidad * 5 then
+            depositar(contenedor, "Base.Bandage", producir(territorio, "medico", 1))
         end
 
     elseif colono.rol == "explorador" then
@@ -86,7 +97,7 @@ end
 -- Cada ciclo: los colonos con rol suman un ciclo de trabajo pendiente
 local function alPasarDia()
     for _, colono in ipairs(Colonos.getDatos().lista) do
-        if colono.rol ~= "ninguno" then
+        if colono.rol ~= "ninguno" and not colono.expedicion then
             colono.trabajoPendiente = math.min((colono.trabajoPendiente or 0) + 1, MAX_DIAS_PENDIENTES)
         end
     end

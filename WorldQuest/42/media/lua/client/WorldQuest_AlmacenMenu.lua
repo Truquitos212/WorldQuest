@@ -89,7 +89,7 @@ local function onFillWorldObjectContextMenu(numJugador, context, worldobjects, t
         local r = Almacen.contar(territorio)
         local info1 = context:addOption(getText("ContextMenu_WQ_AlmacenComida", tostring(r.comidas), tostring(r.calorias)), nil, nil)
         info1.notAvailable = true
-        local info2 = context:addOption(getText("ContextMenu_WQ_AlmacenMateriales", tostring(r.tablas), tostring(r.clavos), tostring(r.troncos)), nil, nil)
+        local info2 = context:addOption(getText("ContextMenu_WQ_AlmacenRecursos", WorldQuest.Recursos.texto(r)), nil, nil)
         info2.notAvailable = true
         context:addOption(getText("ContextMenu_WQ_RenombrarAlmacen"), mueble, renombrarAlmacen)
         context:addOption(getText("ContextMenu_WQ_QuitarAlmacen"), mueble, quitarAlmacen, territorio)

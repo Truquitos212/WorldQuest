@@ -49,6 +49,9 @@ Pistas.LISTA = {
         return false
     end },
     { id = "mando", cumple = function(j, t) return #colonos(t) >= 2 end },
+    { id = "expedicion", cumple = function(j, t)
+        return #colonos(t) >= 3 and WorldQuest.Economia ~= nil and #WorldQuest.Economia.getExpediciones().lista == 0
+    end },
     { id = "hambre", cumple = function(j, t)
         for _, c in ipairs(colonos(t)) do
             if WorldQuest.Colonos.ciclosSinComer(c) > 0 then return true end

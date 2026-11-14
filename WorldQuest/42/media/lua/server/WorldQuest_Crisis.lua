@@ -22,6 +22,14 @@ function Crisis.estaCargado(territorio)
     return getCell():getGridSquare(territorio.x, territorio.y, 0) ~= nil
 end
 
+-- Punto al azar alrededor del territorio, a cierta distancia del borde
+function Crisis.puntoAlrededor(territorio, distanciaExtra)
+    local angulo = ZombRand(360) * math.pi / 180
+    local distancia = territorio.radio + distanciaExtra
+    return math.floor(territorio.x + math.cos(angulo) * distancia),
+           math.floor(territorio.y + math.sin(angulo) * distancia)
+end
+
 -- Deja una crisis pendiente. Si inmediata es true, se salta la espera del aviso
 function Crisis.programar(idTipo, territorio, inmediata)
     local ficha = Crisis.tipos[idTipo]
@@ -34,12 +42,18 @@ function Crisis.programar(idTipo, territorio, inmediata)
         espera = WorldQuest.Modificadores.minutosAviso(territorio, ficha.minutosAviso or 0)
     end
 
-    table.insert(Crisis.getDatos().pendientes, {
+    local pendiente = {
         tipo = idTipo,
         territorio = territorio.id,
+        desde = horaActual(),
         hora = horaActual() + WorldQuest.Reloj.horasDeJuego(espera),
         conAviso = ficha.textoAviso ~= nil,
-    })
+    }
+    -- Amenazas que llegan desde afuera: el mapa muestra por donde vienen
+    if ficha.origen then
+        pendiente.ox, pendiente.oy = Crisis.puntoAlrededor(territorio, ficha.origen)
+    end
+    table.insert(Crisis.getDatos().pendientes, pendiente)
     Red.cambio()
 
     if ficha.textoAviso then
@@ -69,11 +83,28 @@ function Crisis.procesarPendientes()
             table.remove(pendientes, i)
             Red.cambio()
             -- La ficha devuelve false si no pudo ejecutarse
-            if ficha.ejecutar(territorio) ~= false and ficha.textoInicio then
+            if ficha.ejecutar(territorio, pendiente) ~= false and ficha.textoInicio then
                 Red.avisar(ficha.textoInicio, { territorio.nombre }, "crisis")
             end
         end
     end
+end
+
+-- Presion extra del narrador (la sube el final por tiempo y el modo Caos)
+function Crisis.presion()
+    local p = 1
+    for _, funcion in ipairs(Crisis.presiones or {}) do
+        local ok, valor = pcall(funcion)
+        if ok and type(valor) == "number" then
+            p = p * valor
+        end
+    end
+    return p
+end
+
+function Crisis.agregarPresion(funcion)
+    Crisis.presiones = Crisis.presiones or {}
+    table.insert(Crisis.presiones, funcion)
 end
 
 local function tipoAlAzar()
@@ -89,14 +120,21 @@ end
 
 -- El narrador decide si hay crisis
 function Crisis.tirarDado()
-    local lista = Territorios.getDatos().lista
+    -- Las facciones protegidas por desconexion no reciben crisis
+    local lista = {}
+    for _, t in ipairs(Territorios.getDatos().lista) do
+        if not (WorldQuest.Conflicto and WorldQuest.Conflicto.protegido(t)) then
+            table.insert(lista, t)
+        end
+    end
     if #lista == 0 then
         return
     end
 
     local datos = Crisis.getDatos()
     datos.tension = datos.tension + 1
-    local probabilidad = math.min(datos.tension * PROBABILIDAD_POR_TENSION * WorldQuest.Modificadores.factorNarrador() * WorldQuest.Opciones.frecuenciaCrisis(), PROBABILIDAD_MAXIMA)
+    local probabilidad = math.min(datos.tension * PROBABILIDAD_POR_TENSION * WorldQuest.Modificadores.factorNarrador()
+        * WorldQuest.Opciones.frecuenciaCrisis() * Crisis.presion(), PROBABILIDAD_MAXIMA)
     print("[WorldQuest] Narrador: tension " .. datos.tension .. ", probabilidad " .. probabilidad .. "%")
 
     if ZombRand(100) >= probabilidad then

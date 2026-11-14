@@ -16,7 +16,7 @@ local MAX_CICLOS_DEUDA = 7           -- tope de comida atrasada
 
 -- Los colonos del territorio comen del almacen hasta pagar lo que deben
 local function comer(territorio)
-    local colonos = Colonos.delTerritorio(territorio)
+    local colonos = M.colonosEnBase(territorio)
     local deudaTotal = 0
     for _, colono in ipairs(colonos) do
         deudaTotal = deudaTotal + colono.deuda
@@ -136,6 +136,8 @@ local function alPasarCiclo()
         if not territorio then
             -- Territorio abandonado: el colono se va sin aviso
             table.remove(lista, i)
+        elseif colono.expedicion or (WorldQuest.Conflicto and WorldQuest.Conflicto.protegido(territorio)) then
+            -- De expedicion (lleva su comida) o faccion protegida por desconexion: nada cambia
         else
             local seFue = false
 

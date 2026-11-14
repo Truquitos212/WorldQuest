@@ -21,13 +21,7 @@ local function recorrerCasillas(territorio, funcion)
     end
 end
 
--- Punto al azar alrededor del territorio, a cierta distancia del borde
-local function puntoAlrededor(territorio, distanciaExtra)
-    local angulo = ZombRand(360) * math.pi / 180
-    local distancia = territorio.radio + distanciaExtra
-    return math.floor(territorio.x + math.cos(angulo) * distancia),
-           math.floor(territorio.y + math.sin(angulo) * distancia)
-end
+local puntoAlrededor = Crisis.puntoAlrededor
 
 -- Numero al azar entre -n y n
 local function desvio(n)
@@ -42,10 +36,14 @@ local DISPERSION_HORDA = 4
 Crisis.registrar({
     id = "horda",
     minutosAviso = 8,
+    origen = DISTANCIA_HORDA,
     textoAviso = "IGUI_WQ_AvisoHorda",
     textoInicio = "IGUI_WQ_InicioHorda",
-    ejecutar = function(territorio)
+    ejecutar = function(territorio, pendiente)
         local origenX, origenY = puntoAlrededor(territorio, DISTANCIA_HORDA)
+        if pendiente and pendiente.ox then
+            origenX, origenY = pendiente.ox, pendiente.oy
+        end
 
         for i = 1, WorldQuest.Modificadores.tamanoHorda(territorio, TAMANO_HORDA) do
             local x = origenX + desvio(DISPERSION_HORDA)
