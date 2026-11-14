@@ -216,7 +216,7 @@ end)
 function C.fuerzaColonos(colonos, t)
     local fuerza = 0
     for _, c in ipairs(colonos) do
-        fuerza = fuerza + 5 + c.habilidades.combate * 2
+        fuerza = fuerza + math.max(1, 5 + c.habilidades.combate * 2 + WorldQuest.Colonos.efecto(c, "defensa"))
     end
     return fuerza * (M.efecto(t, "asalto") or 1)
 end

@@ -77,6 +77,8 @@ function Colonos.ofrecerLlegada(territorio)
         especialidad = propuesta.especialidad,
         nivel = propuesta.habilidades[propuesta.especialidad],
         territorio = territorio.nombre,
+        rasgos = table.concat(propuesta.rasgos or {}, ","),
+        oficio = propuesta.oficio,
     }, jugador)
 end
 
@@ -131,6 +133,7 @@ local function alPasarCiclo()
 
     for i = #lista, 1, -1 do
         local colono = lista[i]
+        Colonos.completar(colono)
         local territorio = Territorios.buscarPorId(colono.territorio)
 
         if not territorio then
@@ -146,7 +149,11 @@ local function alPasarCiclo()
                 comer(territorio)
                 local ciclosHambre = math.floor(colono.deuda / M.racion(territorio))
                 if ciclosHambre == 0 then
-                    colono.animo = math.min(100, colono.animo + ANIMO_SI_COMEN + M.animoDiario(territorio))
+                    local extra = Colonos.efecto(colono, "animo")
+                    if #M.colonosEnBase(territorio) >= 4 then
+                        extra = extra + Colonos.efecto(colono, "animoGrupo")
+                    end
+                    colono.animo = math.max(0, math.min(100, colono.animo + ANIMO_SI_COMEN + M.animoDiario(territorio) + extra))
                 else
                     colono.animo = math.max(0, colono.animo - ANIMO_POR_CICLO_DE_HAMBRE * ciclosHambre)
                 end
@@ -161,7 +168,7 @@ local function alPasarCiclo()
             -- La racion de este ciclo queda pendiente
             if not seFue then
                 local racion = M.racion(territorio)
-                colono.deuda = math.min(colono.deuda + racion, racion * MAX_CICLOS_DEUDA)
+                colono.deuda = math.min(colono.deuda + racion * Colonos.efecto(colono, "racion"), racion * MAX_CICLOS_DEUDA)
             end
         end
     end

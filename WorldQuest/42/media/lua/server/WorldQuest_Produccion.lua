@@ -43,7 +43,10 @@ local function contenedorDeposito(territorio)
     return nil
 end
 
+local colonoActual = nil   -- colono que esta trabajando (sus rasgos cambian lo que produce)
+
 local function depositar(contenedor, tipos, cantidad)
+    cantidad = math.floor(cantidad * WorldQuest.Colonos.efecto(colonoActual, "produccion") + 0.5)
     for i = 1, cantidad do
         if type(tipos) == "table" then
             Almacen.agregar(contenedor, alAzar(tipos))
@@ -60,6 +63,8 @@ local function trabajar(colono, territorio, contenedor)
         return true
     end
     local habilidad = colono.habilidades[habilidadId]
+    colonoActual = colono
+    colono.trabajos = (colono.trabajos or 0) + 1
 
     if colono.rol == "agricultor" then
         depositar(contenedor, COSECHA, producir(territorio, "agricultor", 1 + math.floor(habilidad / 3)))

@@ -161,6 +161,7 @@ end
 function M.defensa(t)
     local defensa = 0
     for _, colono in ipairs(colonosDe(t)) do
+        defensa = defensa + (WorldQuest.Colonos.efecto and WorldQuest.Colonos.efecto(colono, "defensa") or 0)
         if colono.rol == "guardia" then
             defensa = defensa + 5 + colono.habilidades.combate * 2
         else

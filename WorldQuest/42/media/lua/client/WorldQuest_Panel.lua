@@ -343,6 +343,35 @@ function VistaColonos:dibujar()
         self:barra(X_FICHA + 110, y + 3, 110, valor, 10, 0.35, 0.55, 0.85)
         self:texto(tostring(valor), X_FICHA + 228, y)
     end
+
+    -- Segunda columna: quien es, sus rasgos y que esta haciendo
+    local x2 = X_FICHA + 280
+    local y2 = Y_ROL
+    if colono.oficio then
+        self:texto(getText("IGUI_WQ_Ficha_Antes", getText("IGUI_WQ_Oficio_" .. colono.oficio), tostring(colono.edad or "?")), x2, y2, e.gris)
+        y2 = y2 + ALTO_LINEA
+    end
+    if colono.desde then
+        local minutos = math.floor(WorldQuest.Reloj.minutosDePartida(getGameTime():getWorldAgeHours() - colono.desde))
+        self:texto(getText("IGUI_WQ_Ficha_Desde", tostring(minutos), tostring(colono.trabajos or 0)), x2, y2, e.gris, nil, ayuda("Ficha_Desde"))
+        y2 = y2 + ALTO_LINEA
+    end
+    y2 = y2 + 6
+    self:texto(getText("IGUI_WQ_Ficha_Rasgos"), x2, y2, e.gris, nil, ayuda("Rasgos"))
+    y2 = y2 + ALTO_LINEA
+    for _, r in ipairs(colono.rasgos or {}) do
+        self:texto("- " .. getText("IGUI_WQ_RasgoColono_" .. r), x2 + 8, y2, e.acento, nil, getText("IGUI_WQ_Ayuda_RasgoColono_" .. r))
+        y2 = y2 + ALTO_LINEA
+    end
+    y2 = y2 + 6
+    local estado = getText("IGUI_WQ_Ficha_EnBase")
+    local viaje = WorldQuest.Economia and WorldQuest.Economia.expedicionDe(colono)
+    if viaje then
+        estado = getText("IGUI_WQ_Ficha_DeViaje", getText("IGUI_WQ_Viaje_" .. tostring(viaje.tipo)))
+    elseif colono.orden then
+        estado = getText("IGUI_WQ_Ficha_Orden", getText("IGUI_WQ_Orden_" .. tostring(colono.orden.tipo)))
+    end
+    self:texto(estado, x2, y2, viaje and e.acento or e.texto, nil, ayuda("Ficha_Estado"))
 end
 
 -- PESTANA OBRAS ------------------------------------------------------------

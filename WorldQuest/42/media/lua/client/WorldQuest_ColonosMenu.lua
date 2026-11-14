@@ -21,6 +21,15 @@ function ColonosUI.ofrecer(args)
         getText("IGUI_WQ_Hab_" .. args.especialidad),
         tostring(args.nivel),
         args.territorio)
+    -- Rasgos y oficio, para decidir mejor
+    if type(args.rasgos) == "string" and args.rasgos ~= "" then
+        local nombres = {}
+        for r in string.gmatch(args.rasgos, "[^,]+") do
+            table.insert(nombres, getText("IGUI_WQ_RasgoColono_" .. r))
+        end
+        texto = texto .. " " .. getText("IGUI_WQ_ColonoPideRasgos", table.concat(nombres, ", "),
+            getText("IGUI_WQ_Oficio_" .. tostring(args.oficio)))
+    end
 
     local ancho, alto = 500, 150
     local x = (getCore():getScreenWidth() - ancho) / 2

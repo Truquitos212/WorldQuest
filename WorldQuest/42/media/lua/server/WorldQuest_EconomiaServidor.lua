@@ -201,7 +201,8 @@ E.TIPOS_VIAJE.exploracion = function(v, t, colonos)
     local peligro = 1 + distancia / E.DISTANCIA_MAXIMA + (E.peligroZona and E.peligroZona(v.dx, v.dy) or 0)
     local muertos = {}
     for _, c in ipairs(colonos) do
-        local riesgo = math.max(1, M.riesgoExplorador(t, (RIESGO_BASE - math.floor(c.habilidades.combate / 2)) * peligro))
+        local riesgo = math.max(1, M.riesgoExplorador(t, (RIESGO_BASE - math.floor(c.habilidades.combate / 2)) * peligro)
+            * Colonos.efecto(c, "riesgo"))
         if ZombRand(100) < riesgo then
             table.insert(muertos, c)
         else
