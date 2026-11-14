@@ -570,6 +570,12 @@ function VistaFaccion:dibujar()
     y = y + ALTO_LINEA
     self:texto(getText("IGUI_WQ_Panel_Lider", f.lider), MARGEN, y, nil, nil, ayuda("Lider"))
     y = y + ALTO_LINEA
+    if WorldQuest.Diplomacia then
+        local D = WorldQuest.Diplomacia
+        self:texto(getText("IGUI_WQ_Dipl_TuReputacion", tostring(D.reputacion(f))), MARGEN, y,
+            D.malaFama(f) and e.alerta or nil, nil, ayuda("Reputacion"))
+        y = y + ALTO_LINEA
+    end
 
     -- Rasgo del lider
     local B = WorldQuest.Balance

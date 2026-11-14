@@ -53,7 +53,7 @@ B.FACCIONES = {
 B.PENDIENTES = {
     leales = { "mercenarios" },
     caravana = { "comercio", "mercenarios" },
-    carroneros = { "asaltos", "reputacion" },
+    carroneros = { "asaltos" },
     moteros = { "comercio", "asaltos", "mercenarios" },
     fugados = { "mercenarios", "caos" },
 }

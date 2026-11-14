@@ -106,6 +106,11 @@ function M.probabilidadLlegada(base, territorio)
     end
     if territorio then
         base = base * (efecto(territorio, "llegadas") or 1)
+        -- Con mala fama llegan menos sobrevivientes
+        local f = WorldQuest.Facciones and WorldQuest.Facciones.deTerritorio(territorio)
+        if f and WorldQuest.Diplomacia and WorldQuest.Diplomacia.malaFama(f) then
+            base = base * 0.75
+        end
     end
     return base
 end
