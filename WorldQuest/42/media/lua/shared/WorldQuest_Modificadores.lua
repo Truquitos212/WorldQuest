@@ -106,6 +106,11 @@ function M.probabilidadLlegada(base, territorio)
     end
     if territorio then
         base = base * (efecto(territorio, "llegadas") or 1)
+        -- Una escuela o iglesia controlada atrae gente
+        local duena = WorldQuest.Facciones and WorldQuest.Facciones.deTerritorio(territorio)
+        if duena and WorldQuest.Mundo and WorldQuest.Mundo.controlaTipo(duena, "escuela") then
+            base = base * 1.3
+        end
         -- Con mala fama llegan menos sobrevivientes
         local f = WorldQuest.Facciones and WorldQuest.Facciones.deTerritorio(territorio)
         if f and WorldQuest.Diplomacia and WorldQuest.Diplomacia.malaFama(f) then

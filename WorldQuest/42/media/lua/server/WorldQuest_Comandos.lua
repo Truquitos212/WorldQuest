@@ -110,6 +110,10 @@ Red.orden("reclamar", function(jugador, args)
         Red.decir(jugador, "IGUI_WQ_SinFaccion")
         return
     end
+    if WorldQuest.Conflicto and WorldQuest.Conflicto.esObservador(faccion) then
+        Red.decir(jugador, "IGUI_WQ_Conf_EresObservador")
+        return
+    end
     local maximo = WorldQuest.Modificadores.maxTerritorios(faccion)
     if maximo then
         local tiene = 0

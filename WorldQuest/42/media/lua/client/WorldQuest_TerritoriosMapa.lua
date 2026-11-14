@@ -24,6 +24,7 @@ local COLOR_TEXTO_ALERTA = { r = 1.0, g = 0.7, b = 0.4 }
 local FONDO = { r = 0.1, g = 0.1, b = 0.1, a = 0.75 }
 local MARGEN_X, MARGEN_Y = 6, 2
 local RADIO_MINIMO_ETIQUETA = 30 -- en pixeles
+local alfa = 1                   -- las fotos de la niebla se dibujan mas tenues
 
 -- Arma, por id de territorio, la lista de alertas (crisis avisadas y frio)
 local function juntarAlertas()
@@ -80,7 +81,7 @@ local function dibujarRelleno(mapa, centroX, centroY, puntos, color)
     for i = 1, #puntos - 1 do
         local a, b = puntos[i], puntos[i + 1]
         mapa:drawTextureAllPoint(nil, centroX, centroY, a.x, a.y, b.x, b.y, b.x, b.y,
-            color.r, color.g, color.b, ALFA_RELLENO)
+            color.r, color.g, color.b, ALFA_RELLENO * alfa)
     end
 end
 
@@ -88,11 +89,11 @@ end
 local function dibujarBorde(mapa, puntos, color)
     for i = 1, #puntos - 1 do
         local a, b = puntos[i], puntos[i + 1]
-        mapa.javaObject:DrawLine(nil, a.x, a.y, b.x, b.y, GROSOR_CONTORNO, 0, 0, 0, ALFA_CONTORNO)
+        mapa.javaObject:DrawLine(nil, a.x, a.y, b.x, b.y, GROSOR_CONTORNO, 0, 0, 0, ALFA_CONTORNO * alfa)
     end
     for i = 1, #puntos - 1 do
         local a, b = puntos[i], puntos[i + 1]
-        mapa.javaObject:DrawLine(nil, a.x, a.y, b.x, b.y, GROSOR_BORDE, color.r, color.g, color.b, ALFA_BORDE)
+        mapa.javaObject:DrawLine(nil, a.x, a.y, b.x, b.y, GROSOR_BORDE, color.r, color.g, color.b, ALFA_BORDE * alfa)
     end
 end
 
@@ -124,6 +125,7 @@ end
 
 local function dibujarTerritorio(mapa, territorio, lineas)
     local api = mapa.mapAPI
+    alfa = territorio.foto and 0.45 or 1
     local centroX = api:worldToUIX(territorio.x, territorio.y)
     local centroY = api:worldToUIY(territorio.x, territorio.y)
     local puntos = puntosEnPantalla(api, territorio)
@@ -145,7 +147,7 @@ local function dibujarTerritorio(mapa, territorio, lineas)
 
     -- Puesto de mando: un cuadro blanco con el color de la faccion adentro
     local faccion = WorldQuest.Facciones.deTerritorio(territorio)
-    if faccion and faccion.puesto and faccion.puesto.territorio == territorio.id then
+    if faccion and not territorio.foto and faccion.puesto and faccion.puesto.territorio == territorio.id then
         local px = api:worldToUIX(faccion.puesto.x + 0.5, faccion.puesto.y + 0.5)
         local py = api:worldToUIY(faccion.puesto.x + 0.5, faccion.puesto.y + 0.5)
         local c = WorldQuest.Facciones.color(faccion.color) or { r = 1, g = 1, b = 1 }
@@ -158,7 +160,15 @@ local function dibujarTerritorio(mapa, territorio, lineas)
     local dx = puntos[1].x - centroX
     local dy = puntos[1].y - centroY
     if (dx * dx + dy * dy) >= RADIO_MINIMO_ETIQUETA * RADIO_MINIMO_ETIQUETA then
-        dibujarEtiqueta(mapa, WorldQuest.Niveles and WorldQuest.Niveles.titulo(territorio) or territorio.nombre, lineas, centroX, centroY)
+        local titulo = WorldQuest.Niveles and WorldQuest.Niveles.titulo(territorio) or territorio.nombre
+        if territorio.foto and territorio.vistoHace then
+            lineas = { getText("IGUI_WQ_Niebla_Hace", tostring(territorio.vistoHace)) }
+        end
+        local captura = WorldQuest.Conflicto and not territorio.foto and WorldQuest.Conflicto.captura(territorio)
+        if captura then
+            lineas = { getText("IGUI_WQ_Conf_CapturaAvance", tostring(math.floor(captura.avance)), tostring(captura.necesario)) }
+        end
+        dibujarEtiqueta(mapa, titulo, lineas, centroX, centroY)
     end
 end
 
@@ -169,7 +179,12 @@ function ISWorldMap:render()
     renderOriginal(self)
 
     local alertas = juntarAlertas()
-    for _, territorio in ipairs(Territorios.getDatos().lista) do
-        dibujarTerritorio(self, territorio, alertas[territorio.id] or {})
+    local lista = WorldQuest.Niebla and WorldQuest.Niebla.territoriosConocidos() or Territorios.getDatos().lista
+    for _, territorio in ipairs(lista) do
+        local ok, err = pcall(dibujarTerritorio, self, territorio, (not territorio.foto and alertas[territorio.id]) or {})
+        if not ok and not self.wqErrorTerritorio then
+            self.wqErrorTerritorio = true
+            print("[WorldQuest] Error al dibujar un territorio: " .. tostring(err))
+        end
     end
 end

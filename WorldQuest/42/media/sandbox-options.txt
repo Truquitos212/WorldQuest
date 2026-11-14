@@ -31,3 +31,8 @@ option WorldQuest.Costos = {
     type = double, min = 0.25, max = 4.0, default = 1.0,
     page = WorldQuest, translation = WorldQuest_Costos,
 }
+
+option WorldQuest.NieblaDeGuerra = {
+    type = boolean, default = true,
+    page = WorldQuest, translation = WorldQuest_NieblaDeGuerra,
+}

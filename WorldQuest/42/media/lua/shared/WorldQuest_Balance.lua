@@ -16,7 +16,7 @@ local B = WorldQuest.Balance
 
 B.MULT = { agricultor = true, troncos = true, metal = true, botin = true, obras = true, defensa = true, horda = true,
     llegadas = true, racion = true, riesgo = true, perdidaComida = true, saqueo = true, velocidad = true,
-    comercio = true, seguridad = true, precioMercenarios = true }
+    comercio = true, seguridad = true, precioMercenarios = true, asalto = true }
 B.SUMA = { cupo = true, animo = true, resistenciaLocura = true, aviso = true,
     simpatiaMercenarios = true, simpatiaDuros = true, simpatiaTurbios = true }
 
@@ -24,11 +24,11 @@ B.SUMA = { cupo = true, animo = true, resistenciaLocura = true, aviso = true,
 B.BUENO_SUBIR = { agricultor = true, troncos = true, metal = true, velocidad = true, botin = true, obras = true, defensa = true,
     llegadas = true, cupo = true, animo = true, resistenciaLocura = true, aviso = true,
     horda = false, racion = false, riesgo = false, perdidaComida = false, saqueo = false, maxTerritorios = false,
-    comercio = true, seguridad = false, precioMercenarios = false,
+    comercio = true, seguridad = false, precioMercenarios = false, asalto = true,
     simpatiaMercenarios = true, simpatiaDuros = true, simpatiaTurbios = true }
 
 -- Orden para mostrar los efectos
-B.ORDEN = { "defensa", "horda", "saqueo", "agricultor", "troncos", "metal", "botin", "riesgo", "velocidad", "obras",
+B.ORDEN = { "asalto", "defensa", "horda", "saqueo", "agricultor", "troncos", "metal", "botin", "riesgo", "velocidad", "obras",
     "llegadas", "cupo", "animo", "resistenciaLocura", "racion", "perdidaComida", "aviso", "comercio", "seguridad",
     "precioMercenarios", "simpatiaMercenarios", "simpatiaDuros", "simpatiaTurbios", "maxTerritorios" }
 
@@ -43,11 +43,11 @@ B.FACCIONES = {
     -- Fuerte: comercio y caravanas seguras. Menor: simpatia de mercenarios. Debilidad: 2 territorios
     caravana    = { comercio = 1.15, seguridad = 0.3, simpatiaMercenarios = 15, riesgo = 0.8, maxTerritorios = 2 },
     -- Fuerte: saqueo. Menor: expediciones menos riesgosas. Debilidad: mala fama, llegan menos colonos
-    carroneros  = { botin = 1.6, riesgo = 0.8, llegadas = 0.7 },
+    carroneros  = { asalto = 1.3, botin = 1.4, riesgo = 0.8, llegadas = 0.7 },
     -- Fuerte: atraen colonos. Menor: casi no enloquecen. Debilidad: economia lenta
     devotos     = { llegadas = 1.5, cupo = 1, resistenciaLocura = 15, agricultor = 0.85, troncos = 0.85, botin = 0.85 },
     -- Fuerte: movilidad (caravanas, expediciones y asaltos rapidos). Menor: respeto de mercenarios duros. Debilidad: bases fragiles
-    moteros     = { velocidad = 1.5, riesgo = 0.7, simpatiaDuros = 15, defensa = 0.75, horda = 1.2 },
+    moteros     = { velocidad = 1.5, asalto = 1.1, riesgo = 0.7, simpatiaDuros = 15, defensa = 0.75, horda = 1.2 },
     -- Fuerte: resisten asedios. Menor: racionan bien. Debilidad: crecen lento
     preppers    = { defensa = 1.2, saqueo = 0.5, perdidaComida = 0.25, racion = 0.85, llegadas = 0.5, cupo = -1 },
     -- Fuerte: combate y hordas. Menor: simpatia de criminales y mercenarios turbios. Debilidad: poca disciplina
@@ -56,8 +56,6 @@ B.FACCIONES = {
 
 -- Efectos que llegan con sistemas futuros (se muestran como pendientes)
 B.PENDIENTES = {
-    carroneros = { "asaltos" },
-    moteros = { "asaltos" },
     fugados = { "caos" },
 }
 

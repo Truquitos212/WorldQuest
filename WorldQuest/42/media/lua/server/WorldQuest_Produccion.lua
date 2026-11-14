@@ -97,7 +97,9 @@ end
 -- Cada ciclo: los colonos con rol suman un ciclo de trabajo pendiente
 local function alPasarDia()
     for _, colono in ipairs(Colonos.getDatos().lista) do
-        if colono.rol ~= "ninguno" and not colono.expedicion then
+        local t = Territorios.buscarPorId(colono.territorio)
+        local protegido = t and WorldQuest.Conflicto and WorldQuest.Conflicto.protegido(t)
+        if colono.rol ~= "ninguno" and not colono.expedicion and not protegido then
             colono.trabajoPendiente = math.min((colono.trabajoPendiente or 0) + 1, MAX_DIAS_PENDIENTES)
         end
     end

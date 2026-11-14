@@ -68,6 +68,13 @@ Pistas.LISTA = {
     { id = "mejorar", cumple = function(j, t)
         return t ~= nil and WorldQuest.Niveles.siguiente(t) ~= nil and WorldQuest.Niveles.puedeMejorar(t) == true
     end },
+    { id = "lugares", cumple = function(j, t)
+        return WorldQuest.Mundo ~= nil and #WorldQuest.Mundo.getDatos().lugares > 0
+    end },
+    { id = "guerra", cumple = function(j, t)
+        local f = WorldQuest.Facciones.deJugador(j)
+        return f ~= nil and WorldQuest.Diplomacia ~= nil and #WorldQuest.Diplomacia.enemigos(f.id) > 0
+    end },
     { id = "crisis", cumple = function(j, t)
         if not t then return false end
         for _, p in ipairs(WorldQuest.Crisis.getDatos().pendientes) do

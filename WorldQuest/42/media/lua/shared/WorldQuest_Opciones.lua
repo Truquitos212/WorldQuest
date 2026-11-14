@@ -36,6 +36,21 @@ function Opciones.duracion()
     return valor("Duracion", 2)
 end
 
+-- Niebla de guerra (solo ves lo que tienes cerca)
+function Opciones.niebla()
+    return valor("NieblaDeGuerra", true) == true
+end
+
+-- 1 estandar, 2 caos
+function Opciones.modoJuego()
+    return valor("ModoJuego", 1)
+end
+
+-- Horas de partida antes del final por tiempo (0 = segun la duracion)
+function Opciones.limiteHoras()
+    return valor("LimiteHoras", 0)
+end
+
 function Opciones.costos()
     return valor("Costos", 1.0)
 end
