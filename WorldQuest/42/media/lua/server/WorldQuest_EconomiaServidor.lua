@@ -94,6 +94,56 @@ local function repartirEntregas()
     end
 end
 
+-- PAGOS ------------------------------------------------------------------------------
+
+-- Territorio de la faccion cargado y con suficiente del recurso (o nil)
+function E.territorioConRecurso(f, recurso, cantidad)
+    for _, t in ipairs(Territorios.getDatos().lista) do
+        if t.faccion == f.id and WorldQuest.Crisis.estaCargado(t) then
+            local c = Almacen.contar(t)
+            if (c[recurso] or 0) >= cantidad then
+                return t
+            end
+        end
+    end
+    return nil
+end
+
+-- Saca un pago de una base cargada de la faccion. Devuelve items { tipo = n } y el
+-- territorio, o nil si ninguna base cargada alcanza.
+function E.cobrar(f, recurso, cantidad, territorio)
+    local t = territorio or E.territorioConRecurso(f, recurso, cantidad)
+    if not t then
+        return nil
+    end
+    local sacados = Almacen.sacar(t, recurso, cantidad)
+    local items = {}
+    for _, tipo in ipairs(sacados) do
+        items[tipo] = (items[tipo] or 0) + 1
+    end
+    E.actualizarConteo(t)
+    return items, t
+end
+
+-- Territorio donde una faccion recibe lo que le mandan: el del puesto de mando, si no el primero
+function E.territorioPrincipal(f)
+    if not f then
+        return nil
+    end
+    if f.puesto then
+        local t = Territorios.buscarPorId(f.puesto.territorio)
+        if t and t.faccion == f.id then
+            return t
+        end
+    end
+    for _, t in ipairs(Territorios.getDatos().lista) do
+        if t.faccion == f.id then
+            return t
+        end
+    end
+    return nil
+end
+
 -- EXPEDICIONES ---------------------------------------------------------------------
 
 -- Tipos de viaje: cada uno decide que pasa al llegar. Devuelve botin (recursos) o nil.
@@ -253,6 +303,9 @@ local function avanzarViajes()
             end
         elseif v.vuelta and ahora >= v.vuelta then
             -- Volvieron a la base
+            if v.botinItems then
+                E.entregar(t, nil, v.botinItems)
+            end
             if v.botin and R.valor(v.botin) > 0 then
                 E.entregar(t, v.botin)
                 Red.avisarFaccion(f, "IGUI_WQ_ExpedicionVolvio", { t.nombre, R.texto(v.botin) }, "aviso")

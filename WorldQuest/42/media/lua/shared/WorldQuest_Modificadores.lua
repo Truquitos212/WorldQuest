@@ -172,6 +172,10 @@ function M.defensa(t)
     if M.tieneMejora(t, "muralla") then
         defensa = defensa + 15
     end
+    -- Mercenarios contratados que cuidan la base
+    if WorldQuest.Mercenarios then
+        defensa = defensa + WorldQuest.Mercenarios.defensaExtra(t)
+    end
     return math.floor(defensa * (efecto(t, "defensa") or 1) * especial(t, "defensa", 1))
 end
 

@@ -149,7 +149,7 @@ local function dibujarViajes(mapa)
     local api = mapa.mapAPI
     local ahora = getGameTime():getWorldAgeHours()
     for _, v in ipairs(Eco.getExpediciones().lista) do
-        local visible = v.faccion == f.id or (WorldQuest.Niebla and WorldQuest.Niebla.veViaje(f, v))
+        local visible = v.faccion == f.id or v.tipo == "caravana" or (WorldQuest.Niebla and WorldQuest.Niebla.veViaje(f, v))
         if visible then
             local propio = v.faccion == f.id
             local x, y, estado = Eco.posicionViaje(v, ahora)
@@ -371,6 +371,14 @@ Mando.quiereMenu = Mando.quiereMenu or {}   -- funcion(wx, wy, t) -> true si hay
 
 function Mando.agregarDibujo(funcion)
     table.insert(Mando.extras, funcion)
+end
+
+-- Distancia en pixeles entre un punto del mundo y otro, en el mapa abierto
+function Mando.distanciaPantalla(mapa, ax, ay, bx, by)
+    local api = mapa.mapAPI
+    local dx = api:worldToUIX(ax, ay) - api:worldToUIX(bx, by)
+    local dy = api:worldToUIY(ax, ay) - api:worldToUIY(bx, by)
+    return math.sqrt(dx * dx + dy * dy)
 end
 
 function Mando.agregarOpcion(funcion)
@@ -667,7 +675,7 @@ local function instalar()
         local n = Mando.cantidadSeleccion()
         local extra = false
         for _, pregunta in ipairs(Mando.quiereMenu or {}) do
-            local ok, si = pcall(pregunta, wx, wy, t)
+            local ok, si = pcall(pregunta, wx, wy, t, self)
             if ok and si then
                 extra = true
             end
@@ -694,7 +702,7 @@ local function instalar()
             end
         end
         for _, funcion in ipairs(Mando.opcionesMenu or {}) do
-            pcall(funcion, context, wx, wy, t, n)
+            pcall(funcion, context, wx, wy, t, n, self)
         end
         return true
     end

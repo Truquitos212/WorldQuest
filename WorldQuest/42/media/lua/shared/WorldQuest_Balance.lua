@@ -15,47 +15,50 @@ WorldQuest.Balance = WorldQuest.Balance or {}
 local B = WorldQuest.Balance
 
 B.MULT = { agricultor = true, troncos = true, metal = true, botin = true, obras = true, defensa = true, horda = true,
-    llegadas = true, racion = true, riesgo = true, perdidaComida = true, saqueo = true, velocidad = true }
-B.SUMA = { cupo = true, animo = true, resistenciaLocura = true, aviso = true }
+    llegadas = true, racion = true, riesgo = true, perdidaComida = true, saqueo = true, velocidad = true,
+    comercio = true, seguridad = true, precioMercenarios = true }
+B.SUMA = { cupo = true, animo = true, resistenciaLocura = true, aviso = true,
+    simpatiaMercenarios = true, simpatiaDuros = true, simpatiaTurbios = true }
 
 -- true si subir el numero le conviene a la faccion (para pintar verde o rojo)
 B.BUENO_SUBIR = { agricultor = true, troncos = true, metal = true, velocidad = true, botin = true, obras = true, defensa = true,
     llegadas = true, cupo = true, animo = true, resistenciaLocura = true, aviso = true,
-    horda = false, racion = false, riesgo = false, perdidaComida = false, saqueo = false, maxTerritorios = false }
+    horda = false, racion = false, riesgo = false, perdidaComida = false, saqueo = false, maxTerritorios = false,
+    comercio = true, seguridad = false, precioMercenarios = false,
+    simpatiaMercenarios = true, simpatiaDuros = true, simpatiaTurbios = true }
 
 -- Orden para mostrar los efectos
 B.ORDEN = { "defensa", "horda", "saqueo", "agricultor", "troncos", "metal", "botin", "riesgo", "velocidad", "obras",
-    "llegadas", "cupo", "animo", "resistenciaLocura", "racion", "perdidaComida", "aviso", "maxTerritorios" }
+    "llegadas", "cupo", "animo", "resistenciaLocura", "racion", "perdidaComida", "aviso", "comercio", "seguridad",
+    "precioMercenarios", "simpatiaMercenarios", "simpatiaDuros", "simpatiaTurbios", "maxTerritorios" }
 
 -- Efectos de cada faccion (lo que hoy se puede aplicar con los sistemas que existen)
 B.FACCIONES = {
     -- Fuerte: defensa. Menor: disciplina. Debilidad: consumen mas
-    leales      = { defensa = 1.3, resistenciaLocura = 10, racion = 1.25 },
+    leales      = { defensa = 1.3, resistenciaLocura = 10, racion = 1.15, precioMercenarios = 1.3, simpatiaMercenarios = -15 },
     -- Fuerte: comida. Menor: animo. Debilidad: combate
     comuna      = { agricultor = 1.5, animo = 2, defensa = 0.75 },
     -- Fuerte: obras rapidas. Menor: mas madera y metal. Debilidad: poca comida
     chatarreros = { obras = 1.5, troncos = 1.3, metal = 1.4, agricultor = 0.6 },
-    -- Fuerte: expediciones seguras (en lugar del comercio). Menor: mejor botin. Debilidad: 2 territorios
-    caravana    = { riesgo = 0.5, botin = 1.2, maxTerritorios = 2 },
+    -- Fuerte: comercio y caravanas seguras. Menor: simpatia de mercenarios. Debilidad: 2 territorios
+    caravana    = { comercio = 1.15, seguridad = 0.3, simpatiaMercenarios = 15, riesgo = 0.8, maxTerritorios = 2 },
     -- Fuerte: saqueo. Menor: expediciones menos riesgosas. Debilidad: mala fama, llegan menos colonos
     carroneros  = { botin = 1.6, riesgo = 0.8, llegadas = 0.7 },
     -- Fuerte: atraen colonos. Menor: casi no enloquecen. Debilidad: economia lenta
     devotos     = { llegadas = 1.5, cupo = 1, resistenciaLocura = 15, agricultor = 0.85, troncos = 0.85, botin = 0.85 },
-    -- Fuerte: movilidad (expediciones). Menor: (mercenarios, Fase 8). Debilidad: bases fragiles
-    moteros     = { botin = 1.3, riesgo = 0.6, velocidad = 1.5, defensa = 0.75, horda = 1.2 },
+    -- Fuerte: movilidad (caravanas, expediciones y asaltos rapidos). Menor: respeto de mercenarios duros. Debilidad: bases fragiles
+    moteros     = { velocidad = 1.5, riesgo = 0.7, simpatiaDuros = 15, defensa = 0.75, horda = 1.2 },
     -- Fuerte: resisten asedios. Menor: racionan bien. Debilidad: crecen lento
     preppers    = { defensa = 1.2, saqueo = 0.5, perdidaComida = 0.25, racion = 0.85, llegadas = 0.5, cupo = -1 },
-    -- Fuerte: combate y hordas. Menor: (criminales, Fase 8). Debilidad: poca disciplina
-    fugados     = { defensa = 1.25, horda = 0.7, resistenciaLocura = -15, animo = -1 },
+    -- Fuerte: combate y hordas. Menor: simpatia de criminales y mercenarios turbios. Debilidad: poca disciplina
+    fugados     = { defensa = 1.25, horda = 0.7, simpatiaTurbios = 15, resistenciaLocura = -15, animo = -1 },
 }
 
 -- Efectos que llegan con sistemas futuros (se muestran como pendientes)
 B.PENDIENTES = {
-    leales = { "mercenarios" },
-    caravana = { "comercio", "mercenarios" },
     carroneros = { "asaltos" },
-    moteros = { "comercio", "asaltos", "mercenarios" },
-    fugados = { "mercenarios", "caos" },
+    moteros = { "asaltos" },
+    fugados = { "caos" },
 }
 
 -- Rasgos de lider

@@ -31,7 +31,7 @@ function Crisis.puntoAlrededor(territorio, distanciaExtra)
 end
 
 -- Deja una crisis pendiente. Si inmediata es true, se salta la espera del aviso
-function Crisis.programar(idTipo, territorio, inmediata)
+function Crisis.programar(idTipo, territorio, inmediata, extra)
     local ficha = Crisis.tipos[idTipo]
     if not ficha then
         return
@@ -49,15 +49,18 @@ function Crisis.programar(idTipo, territorio, inmediata)
         hora = horaActual() + WorldQuest.Reloj.horasDeJuego(espera),
         conAviso = ficha.textoAviso ~= nil,
     }
+    for clave, valor in pairs(extra or {}) do
+        pendiente[clave] = valor
+    end
     -- Amenazas que llegan desde afuera: el mapa muestra por donde vienen
-    if ficha.origen then
+    if ficha.origen and not pendiente.ox then
         pendiente.ox, pendiente.oy = Crisis.puntoAlrededor(territorio, ficha.origen)
     end
     table.insert(Crisis.getDatos().pendientes, pendiente)
     Red.cambio()
 
     if ficha.textoAviso then
-        Red.avisar(ficha.textoAviso, { territorio.nombre }, "aviso")
+        Red.avisar(ficha.textoAviso, (extra and extra.textoArgs) or { territorio.nombre }, "aviso")
     end
     print("[WorldQuest] Crisis programada: " .. idTipo .. " en " .. territorio.nombre .. " (en " .. espera .. " min)")
 end
@@ -109,8 +112,10 @@ end
 
 local function tipoAlAzar()
     local ids = {}
-    for id, _ in pairs(Crisis.tipos) do
-        table.insert(ids, id)
+    for id, ficha in pairs(Crisis.tipos) do
+        if not ficha.soloProgramada then
+            table.insert(ids, id)
+        end
     end
     if #ids == 0 then
         return nil
