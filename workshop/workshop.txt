@@ -1,0 +1,9 @@
+version=1
+title=WorldQuest
+description=Estrategia multijugador en Knox County (Build 42).
+description=Crea tu faccion, reclama territorios, recibe colonos y mandalos desde el mapa.
+description=Diplomacia, comercio con caravanas, mercenarios, guerra, niebla de guerra y lugares que conquistar.
+description=Tres formas de ganar: Exodo, Dominacion y Economia. Modo Caos con tres enemigos del juego.
+description=Opcional: el mod Bandits le da cuerpo a los colonos.
+tags=Build 42;Multiplayer;Gameplay
+visibility=friendsOnly

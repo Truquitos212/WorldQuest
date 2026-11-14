@@ -72,6 +72,11 @@ function VentanaTributo:alEnviar()
     self:close()
 end
 
+function VentanaTributo:prerender()
+    WorldQuest.Estilo.aplicarVentana(self)
+    ISCollapsableWindow.prerender(self)
+end
+
 function VentanaTributo:render()
     ISCollapsableWindow.render(self)
     if self.comboRecurso:getSelectedData() == "comida" then
@@ -256,8 +261,7 @@ function Vista:dibujar()
     end
     for _, fila in ipairs(self.filas or {}) do
         local f = fila.f
-        local c = Facciones.color(f.color) or { r = 1, g = 1, b = 1 }
-        self:drawRect(MARGEN, fila.y + 4, 12, 12, 1, c.r, c.g, c.b)
+        WorldQuest.Estilo.dibujarEmblema(self, f, MARGEN - 2, fila.y + 2, 16)
         self:texto(f.nombre, MARGEN + 18, fila.y + 4, e.texto, nil, getText("IGUI_WQ_FaccionDesc_" .. tostring(f.tipo)))
         self:texto(Facciones.nombreTipo(f.tipo), MARGEN + 190, fila.y + 4, e.gris)
         local ce = D.COLORES[fila.estado] or e.texto

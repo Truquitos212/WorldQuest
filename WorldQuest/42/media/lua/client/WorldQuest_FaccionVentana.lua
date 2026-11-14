@@ -160,6 +160,7 @@ function Ventana:alUnirse()
 end
 
 function Ventana:prerender()
+    WorldQuest.Estilo.aplicarVentana(self)
     ISCollapsableWindow.prerender(self)
     -- Si ya tiene faccion (o la recien creada llego desde el servidor), se cierra
     if Facciones.deJugador(getPlayer()) then

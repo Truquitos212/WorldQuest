@@ -722,5 +722,15 @@
     "IGUI_WQ_Caos_EresObjetivo": "You are their first target.",
     "IGUI_WQ_Caos_VienenPorTi": "They are coming for %1",
     "IGUI_WQ_Ayuda_Caos_Horda": "No warning of when: it shows up when someone is about to win or in the middle of a war.",
-    "IGUI_WQ_Caos_HordaTexto": "It arrives split up and from several sides at once, right at the worst moments."
+    "IGUI_WQ_Caos_HordaTexto": "It arrives split up and from several sides at once, right at the worst moments.",
+    "IGUI_WQ_Prueba_Menu": "[Test] WorldQuest",
+    "IGUI_WQ_Prueba_Hecho": "Done (test)",
+    "IGUI_WQ_Prueba_Mercenarios": "Friendly mercenaries nearby",
+    "IGUI_WQ_Prueba_MercenariosHostiles": "Hostile mercenaries nearby",
+    "IGUI_WQ_Prueba_Evacuacion": "Evacuation at 95%",
+    "IGUI_WQ_Prueba_Tiempo": "Skip 30 min of game time",
+    "IGUI_WQ_Prueba_Amenaza": "Raise the threat by 30 (Chaos)",
+    "IGUI_WQ_Prueba_Lugar": "Place a location here",
+    "IGUI_WQ_Viaje_asaltoCaos": "Attack on the Escapees",
+    "IGUI_WQ_Viaje_Letra_asaltoCaos": "F"
 }

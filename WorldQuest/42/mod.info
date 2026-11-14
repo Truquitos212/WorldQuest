@@ -1,6 +1,8 @@
 name=WorldQuest
 id=STRK_WorldQuest
-description=Colonias, territorios y crisis en Knox County.
+description=Estrategia multijugador en Knox County: facciones, colonias, diplomacia, comercio, guerra y tres formas de ganar.
+poster=poster.png
+icon=icon.png
 author=Truquitos212
-modversion=0.1.0
+modversion=1.1.0
 versionMin=42.0

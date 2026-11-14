@@ -97,7 +97,19 @@ end
 
 -- CLIENTE: territorios para mostrar: los vistos en vivo y las fotos de los demas.
 -- Las fotos traen vistoHace (minutos) y colonosVistos.
+local cacheLista, cacheMs = nil, 0
 function Niebla.territoriosConocidos()
+    -- Se usa en cada cuadro del mapa: se recalcula como mucho dos veces por segundo
+    local ms = getTimestampMs()
+    if cacheLista and ms - cacheMs < 500 then
+        return cacheLista
+    end
+    cacheMs = ms
+    cacheLista = Niebla.calcularConocidos()
+    return cacheLista
+end
+
+function Niebla.calcularConocidos()
     local jugador = getPlayer()
     local f = jugador and WorldQuest.Facciones.deJugador(jugador)
     local lista = {}

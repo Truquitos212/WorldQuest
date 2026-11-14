@@ -201,6 +201,11 @@ function VistaColonia:dibujar()
         if id == "comida" then
             texto = getText("IGUI_WQ_Panel_RecursoKcal", R.nombre(id), R.corto(valor))
         end
+        local icono = WorldQuest.Estilo.recurso(id)
+        if icono then
+            self:drawTextureScaled(icono, x, y + 1, 14, 14, 1, 1, 1, 1)
+            x = x + 18
+        end
         self:texto(texto, x, y, valor > 0 and e.texto or e.gris, nil, ayuda("Recurso_" .. id))
         x = x + getTextManager():MeasureStringX(FUENTE, texto) + 18
     end
@@ -585,6 +590,7 @@ function VistaFaccion:dibujar()
     self.botonCrear:setVisible(false)
 
     local y = MARGEN
+    WorldQuest.Estilo.dibujarEmblema(self, f, self.width - MARGEN - 56, MARGEN, 48)
     self:texto(f.nombre, MARGEN, y, e.acento, FUENTE_TITULO)
     y = y + ALTO_LINEA * 2
     self:texto(getText("IGUI_WQ_Panel_TipoFaccion", Facciones.nombreTipo(f.tipo)), MARGEN, y, nil, nil,
@@ -944,6 +950,7 @@ end
 
 function Ventana:prerender()
     self:refrescar(false)
+    WorldQuest.Estilo.aplicarVentana(self)
     ISCollapsableWindow.prerender(self)
 end
 

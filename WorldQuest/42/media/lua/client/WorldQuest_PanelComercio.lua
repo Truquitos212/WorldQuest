@@ -56,6 +56,7 @@ function VentanaMerc:alBoton(boton)
 end
 
 function VentanaMerc:prerender()
+    WorldQuest.Estilo.aplicarVentana(self)
     ISCollapsableWindow.prerender(self)
     local g = self:grupo()
     if not g then

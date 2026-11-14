@@ -556,3 +556,16 @@ V.derrotaCaos = function()
 end
 
 WorldQuest.Reloj.alCiclo(alPasarCiclo)
+
+-- Expediciones que van a un control militar o cerca de los Fugados corren mas peligro
+E.peligroZona = function(x, y)
+    if not Caos.activo() then
+        return 0
+    end
+    local peligro = Caos.enControl(x, y) and 0.5 or 0
+    local base = Caos.base()
+    if base and (base.x - x) ^ 2 + (base.y - y) ^ 2 <= 400 * 400 then
+        peligro = peligro + 0.5
+    end
+    return peligro
+end

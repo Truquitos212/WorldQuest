@@ -72,3 +72,17 @@ local function alPasarCiclo()
 end
 
 WorldQuest.Reloj.alCiclo(alPasarCiclo)
+
+-- Las expediciones que van cerca de un lugar traen mas de lo que ese lugar tiene
+local RADIO_SESGO = 300
+function E.sesgoZona(x, y)
+    for _, l in ipairs(Mundo.getDatos().lugares) do
+        if (l.x - x) ^ 2 + (l.y - y) ^ 2 <= RADIO_SESGO * RADIO_SESGO then
+            local tipo = Mundo.tipo(l.tipo)
+            for recurso, _ in pairs(tipo and tipo.da or {}) do
+                return recurso
+            end
+        end
+    end
+    return nil
+end

@@ -75,6 +75,9 @@ function Tabla:onMouseUp(x, y)
 end
 
 function Tabla:prerender()
+    local e = WorldQuest.Estilo.actual()
+    self.backgroundColor = { r = e.fondo[1], g = e.fondo[2], b = e.fondo[3], a = 0.7 }
+    self.borderColor = { r = e.linea[1], g = e.linea[2], b = e.linea[3], a = 0.5 }
     local lista = V.tabla()
     local filas = self.plegada and 0 or #lista
     local extra = 0
@@ -103,7 +106,7 @@ function Tabla:render()
         local c = color(f)
         local observador = WorldQuest.Conflicto and WorldQuest.Conflicto.esObservador(f)
         local alfa = observador and 0.45 or 1
-        self:drawRect(6, y + 3, 9, 9, alfa, c.r, c.g, c.b)
+        WorldQuest.Estilo.dibujarEmblema(self, f, 4, y + 1, 13)
         local nombre = i .. ". " .. f.nombre
         if mia and mia.id == f.id then
             nombre = nombre .. " *"
@@ -157,6 +160,11 @@ function Resumen:new()
     o.title = getText("IGUI_WQ_Vic_TituloResumen")
     o.resizable = false
     return o
+end
+
+function Resumen:prerender()
+    WorldQuest.Estilo.aplicarVentana(self)
+    ISCollapsableWindow.prerender(self)
 end
 
 function Resumen:render()

@@ -6,26 +6,30 @@ Inspiración: RimWorld, Command & Conquer, Age of Empires y The Walking Dead.
 
 ---
 
-## 1. Estado actual (v0.2)
+## 1. Estado actual (v1.1, todo escrito, falta probarlo en partida)
 
 ### Hecho
-- Territorios: reclamar con nombre, renombrar, abandonar con confirmación, sin superposición, dueño.
-- Mapa: territorios con relleno, borde, nombre, nivel, almacenes y crisis anunciadas.
-- Crisis con narrador de tensión: horda, incendio, pérdida de comida, tormenta con frío,
-  locura y asaltantes. Aviso grande en pantalla.
-- Almacén de la colonia: marcar muebles, nombre propio visible en la ventana de botín,
-  resaltado solo para el dueño, conteo de recursos.
-- Colonos: llegada por evento, hambre, ánimo, roles, producción diaria y habilidades que suben.
-- Niveles Refugio → Campamento → Asentamiento → Fortaleza. Estructuras detectadas y obras.
-- Cuerpos de colonos con Bandits (opcional).
-- Panel de la colonia con pestañas y botón en la barra izquierda.
-- Traducciones español e inglés.
+- Territorios, almacenes, colonos, crisis con narrador, niveles, obras y estructuras (v0.2).
+- Capa de red multijugador: el servidor es dueño de los datos; los clientes piden órdenes.
+- Centro de mando con pestañas: Resumen, Colonos, Obras, Crisis, Facción, Diplomacia,
+  Comercio, Mapa, Objetivos, Caos (solo en ese modo), Registro y Ayuda.
+- Facciones (9 tipos) con balance, rasgos de líder, modos de inicio y puesto de mando.
+- Mapa de mando: íconos, selección, órdenes, escuadras, colocar obras, amenazas, viajes.
+- Economía: cinco recursos, trueque, riqueza, especialización, expediciones.
+- Diplomacia: estados, propuestas, tributos, reputación.
+- Comercio con caravanas emboscables y mercenarios con personalidad.
+- Conflicto: lugares por ciudad, niebla con desfase, asaltos, captura en vivo,
+  espionaje, sabotaje, observador y protección por desconexión.
+- Victoria: tabla siempre visible, Éxodo, Dominación, Economía, cuenta regresiva,
+  final por tiempo y resumen con línea de tiempo.
+- Colonos vivos: rasgos, ficha completa y trabajo visible con Bandits.
+- Modo Caos: Militares, Fugados de rama dura y la Horda que piensa.
+- Estilo visual por tipo de facción, emblemas, íconos de recursos y póster.
+- Script para preparar la subida al Workshop (tools/preparar-workshop.ps1).
 
 ### Pendiente de probar
-- Producción, hambre, niveles, obras, locura y asaltantes en partida real.
+- Todo en una partida multijugador real (ver docs/PRUEBAS.md).
 - Causa de la muerte de colonos con cuerpo de Bandits (hay diagnóstico en el log).
-
----
 
 ## 2. Principios de interfaz
 - Un solo botón abre el **Centro de mando**; todo el mod vive ahí en pestañas.
@@ -207,52 +211,29 @@ Se elige al crear la partida:
 
 ## 11. Hoja de ruta
 
-> Orden real: la Fase 2 (base multijugador) se adelantó a la Fase 1, para que el
-> Centro de mando nazca conectado al servidor en vez de rehacerlo después.
+Todas las fases están escritas (tandas 1 a 8). Lo que sigue es probar y ajustar.
 
-### Hito 1 — "Lo que hay, sólido" (v0.3)
-- **Fase 0: estabilizar**
-  - Probar producción, hambre, niveles, obras, locura y asaltantes.
-  - Resolver la muerte de colonos con cuerpo.
-  - Reemplazar los MODO_PRUEBA por una opción de partida.
-  - Opciones de sandbox (frecuencia de crisis, costos, producción).
-  - Reloj del mod y opción Duración de la partida (ritmo en minutos reales).
-- **Fase 1: Centro de mando**
-  - Rehacer el panel como Centro de mando con pestañas: Colonia, Mapa, Diplomacia,
-    Comercio, Objetivos, Registro y Ayuda.
-  - Tooltips reutilizables, registro de eventos, pistas de primera vez.
-  - Estilo visual por facción e íconos.
+| Fase | Contenido | Estado |
+|---|---|---|
+| 0 | Estabilizar, opciones de partida, reloj del mod | Hecho |
+| 1 | Centro de mando, tooltips, registro, pistas, estilo por facción | Hecho |
+| 2 | Base multijugador | Hecho |
+| 3 | Facciones, modos de inicio, puesto de mando | Hecho |
+| 4 | Mapa de mando (incluye amenazas y viajes visibles) | Hecho |
+| 5 | Colonos vivos (rasgos, ficha, trabajo visible) | Hecho |
+| 6 | Economía (cinco recursos, trueque, especialización, expediciones) | Hecho |
+| 7 | Diplomacia | Hecho |
+| 8 | Comercio y mercenarios | Hecho |
+| 9 | Conflicto y mundo | Hecho |
+| 10 | Victoria | Hecho |
+| 11 | Pulido y publicación | Hecho en parte: falta balance con amigos y sonidos |
+| 12 | Modo Caos | Hecho |
 
-### Hito 2 — "Jugable con amigos" (v0.5)
-- **Fase 2: base multijugador**
-  - El servidor es dueño de los datos; los jugadores mandan órdenes con comandos.
-  - Pasar a esa forma todo lo que hoy hace el cliente.
-  - Probar hosteando desde el juego.
-- **Fase 3: facciones**
-  - Creación y personalización de la facción (tipo, nombre, color, emblema, líder y rasgo).
-  - Territorios, colonos y almacenes de la facción. Puesto de mando.
-  - Modos de inicio: Justo, Pueblo chico y Aleatorio (STERAK).
-
-### Hito 3 — "Estrategia" (v0.7)
-- **Fase 4: mapa de mando** (íconos, selección, órdenes, escuadras, colocar obras, amenazas).
-- **Fase 5: colonos vivos** (programa propio de Bandits, trabajo visible, ficha completa,
-  decidir si Bandits es obligatorio).
-- **Fase 6: economía** (cinco recursos, trueque, especialización, riqueza, expediciones).
-
-### Hito 4 — "Mundo político" (v0.9)
-- **Fase 7: diplomacia** (estados, propuestas, reputación).
-- **Fase 8: comercio y mercenarios** (ofertas, caravanas, mercenarios con personalidad).
-- **Fase 9: conflicto y mundo** (asaltos, sabotaje, niebla con desfase, puntos de interés,
-  captura de territorios, observador, protección por desconexión).
-
-### Hito 5 — "Ganar" (v1.0)
-- **Fase 10: victoria** (Éxodo, Dominación, Economía, cuenta regresiva, final por tiempo, tabla siempre visible, resumen final).
-- **Fase 11: pulido y publicación** (balance con amigos, rendimiento, sonidos, Workshop).
-
-### Hito 6 — "Caos" (v1.1)
-- **Fase 12: modo Caos** (Militares, Fugados de rama dura y la Horda que piensa; dificultad).
-
----
+### Siguiente
+1. Prueba multijugador larga (docs/PRUEBAS.md) y anotar todo lo que falle en el log.
+2. Ajustar números en WorldQuest_Balance.lua, WorldQuest_Victoria.lua y WorldQuest_Caos*.lua.
+3. Sonidos para avisos y crisis.
+4. Subir al Workshop (solo amigos) con tools/preparar-workshop.ps1.
 
 ## 12. Investigación pendiente
 1. Integrar la facción al creador de personajes del juego (si no, ventana propia al aparecer).
@@ -263,3 +244,21 @@ Se elige al crear la partida:
 6. Lista exacta de puntos de interés por ciudad.
 7. Necesidades del comandante: modificarlas desde el mod sin trucos de administrador.
 8. Sistema de líquidos de B42 (agua), para una versión futura.
+
+---
+
+## 13. Decisiones tomadas al escribir las fases
+- **Bandits sigue siendo opcional.** Sin Bandits todo funciona con la capa simulada; con
+  Bandits los colonos tienen cuerpo, caminan a su trabajo y obedecen ir, mantener y llamar.
+- **Lugares por descubrimiento.** En vez de una lista fija de coordenadas por ciudad, el
+  cliente reconoce el tipo de edificio por el nombre de sus habitaciones al pasar cerca.
+  El primero de cada tipo en cada ciudad queda fijo para toda la partida.
+- **Captura de lugares con territorios.** Un lugar lo controla quien tenga un territorio encima.
+- **Pagos desde bases cargadas.** Tributos, tratos, mercenarios y la evacuación se pagan con
+  ítems reales de un almacén que esté cargado (alguien de la facción cerca).
+- **Comercio con cualquiera que no esté en guerra.** El pacto comercial mejora la relación;
+  La Caravana recibe más en los tratos y sus caravanas son difíciles de emboscar.
+- **Asaltos lejanos simulados, capturas cercanas en vivo.** Las peleas reales entre jugadores
+  las resuelve el juego normal; la captura en vivo pide quedarse adentro sin defensores.
+- **Duración.** Límite por tiempo de 6, 10 o 12 horas según la duración (opción para fijarlo,
+  tope 12). Cuenta regresiva de 10, 12 o 15 minutos.

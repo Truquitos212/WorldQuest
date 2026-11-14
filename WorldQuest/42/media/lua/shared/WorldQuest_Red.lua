@@ -8,8 +8,11 @@ WorldQuest.Red = WorldQuest.Red or {}
 
 local Red = WorldQuest.Red
 Red.MODULO = "WorldQuest"
+-- Todas las claves van aqui (este archivo lo cargan cliente y servidor): asi el
+-- cliente en multijugador sabe que datos pedir y aceptar
 Red.CLAVES = { "WorldQuest_Territorios", "WorldQuest_Colonos", "WorldQuest_Crisis", "WorldQuest_Registro", "WorldQuest_Facciones",
-    "WorldQuest_Expediciones" }
+    "WorldQuest_Expediciones", "WorldQuest_Diplomacia", "WorldQuest_Comercio", "WorldQuest_Mercenarios", "WorldQuest_Mundo",
+    "WorldQuest_Niebla", "WorldQuest_Conflicto", "WorldQuest_Victoria", "WorldQuest_Caos" }
 
 -- Otros archivos agregan sus claves de datos para que viajen a los clientes
 function Red.agregarClave(clave)

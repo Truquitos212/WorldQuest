@@ -722,5 +722,15 @@
     "IGUI_WQ_Caos_EresObjetivo": "Eres su primer objetivo.",
     "IGUI_WQ_Caos_VienenPorTi": "Vienen por %1",
     "IGUI_WQ_Ayuda_Caos_Horda": "No avisa cuándo: aparece cuando alguien está por ganar o en plena guerra.",
-    "IGUI_WQ_Caos_HordaTexto": "Llega dividida y por varios lados a la vez, justo en los peores momentos."
+    "IGUI_WQ_Caos_HordaTexto": "Llega dividida y por varios lados a la vez, justo en los peores momentos.",
+    "IGUI_WQ_Prueba_Menu": "[Prueba] WorldQuest",
+    "IGUI_WQ_Prueba_Hecho": "Listo (prueba)",
+    "IGUI_WQ_Prueba_Mercenarios": "Mercenarios amigos cerca",
+    "IGUI_WQ_Prueba_MercenariosHostiles": "Mercenarios hostiles cerca",
+    "IGUI_WQ_Prueba_Evacuacion": "Evacuación al 95%",
+    "IGUI_WQ_Prueba_Tiempo": "Adelantar 30 min de partida",
+    "IGUI_WQ_Prueba_Amenaza": "Subir 30 la amenaza (Caos)",
+    "IGUI_WQ_Prueba_Lugar": "Poner un lugar aquí",
+    "IGUI_WQ_Viaje_asaltoCaos": "Asalto a los Fugados",
+    "IGUI_WQ_Viaje_Letra_asaltoCaos": "F"
 }
