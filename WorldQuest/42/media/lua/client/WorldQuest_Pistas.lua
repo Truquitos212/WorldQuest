@@ -68,6 +68,9 @@ Pistas.LISTA = {
     { id = "mejorar", cumple = function(j, t)
         return t ~= nil and WorldQuest.Niveles.siguiente(t) ~= nil and WorldQuest.Niveles.puedeMejorar(t) == true
     end },
+    { id = "objetivos", cumple = function(j, t)
+        return t ~= nil and WorldQuest.Victoria ~= nil and WorldQuest.Victoria.getDatos().minutos >= 10
+    end },
     { id = "lugares", cumple = function(j, t)
         return WorldQuest.Mundo ~= nil and #WorldQuest.Mundo.getDatos().lugares > 0
     end },

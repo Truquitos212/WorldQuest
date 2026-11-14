@@ -36,3 +36,8 @@ option WorldQuest.NieblaDeGuerra = {
     type = boolean, default = true,
     page = WorldQuest, translation = WorldQuest_NieblaDeGuerra,
 }
+
+option WorldQuest.LimiteHoras = {
+    type = integer, min = 0, max = 12, default = 0,
+    page = WorldQuest, translation = WorldQuest_LimiteHoras,
+}

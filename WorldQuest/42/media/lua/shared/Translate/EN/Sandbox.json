@@ -20,5 +20,7 @@
     "Sandbox_WorldQuest_ModoInicio_option3": "Small town",
     "Sandbox_WorldQuest_ModoInicio_option4": "Random (STERAK)",
     "Sandbox_WorldQuest_NieblaDeGuerra": "Fog of war",
-    "Sandbox_WorldQuest_NieblaDeGuerra_tooltip": "You only see what is near you. The rest stays as it was the last time you saw it."
+    "Sandbox_WorldQuest_NieblaDeGuerra_tooltip": "You only see what is near you. The rest stays as it was the last time you saw it.",
+    "Sandbox_WorldQuest_LimiteHoras": "Game limit (hours)",
+    "Sandbox_WorldQuest_LimiteHoras_tooltip": "If nobody wins before, whoever is first wins. With 0 it uses the duration's: 6, 10 or 12 hours. Max: 12."
 }

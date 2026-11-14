@@ -15,6 +15,8 @@ Proyectos.LISTA = {
     { id = "taller",  costo = { madera = 20, metal = 4 },               trabajo = 2, tamano = 3 },
     { id = "muralla", costo = { madera = 120, metal = 10 },             trabajo = 6, tamano = 1, nivel = 2 },
     { id = "radio",   costo = { madera = 15, metal = 8 },               trabajo = 2, tamano = 1, nivel = 2 },
+    -- Para la victoria por Exodo
+    { id = "helipuerto", costo = { madera = 150, metal = 60 },          trabajo = 8, tamano = 4, nivel = 3 },
 }
 
 function Proyectos.buscar(id)

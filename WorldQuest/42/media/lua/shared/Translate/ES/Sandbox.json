@@ -20,5 +20,7 @@
     "Sandbox_WorldQuest_ModoInicio_option3": "Pueblo chico",
     "Sandbox_WorldQuest_ModoInicio_option4": "Aleatorio (STERAK)",
     "Sandbox_WorldQuest_NieblaDeGuerra": "Niebla de guerra",
-    "Sandbox_WorldQuest_NieblaDeGuerra_tooltip": "Solo ves lo que tienes cerca. Lo demás queda como estaba la última vez que lo viste."
+    "Sandbox_WorldQuest_NieblaDeGuerra_tooltip": "Solo ves lo que tienes cerca. Lo demás queda como estaba la última vez que lo viste.",
+    "Sandbox_WorldQuest_LimiteHoras": "Límite de la partida (horas)",
+    "Sandbox_WorldQuest_LimiteHoras_tooltip": "Si nadie gana antes, gana quien va primero. Con 0 se usa el de la duración: 6, 10 o 12 horas. Tope: 12."
 }
